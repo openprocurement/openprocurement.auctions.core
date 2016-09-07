@@ -554,6 +554,19 @@ def set_logging_context(event):
     update_logging_context(request, params)
 
 
+def auction_from_data(request, data, raise_error=True, create=True):
+    procurementMethodType = data.get('procurementMethodType', 'belowThreshold')
+    model = request.registry.auction_procurementMethodTypes.get(procurementMethodType)
+    if model is None and raise_error:
+       request.errors.add('data', 'procurementMethodType', 'Not implemented')
+       request.errors.status = 415
+       raise error_handler(request.errors)
+    update_logging_context(request, {'auction_type': procurementMethodType})
+    if model is not None and create:
+       model = model(data)
+    return model
+
+
 def extract_auction_adapter(request, auction_id):
     db = request.registry.db
     doc = db.get(auction_id)
@@ -589,7 +602,7 @@ class isAuction(object):
         self.val = val
 
     def text(self):
-        return 'procurementMethodType = %s' % (self.val,)
+        return 'auctionsprocurementMethodType = %s' % (self.val,)
 
     phash = text
 
