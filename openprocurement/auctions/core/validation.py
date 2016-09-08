@@ -142,11 +142,6 @@ def validate_patch_award_data(request):
     return validate_data(request, model, True)
 
 
-def validate_patch_document_data(request):
-    model = type(request.context)
-    return validate_data(request, model, True)
-
-
 def validate_question_data(request):
     if not request.check_accreditation(request.auction.edit_accreditation):
         request.errors.add('procurementMethodType', 'accreditation', 'Broker Accreditation level does not permit question creation')
@@ -216,17 +211,3 @@ def validate_lot_data(request):
 def validate_patch_lot_data(request):
     model = type(request.auction).lots.model_class
     return validate_data(request, model, True)
-
-
-def validate_file_upload(request):
-    update_logging_context(request, {'document_id': '__new__'})
-    if 'file' not in request.POST or not hasattr(request.POST['file'], 'filename'):
-        request.errors.add('body', 'file', 'Not Found')
-        request.errors.status = 404
-    else:
-        request.validated['file'] = request.POST['file']
-
-
-def validate_file_update(request):
-    if request.content_type == 'multipart/form-data':
-        validate_file_upload(request)

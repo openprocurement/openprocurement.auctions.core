@@ -63,7 +63,7 @@ def factory(request):
     request.validated['auction_id'] = request.matchdict['auction_id']
     auction = request.auction
     auction.__parent__ = root
-    request.validated['auction'] = auction
+    request.validated['auction'] = request.validated['db_doc'] = auction
     request.validated['auction_status'] = auction.status
     if request.method != 'GET':
         request.validated['auction_src'] = auction.serialize('plain')
