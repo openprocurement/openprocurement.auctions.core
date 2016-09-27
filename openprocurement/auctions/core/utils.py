@@ -374,7 +374,7 @@ def add_next_award(request):
                     }
                 })
                 auction.awards.append(award)
-                request.response.headers['Location'] = request.route_url('Auction Awards', auction_id=auction.id, award_id=award['id'])
+                request.response.headers['Location'] = request.route_url('{}:Auction Awards'.format(auction.procurementMethodType), auction_id=auction.id, award_id=award['id'])
                 statuses.add('pending')
             else:
                 statuses.add('unsuccessful')
@@ -401,7 +401,7 @@ def add_next_award(request):
                     }
                 })
                 auction.awards.append(award)
-                request.response.headers['Location'] = request.route_url('Auction Awards', auction_id=auction.id, award_id=award['id'])
+                request.response.headers['Location'] = request.route_url('{}:Auction Awards'.format(auction.procurementMethodType), auction_id=auction.id, award_id=award['id'])
         if auction.awards[-1].status == 'pending':
             auction.awardPeriod.endDate = None
             auction.status = 'active.qualification'

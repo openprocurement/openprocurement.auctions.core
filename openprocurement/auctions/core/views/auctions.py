@@ -357,7 +357,7 @@ class AuctionsResource(APIResource):
                         extra=context_unpack(self.request, {'MESSAGE_ID': 'auction_create'}, {'auction_id': auction_id, 'auctionID': auction.auctionID}))
             self.request.response.status = 201
             self.request.response.headers[
-                'Location'] = self.request.route_url('Auction', auction_id=auction_id)
+                'Location'] = self.request.route_url('{}:Auction'.format(auction.procurementMethodType), auction_id=auction_id)
             return {
                 'data': auction.serialize(auction.status),
                 'access': {
