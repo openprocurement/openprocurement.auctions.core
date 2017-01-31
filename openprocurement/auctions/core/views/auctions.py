@@ -349,7 +349,7 @@ class AuctionsResource(APIResource):
             auction.initialize()
         if self.request.json_body['data'].get('status') == 'draft':
             auction.status = 'draft'
-        set_ownership(auction, self.request)
+        acc = set_ownership(auction, self.request)
         self.request.validated['auction'] = auction
         self.request.validated['auction_src'] = {}
         if save_auction(self.request):
@@ -358,9 +358,4 @@ class AuctionsResource(APIResource):
             self.request.response.status = 201
             self.request.response.headers[
                 'Location'] = self.request.route_url('{}:Auction'.format(auction.procurementMethodType), auction_id=auction_id)
-            return {
-                'data': auction.serialize(auction.status),
-                'access': {
-                    'token': auction.owner_token
-                }
-            }
+            return {'data': auction.serialize(auction.status), 'access': acc}
