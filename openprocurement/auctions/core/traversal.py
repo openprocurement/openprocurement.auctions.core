@@ -27,6 +27,7 @@ class Root(object):
         (Allow, 'g:contracting', 'extract_credentials'),
         (Allow, 'g:chronograph', 'edit_auction'),
         (Allow, 'g:Administrator', 'edit_auction'),
+        (Allow, 'g:Administrator', 'edit_auction_award'),
         (Allow, 'g:Administrator', 'edit_bid'),
         (Allow, 'g:admins', ALL_PERMISSIONS),
     ]
