@@ -347,8 +347,9 @@ class AuctionsResource(APIResource):
         auction.auctionID = generate_auction_id(get_now(), self.db, self.server_id)
         if hasattr(auction, "initialize"):
             auction.initialize()
-        if self.request.json_body['data'].get('status') == 'draft':
-            auction.status = 'draft'
+        status = self.request.json_body['data'].get('status')
+        if status and status in ['draft', 'pending.verification']:
+            auction.status = status
         set_ownership(auction, self.request)
         self.request.validated['auction'] = auction
         self.request.validated['auction_src'] = {}
