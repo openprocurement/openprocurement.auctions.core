@@ -14,6 +14,7 @@ class Root(object):
     __acl__ = [
         # (Allow, Everyone, ALL_PERMISSIONS),
         (Allow, Everyone, 'view_auction'),
+        (Deny, Everyone, 'delete_bid'),
         (Deny, 'broker05', 'create_bid'),
         (Deny, 'broker05', 'create_complaint'),
         (Deny, 'broker05', 'create_question'),
