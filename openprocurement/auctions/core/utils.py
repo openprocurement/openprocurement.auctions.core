@@ -56,6 +56,7 @@ def auction_serialize(request, auction_data, fields):
     auction = request.auction_from_data(auction_data, raise_error=False)
     if auction is None:
         return dict([(i, auction_data.get(i, '')) for i in ['procurementMethodType', 'dateModified', 'id']])
+    auction.__parent__ = request.context
     return dict([(i, j) for i, j in auction.serialize(auction.status).items() if i in fields])
 
 
