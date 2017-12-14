@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+from schematics.exceptions import ValidationError
+
 from openprocurement.api.models import get_now
 from openprocurement.api.utils import update_logging_context
 from openprocurement.api.validation import validate_json_data, validate_data
@@ -205,3 +207,10 @@ def validate_lot_data(request):
 def validate_patch_lot_data(request):
     model = type(request.auction).lots.model_class
     return validate_data(request, model, True)
+
+
+def validate_disallow_dgfPlatformLegalDetails(docs, *args):
+    if any([i.documentType == 'x_dgfPlatformLegalDetails' for i in docs]):
+        raise ValidationError(u"Disallow documents with x_dgfPlatformLegalDetails documentType")
+
+
