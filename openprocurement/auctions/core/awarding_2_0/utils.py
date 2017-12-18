@@ -1,4 +1,5 @@
-from openprocurement.api.utils import get_now 
+from openprocurement.api.utils import get_now
+from openprocurement.api.models import TZ
 
 
 def switch_to_next_award(request):
@@ -23,3 +24,56 @@ def check_auction_protocol(award):
             if document['documentType'] == 'auctionProtocol' and document['author'] == 'auction_owner':
                 return True
     return False
+
+
+def next_check_awarding(auction, checks):
+    if not auction.lots and auction.status == 'active.qualification':
+        for award in auction.awards:
+            if award.status == 'pending.verification':
+                checks.append(award.verificationPeriod.endDate.astimezone(TZ))
+            elif award.status == 'pending.payment':
+                checks.append(award.paymentPeriod.endDate.astimezone(TZ))
+    elif not auction.lots and auction.status == 'active.awarded' and not any([
+            i.status in auction.block_complaint_status
+            for i in auction.complaints
+        ]) and not any([
+            i.status in auction.block_complaint_status
+            for a in auction.awards
+            for i in a.complaints]):
+        standStillEnds = [
+            a.complaintPeriod.endDate.astimezone(TZ)
+            for a in auction.awards
+            if a.complaintPeriod.endDate
+        ]
+        for award in auction.awards:
+            if award.status == 'active':
+                checks.append(award.signingPeriod.endDate.astimezone(TZ))
+
+        last_award_status = auction.awards[-1].status if auction.awards else ''
+        if standStillEnds and last_award_status == 'unsuccessful':
+            checks.append(max(standStillEnds))
+    elif auction.lots and auction.status in ['active.qualification', 'active.awarded'] and not any([
+            i.status in auction.block_complaint_status and i.relatedLot is None
+            for i in auction.complaints]):
+        for lot in auction.lots:
+            if lot['status'] != 'active':
+                continue
+            lot_awards = [i for i in auction.awards if i.lotID == lot.id]
+            pending_complaints = any([
+                i['status'] in auction.block_complaint_status and i.relatedLot == lot.id
+                for i in auction.complaints
+            ])
+            pending_awards_complaints = any([
+                i.status in auction.block_complaint_status
+                for a in lot_awards
+                for i in a.complaints
+            ])
+            standStillEnds = [
+                a.complaintPeriod.endDate.astimezone(TZ)
+                for a in lot_awards
+                if a.complaintPeriod.endDate
+            ]
+            last_award_status = lot_awards[-1].status if lot_awards else ''
+            if not pending_complaints and not pending_awards_complaints and standStillEnds and last_award_status == 'unsuccessful':
+                checks.append(max(standStillEnds))
+    return checks
