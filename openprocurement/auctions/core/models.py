@@ -14,7 +14,6 @@ from schematics.transforms import (
     whitelist
 )
 from schematics.exceptions import ValidationError
-from schematics_flexible.schematics_flexible import FlexibleModelType
 from schematics.types.serializable import serializable
 
 from openprocurement.api.models import (
