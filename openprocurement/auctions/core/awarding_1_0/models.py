@@ -13,7 +13,6 @@ from openprocurement.api.models import (
     Organization,
     IsoDateTimeType,
     Document,
-    Complaint,
     Period,
     ListType,
     Model
@@ -23,6 +22,7 @@ from openprocurement.auctions.core.models import (
     flashComplaint as Complaint,
     flashItem as Item
 )
+
 
 class Award(Award):
     id = MD5Type(required=True, default=lambda: uuid4().hex)

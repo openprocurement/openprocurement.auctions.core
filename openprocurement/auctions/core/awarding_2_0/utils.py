@@ -77,3 +77,10 @@ def next_check_awarding(auction, checks):
             if not pending_complaints and not pending_awards_complaints and standStillEnds and last_award_status == 'unsuccessful':
                 checks.append(max(standStillEnds))
     return checks
+
+
+def invalidate_bids_under_threshold(auction):
+    value_threshold = round(auction['value']['amount'] + auction['minimalStep']['amount'], 2)
+    for bid in auction['bids']:
+        if bid['value']['amount'] < value_threshold:
+            bid['status'] = 'invalid'
