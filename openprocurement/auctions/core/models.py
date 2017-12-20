@@ -42,7 +42,6 @@ from openprocurement.auctions.core.constants import (
     CAV_CODES_FLASH,
     ORA_CODES
 )
-from openprocurement.schemas.dgf.schemas_store import SchemaStore
 
 
 view_complaint_role = (blacklist('owner_token', 'owner') + schematics_default_role)
@@ -92,13 +91,7 @@ class Item(Item):
     additionalClassifications = ListType(ModelType(Classification), default=list())
     address = ModelType(Address)
     location = ModelType(Location)
-    schema_properties = FlexibleModelType(SchemaStore())
 
-    def validate_schema_properties(self, data, new_schema_properties):
-        """ Raise validation error if code in schema_properties mismatch
-            with classification id """
-        if new_schema_properties and not data['classification']['id'].startswith(new_schema_properties['code']):
-            raise ValidationError("classification id mismatch with schema_properties code")
 
 dgfItem = Item
 

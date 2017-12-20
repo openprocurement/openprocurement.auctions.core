@@ -101,5 +101,3 @@ class Award(BaseAward):
             round_to_18_hour_delta = period.endDate.replace(hour=18, minute=0, second=0) - period.endDate
             period.endDate = calculate_business_date(period.endDate, round_to_18_hour_delta, auction, False)
         return period.to_primitive()
-
-
