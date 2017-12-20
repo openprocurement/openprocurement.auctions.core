@@ -516,3 +516,15 @@ def register_auction_procurementMethodType(config, model):
         The auction model class
     """
     config.registry.auction_procurementMethodTypes[model.procurementMethodType.default] = model
+
+
+def read_json(name):
+    import os.path
+    from json import loads
+    curr_dir = os.path.dirname(os.path.realpath(__file__))
+    file_path = os.path.join(curr_dir, name)
+    with open(file_path) as lang_file:
+        data = lang_file.read()
+    return loads(data)
+
+
