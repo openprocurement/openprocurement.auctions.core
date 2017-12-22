@@ -12,7 +12,7 @@ from openprocurement.api.models import (
     Period
 )
 from openprocurement.api.utils import calculate_business_date
-from openprocurement.auctions.core.awarding_1_0.models import (
+from openprocurement.auctions.core.plugins.awarding_1_0.models import (
     Award as BaseAward
 )
 from openprocurement.auctions.core.models import (
@@ -25,7 +25,7 @@ from openprocurement.auctions.core.models import (
 from openprocurement.auctions.core.validation import (
     validate_disallow_dgfPlatformLegalDetails
 )
-from openprocurement.auctions.core.awarding_2_0.constants import (
+from openprocurement.auctions.core.plugins.awarding_2_0.constants import (
     AWARD_PAYMENT_TIME,
     CONTRACT_SIGNING_TIME,
     VERIFY_AUCTION_PROTOCOL_TIME

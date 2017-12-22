@@ -25,7 +25,7 @@ from openprocurement.auctions.core.validation import (
     validate_complaint_data,
     validate_patch_complaint_data
 )
-from openprocurement.auctions.core.awarding_2_0.utils import (
+from openprocurement.auctions.core.plugins.awarding_2_0.utils import (
     switch_to_next_award,
     check_auction_protocol
 )
