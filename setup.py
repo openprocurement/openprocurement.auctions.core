@@ -5,7 +5,7 @@ version = '1.0.3'
 
 entry_points = {
     'openprocurement.api.plugins': [
-        'auctions.core = openprocurement.auctions.core:includeme'
+        'auctions.core = openprocurement.auctions.core.includeme:includeme'
     ]
 }
 
