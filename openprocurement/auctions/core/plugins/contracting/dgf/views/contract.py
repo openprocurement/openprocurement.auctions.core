@@ -8,8 +8,9 @@ from openprocurement.api.utils import (
 from openprocurement.auctions.core.utils import (
     apply_patch,
     save_auction,
+    opresource,
 )
-from openprocurement.auctions.core.contracting.dgf.utils import (
+from openprocurement.auctions.core.plugins.contracting.dgf.utils import (
     check_auction_status,
 )
 from openprocurement.auctions.core.validation import (
@@ -18,6 +19,27 @@ from openprocurement.auctions.core.validation import (
 )
 
 
+@opresource(
+    name='dgfInsider:Auction Contracts',
+    collection_path='/auctions/{auction_id}/contracts',
+    path='/auctions/{auction_id}/contracts/{contract_id}',
+    auctionsprocurementMethodType="dgfInsider",
+    description="Insider auction contracts"
+)
+@opresource(
+    name='dgfOtherAssets:Auction Contracts',
+    collection_path='/auctions/{auction_id}/contracts',
+    path='/auctions/{auction_id}/contracts/{contract_id}',
+    auctionsprocurementMethodType="dgfOtherAssets",
+    description="Auction contracts"
+)
+@opresource(
+    name='dgfFinancialAssets:Auction Contracts',
+    collection_path='/auctions/{auction_id}/contracts',
+    path='/auctions/{auction_id}/contracts/{contract_id}',
+    auctionsprocurementMethodType="dgfFinancialAssets",
+    description=" Financial auction contracts"
+)
 class BaseAuctionAwardContractResource(APIResource):
 
     @json_view(content_type="application/json", permission='create_contract', validators=(validate_contract_data,))
@@ -118,3 +140,4 @@ class BaseAuctionAwardContractResource(APIResource):
             self.LOGGER.info('Updated auction contract {}'.format(self.request.context.id),
                         extra=context_unpack(self.request, {'MESSAGE_ID': 'auction_contract_patch'}))
             return {'data': self.request.context.serialize()}
+
