@@ -50,4 +50,3 @@ class Award(Award):
             if lotID and lotID not in [i.id for i in data['__parent__'].lots]:
                 raise ValidationError(u"lotID should be one of lots")
 
-
