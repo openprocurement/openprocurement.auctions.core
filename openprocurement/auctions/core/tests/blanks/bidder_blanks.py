@@ -534,3 +534,97 @@ def put_auction_bidder_document_json(self):
     self.assertEqual(response.status, '403 Forbidden')
     self.assertEqual(response.content_type, 'application/json')
     self.assertEqual(response.json['errors'][0]["description"], "Can't update document in current (active.awarded) auction status")
+
+# AuctionBidderResourceTest
+def create_auction_bidder(self):
+    dateModified = self.db.get(self.auction_id).get('dateModified')
+
+    if self.initial_organization == self.test_financial_organization:
+        response = self.app.post_json('/auctions/{}/bids'.format(
+            self.auction_id), {
+            'data': {'tenderers': [self.initial_organization], "value": {"amount": 500}, 'qualified': True,
+                     'eligible': True}})
+    else:
+        response = self.app.post_json('/auctions/{}/bids'.format(
+            self.auction_id),
+            {'data': {'tenderers': [self.initial_organization], "value": {"amount": 500}, 'qualified': True}})
+    self.assertEqual(response.status, '201 Created')
+    self.assertEqual(response.content_type, 'application/json')
+    bidder = response.json['data']
+    self.assertEqual(bidder['tenderers'][0]['name'], self.initial_organization['name'])
+    self.assertIn('id', bidder)
+    self.assertIn(bidder['id'], response.headers['Location'])
+
+    self.assertEqual(self.db.get(self.auction_id).get('dateModified'), dateModified)
+
+    self.set_status('complete')
+
+    if self.initial_organization == self.test_financial_organization:
+        response = self.app.post_json('/auctions/{}/bids'.format(
+            self.auction_id), {
+            'data': {'tenderers': [self.initial_organization], "value": {"amount": 500}, 'qualified': True,
+                     'eligible': True}}, status=403)
+    else:
+        response = self.app.post_json('/auctions/{}/bids'.format(
+            self.auction_id),
+            {'data': {'tenderers': [self.initial_organization], "value": {"amount": 500}, 'qualified': True}},
+            status=403)
+    self.assertEqual(response.status, '403 Forbidden')
+    self.assertEqual(response.content_type, 'application/json')
+    self.assertEqual(response.json['errors'][0]["description"], "Can't add bid in current (complete) auction status")
+
+
+# AuctionBidderFeaturesResourceTest
+def features_bidder_invalid(self):
+    data = {
+        "tenderers": [
+            self.initial_organization
+        ],
+        "value": {
+            "amount": 469,
+            "currency": "UAH",
+            "valueAddedTaxIncluded": True
+        }
+    }
+    response = self.app.post_json('/auctions/{}/bids'.format(self.auction_id), {'data': data}, status=422)
+    self.assertEqual(response.status, '422 Unprocessable Entity')
+    self.assertEqual(response.content_type, 'application/json')
+    self.assertEqual(response.json['status'], 'error')
+    self.assertEqual(response.json['errors'], [
+        {u'description': [u'This field is required.'], u'location': u'body', u'name': u'parameters'}
+    ])
+    data["parameters"] = [
+        {
+            "code": "OCDS-123454-AIR-INTAKE",
+            "value": 0.1,
+        }
+    ]
+    response = self.app.post_json('/auctions/{}/bids'.format(self.auction_id), {'data': data}, status=422)
+    self.assertEqual(response.status, '422 Unprocessable Entity')
+    self.assertEqual(response.content_type, 'application/json')
+    self.assertEqual(response.json['status'], 'error')
+    self.assertEqual(response.json['errors'], [
+        {u'description': [u'All features parameters is required.'], u'location': u'body', u'name': u'parameters'}
+    ])
+    data["parameters"].append({
+        "code": "OCDS-123454-AIR-INTAKE",
+        "value": 0.1,
+    })
+    response = self.app.post_json('/auctions/{}/bids'.format(self.auction_id), {'data': data}, status=422)
+    self.assertEqual(response.status, '422 Unprocessable Entity')
+    self.assertEqual(response.content_type, 'application/json')
+    self.assertEqual(response.json['status'], 'error')
+    self.assertEqual(response.json['errors'], [
+        {u'description': [u'Parameter code should be uniq for all parameters'], u'location': u'body',
+         u'name': u'parameters'}
+    ])
+    data["parameters"][1]["code"] = "OCDS-123454-YEARS"
+    data["parameters"][1]["value"] = 0.2
+    response = self.app.post_json('/auctions/{}/bids'.format(self.auction_id), {'data': data}, status=422)
+    self.assertEqual(response.status, '422 Unprocessable Entity')
+    self.assertEqual(response.content_type, 'application/json')
+    self.assertEqual(response.json['status'], 'error')
+    self.assertEqual(response.json['errors'], [
+        {u'description': [{u'value': [u'value should be one of feature value.']}], u'location': u'body',
+         u'name': u'parameters'}
+    ])
