@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 from openprocurement.api.models import get_now
-from openprocurement.auctions.flash.tests.base import test_organization
 
 
 # CreateAuctionAwardTest
@@ -449,7 +448,7 @@ def create_auction_award_2_lots(self):
     self.assertEqual(response.status, '201 Created')
 
     response = self.app.post_json(request_path, {'data': {
-        'suppliers': [test_organization],
+        'suppliers': [self.initial_organization],
         'status': 'pending',
         'bid_id': self.initial_bids[0]['id'],
         'lotID': self.initial_lots[0]['id']
@@ -459,7 +458,7 @@ def create_auction_award_2_lots(self):
     self.assertEqual(response.json['errors'][0]["description"], "Can create award only in active lot status")
 
     response = self.app.post_json(request_path, {'data': {
-        'suppliers': [test_organization],
+        'suppliers': [self.initial_organization],
         'status': 'pending',
         'bid_id': self.initial_bids[0]['id'],
         'lotID': self.initial_lots[1]['id']
@@ -467,7 +466,7 @@ def create_auction_award_2_lots(self):
     self.assertEqual(response.status, '201 Created')
     self.assertEqual(response.content_type, 'application/json')
     award = response.json['data']
-    self.assertEqual(award['suppliers'][0]['name'], test_organization['name'])
+    self.assertEqual(award['suppliers'][0]['name'], self.initial_organization['name'])
     self.assertEqual(award['lotID'], self.initial_lots[1]['id'])
     self.assertIn('id', award)
     self.assertIn(award['id'], response.headers['Location'])
@@ -496,7 +495,7 @@ def create_auction_award_2_lots(self):
 
 def patch_auction_award_2_lots(self):
     request_path = '/auctions/{}/awards'.format(self.auction_id)
-    response = self.app.post_json(request_path, {'data': {'suppliers': [test_organization], 'status': u'pending', 'bid_id': self.initial_bids[0]['id'], 'lotID': self.initial_lots[0]['id'], "value": {"amount": 500}}})
+    response = self.app.post_json(request_path, {'data': {'suppliers': [self.initial_organization], 'status': u'pending', 'bid_id': self.initial_bids[0]['id'], 'lotID': self.initial_lots[0]['id'], "value": {"amount": 500}}})
     self.assertEqual(response.status, '201 Created')
     self.assertEqual(response.content_type, 'application/json')
     award = response.json['data']

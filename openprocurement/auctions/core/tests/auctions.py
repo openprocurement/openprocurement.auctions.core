@@ -2,10 +2,7 @@
 import unittest
 
 from openprocurement.auctions.core.tests.base import BaseWebTest, snitch
-from openprocurement.auctions.core.tests.blanks.tender_blanks import (
-    empty_listing,
-
-)
+from openprocurement.auctions.core.tests.blanks.tender_blanks import empty_listing
 from openprocurement.auctions.core.tests.blanks.auction_blanks import (
     # AuctionAuctionResourceTest
     get_auction_auction_not_found,

@@ -106,6 +106,7 @@ class Auction2LotAwardComplaintDocumentResourceTestMixin(object):
     test_put_auction_award_2_lot_complaint_document = snitch(put_auction_award_2_lot_complaint_document)
     test_patch_auction_award_2_lot_complaint_document = snitch(patch_auction_award_2_lot_complaint_document)
 
+
 class Auction2LotAwardDocumentResourceTestMixin(object):
     test_create_auction_2_lot_award_document = snitch(create_auction_2_lot_award_document)
     test_put_auction_2_lot_award_document = snitch(put_auction_2_lot_award_document)
