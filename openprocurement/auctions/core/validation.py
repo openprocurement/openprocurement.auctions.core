@@ -2,6 +2,7 @@
 from openprocurement.api.models import get_now, SANDBOX_MODE
 from openprocurement.api.utils import update_logging_context
 from openprocurement.api.validation import validate_json_data, validate_data
+from openprocurement.auctions.core.constants import ENGLISH_AUCTION_PROCUREMENT_METHOD_TYPES
 
 
 def validate_auction_data(request):
@@ -99,10 +100,9 @@ def validate_auction_auction_data(request):
         data = {}
     if request.method == 'POST':
         now = get_now().isoformat()
-        if SANDBOX_MODE and\
-                auction.submissionMethodDetails and \
-                auction.submissionMethodDetails in [u'quick(mode:no-auction)',
-                                                    u'quick(mode:fast-forward)']:
+        if SANDBOX_MODE and auction.submissionMethodDetails and \
+                auction.submissionMethodDetails in [u'quick(mode:no-auction)', u'quick(mode:fast-forward)'] and \
+                auction.procurementMethodType in ENGLISH_AUCTION_PROCUREMENT_METHOD_TYPES:
             if auction.lots:
                 data['lots'] = [{'auctionPeriod':
                                      {'startDate': now, 'endDate': now}}
