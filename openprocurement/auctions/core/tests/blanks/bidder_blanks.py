@@ -1,4 +1,6 @@
 # AuctionBidderDocumentResourceTestMixin
+
+
 def not_found(self):
     response = self.app.post('/auctions/some_id/bids/some_id/documents', status=404, upload_files=[
                              ('file', 'name.doc', 'content')])
@@ -350,7 +352,6 @@ def patch_auction_bidder_document(self):
     self.assertEqual(response.content_type, 'application/json')
     self.assertEqual(response.json['errors'][0]["description"], "Can't update document in current (active.awarded) auction status")
 
-
 # AuctionBidderDocumentWithDSResourceTest
 
 
@@ -536,6 +537,8 @@ def put_auction_bidder_document_json(self):
     self.assertEqual(response.json['errors'][0]["description"], "Can't update document in current (active.awarded) auction status")
 
 # AuctionBidderResourceTest
+
+
 def create_auction_bidder(self):
     dateModified = self.db.get(self.auction_id).get('dateModified')
 
@@ -573,8 +576,9 @@ def create_auction_bidder(self):
     self.assertEqual(response.content_type, 'application/json')
     self.assertEqual(response.json['errors'][0]["description"], "Can't add bid in current (complete) auction status")
 
-
 # AuctionBidderFeaturesResourceTest
+
+
 def features_bidder_invalid(self):
     data = {
         "tenderers": [
