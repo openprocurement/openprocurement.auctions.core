@@ -1,10 +1,7 @@
 # -*- coding: utf-8 -*-
-from barbecue import chef
-from base64 import b64encode
 from cornice.resource import resource, view
 from cornice.util import json_error
 from couchdb.http import ResourceConflict
-from email.header import decode_header
 from functools import partial
 from json import dumps
 from jsonpointer import resolve_pointer
@@ -15,11 +12,8 @@ from openprocurement.api.utils import (generate_id, calculate_business_date, app
                                        context_unpack)
 from openprocurement.auctions.core.traversal import factory
 from pkg_resources import get_distribution
-from rfc6266 import build_header
 from schematics.exceptions import ModelValidationError
 from time import sleep
-from urllib import quote
-from urlparse import urlparse, parse_qs
 from re import compile
 from pyramid.compat import decode_path_info
 from pyramid.exceptions import URLDecodeError
@@ -148,7 +142,7 @@ def check_bids(request):
         if not set([i.status for i in auction.lots]).difference(set(['unsuccessful', 'cancelled'])):
             auction.status = 'unsuccessful'
         elif max([i.numberOfBids for i in auction.lots if i.status == 'active']) < 2:
-            add_next_award(request)
+            request.content_configurator.add_award()
 
     else:
         if auction.numberOfBids < 2 and auction.auctionPeriod and auction.auctionPeriod.startDate:
@@ -157,7 +151,7 @@ def check_bids(request):
             auction.status = 'unsuccessful'
         if auction.numberOfBids == 1:
             # auction.status = 'active.qualification'
-            add_next_award(request)
+            request.content_configurator.add_award()
 
 
 def check_complaint_status(request, complaint, now=None):
@@ -319,96 +313,6 @@ def check_auction_status(request):
             LOGGER.info('Switched auction {} to {}'.format(auction.id, 'unsuccessful'),
                         extra=context_unpack(request, {'MESSAGE_ID': 'switched_auction_complete'}))
             auction.status = 'complete'
-
-
-def add_next_award(request):
-    auction = request.validated['auction']
-    now = get_now()
-    if not auction.awardPeriod:
-        auction.awardPeriod = type(auction).awardPeriod({})
-    if not auction.awardPeriod.startDate:
-        auction.awardPeriod.startDate = now
-    if auction.lots:
-        statuses = set()
-        for lot in auction.lots:
-            if lot.status != 'active':
-                continue
-            lot_awards = [i for i in auction.awards if i.lotID == lot.id]
-            if lot_awards and lot_awards[-1].status in ['pending', 'active']:
-                statuses.add(lot_awards[-1].status if lot_awards else 'unsuccessful')
-                continue
-            lot_items = [i.id for i in auction.items if i.relatedLot == lot.id]
-            features = [
-                i
-                for i in (auction.features or [])
-                if i.featureOf == 'tenderer' or i.featureOf == 'lot' and i.relatedItem == lot.id or i.featureOf == 'item' and i.relatedItem in lot_items
-            ]
-            codes = [i.code for i in features]
-            bids = [
-                {
-                    'id': bid.id,
-                    'value': [i for i in bid.lotValues if lot.id == i.relatedLot][0].value,
-                    'tenderers': bid.tenderers,
-                    'parameters': [i for i in bid.parameters if i.code in codes],
-                    'date': [i for i in bid.lotValues if lot.id == i.relatedLot][0].date
-                }
-                for bid in auction.bids
-                if lot.id in [i.relatedLot for i in bid.lotValues]
-            ]
-            if not bids:
-                lot.status = 'unsuccessful'
-                statuses.add('unsuccessful')
-                continue
-            unsuccessful_awards = [i.bid_id for i in lot_awards if i.status == 'unsuccessful']
-            bids = chef(bids, features, unsuccessful_awards, True)
-            if bids:
-                bid = bids[0]
-                award = type(auction).awards.model_class({
-                    'bid_id': bid['id'],
-                    'lotID': lot.id,
-                    'status': 'pending',
-                    'value': bid['value'],
-                    'date': get_now(),
-                    'suppliers': bid['tenderers'],
-                    'complaintPeriod': {
-                        'startDate': now.isoformat()
-                    }
-                })
-                auction.awards.append(award)
-                request.response.headers['Location'] = request.route_url('{}:Auction Awards'.format(auction.procurementMethodType), auction_id=auction.id, award_id=award['id'])
-                statuses.add('pending')
-            else:
-                statuses.add('unsuccessful')
-        if statuses.difference(set(['unsuccessful', 'active'])):
-            auction.awardPeriod.endDate = None
-            auction.status = 'active.qualification'
-        else:
-            auction.awardPeriod.endDate = now
-            auction.status = 'active.awarded'
-    else:
-        if not auction.awards or auction.awards[-1].status not in ['pending', 'active']:
-            unsuccessful_awards = [i.bid_id for i in auction.awards if i.status == 'unsuccessful']
-            bids = chef(auction.bids, auction.features or [], unsuccessful_awards, True)
-            if bids:
-                bid = bids[0].serialize()
-                award = type(auction).awards.model_class({
-                    'bid_id': bid['id'],
-                    'status': 'pending',
-                    'date': get_now(),
-                    'value': bid['value'],
-                    'suppliers': bid['tenderers'],
-                    'complaintPeriod': {
-                        'startDate': get_now().isoformat()
-                    }
-                })
-                auction.awards.append(award)
-                request.response.headers['Location'] = request.route_url('{}:Auction Awards'.format(auction.procurementMethodType), auction_id=auction.id, award_id=award['id'])
-        if auction.awards[-1].status == 'pending':
-            auction.awardPeriod.endDate = None
-            auction.status = 'active.qualification'
-        else:
-            auction.awardPeriod.endDate = now
-            auction.status = 'active.awarded'
 
 
 def error_handler(errors, request_params=True):
