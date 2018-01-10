@@ -1,4 +1,6 @@
 # AuctionCancellationResourceTestMixin
+
+
 def create_auction_cancellation_invalid(self):
     response = self.app.post_json('/auctions/some_id/cancellations', {
         'data': {'reason': 'cancellation reason'}}, status=404)
@@ -236,7 +238,6 @@ def get_auction_cancellations(self):
             u'url', u'name': u'auction_id'}
     ])
 
-
 # AuctionLotCancellationResourceTestMixin
 
 
@@ -323,7 +324,6 @@ def patch_auction_cancellation_lot(self):
     self.assertEqual(response.content_type, 'application/json')
     self.assertEqual(response.json['data']["status"], "active")
     self.assertEqual(response.json['data']["reason"], "cancellation reason")
-
 
 # AuctionLotsCancellationResourceTestMixin
 
@@ -413,7 +413,6 @@ def patch_auction_cancellation_2_lots(self):
     self.assertEqual(response.content_type, 'application/json')
     self.assertEqual(response.json['data']["status"], "active")
     self.assertEqual(response.json['data']["reason"], "cancellation reason")
-
 
 # AuctionCancellationDocumentResourceTestMixin
 

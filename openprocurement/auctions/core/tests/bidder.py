@@ -17,6 +17,7 @@ class AuctionBidderDocumentResourceTestMixin(object):
     test_put_auction_bidder_document = snitch(put_auction_bidder_document)
     test_patch_auction_bidder_document = snitch(patch_auction_bidder_document)
 
+
 class AuctionBidderDocumentWithDSResourceTestMixin(object):
     test_create_auction_bidder_document_json = snitch(create_auction_bidder_document_json)
     test_put_auction_bidder_document_json = snitch(put_auction_bidder_document_json)
