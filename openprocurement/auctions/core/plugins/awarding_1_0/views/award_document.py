@@ -15,9 +15,17 @@ from openprocurement.api.validation import (
 from openprocurement.auctions.core.utils import (
     apply_patch,
     save_auction,
+    opresource,
 )
 
 
+@opresource(
+    name='belowThreshold:Auction Award Documents',
+    collection_path='/auctions/{auction_id}/awards/{award_id}/documents',
+    path='/auctions/{auction_id}/awards/{award_id}/documents/{document_id}',
+    awardingType='awarding_1_0',
+    description="Auction award documents"
+)
 class AuctionAwardDocumentResource(APIResource):
 
     def validate_award_document(self, operation):

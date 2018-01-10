@@ -15,9 +15,31 @@ from openprocurement.api.validation import (
 from openprocurement.auctions.core.utils import (
     apply_patch,
     save_auction,
+    opresource,
 )
 
 
+@opresource(
+    name='dgfInsider:Auction Award Documents',
+    collection_path='/auctions/{auction_id}/awards/{award_id}/documents',
+    path='/auctions/{auction_id}/awards/{award_id}/documents/{document_id}',
+    awardingType='awarding_2_0',
+    description="Insider auction award documents"
+)
+@opresource(
+    name='dgfFinancialAssets:Auction Award Documents',
+    collection_path='/auctions/{auction_id}/awards/{award_id}/documents',
+    path='/auctions/{auction_id}/awards/{award_id}/documents/{document_id}',
+    awardingType='awarding_2_0',
+    description="Financial auction award documents"
+)
+@opresource(
+    name='dgfOtherAssets:Auction Award Documents',
+    collection_path='/auctions/{auction_id}/awards/{award_id}/documents',
+    path='/auctions/{auction_id}/awards/{award_id}/documents/{document_id}',
+    awardingType='awarding_2_0',
+    description="Auction award documents"
+)
 class AuctionAwardDocumentResource(APIResource):
 
     def validate_award_document(self, operation):
@@ -104,3 +126,4 @@ class AuctionAwardDocumentResource(APIResource):
             self.LOGGER.info('Updated auction award document {}'.format(self.request.context.id),
                         extra=context_unpack(self.request, {'MESSAGE_ID': 'auction_award_document_patch'}))
             return {'data': self.request.context.serialize("view")}
+
