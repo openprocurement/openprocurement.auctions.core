@@ -15,32 +15,22 @@ from openprocurement.auctions.core.utils import (
 )
 from openprocurement.auctions.core.validation import (
     validate_patch_complaint_data,
-    validate_complaint_data
+    validate_complaint_data,
+    validate_complaint_data_post_common,
+    validate_patch_complaint_data_patch_common
 )
 
 
 
 class AuctionAwardComplaintResource(APIResource):
 
-    @json_view(content_type="application/json", permission='create_award_complaint', validators=(validate_complaint_data,))
+    @json_view(content_type="application/json", permission='create_award_complaint',
+               validators=(validate_complaint_data,
+                           validate_complaint_data_post_common))
     def collection_post(self):
         """Post a complaint for award
         """
         auction = self.request.validated['auction']
-        if auction.status not in ['active.qualification', 'active.awarded']:
-            self.request.errors.add('body', 'data', 'Can\'t add complaint in current ({}) auction status'.format(auction.status))
-            self.request.errors.status = 403
-            return
-        if any([i.status != 'active' for i in auction.lots if i.id == self.context.lotID]):
-            self.request.errors.add('body', 'data', 'Can add complaint only in active lot status')
-            self.request.errors.status = 403
-            return
-        if self.context.complaintPeriod and \
-           (self.context.complaintPeriod.startDate and self.context.complaintPeriod.startDate > get_now() or
-                self.context.complaintPeriod.endDate and self.context.complaintPeriod.endDate < get_now()):
-            self.request.errors.add('body', 'data', 'Can add complaint only in complaintPeriod')
-            self.request.errors.status = 403
-            return
         complaint = self.request.validated['complaint']
         complaint.date = get_now()
         complaint.relatedLot = self.context.lotID
@@ -76,23 +66,13 @@ class AuctionAwardComplaintResource(APIResource):
         """
         return {'data': self.context.serialize("view")}
 
-    @json_view(content_type="application/json", permission='edit_complaint', validators=(validate_patch_complaint_data,))
+    @json_view(content_type="application/json", permission='edit_complaint',
+               validators=(validate_patch_complaint_data,
+                           validate_patch_complaint_data_patch_common))
     def patch(self):
         """Post a complaint resolution for award
         """
         auction = self.request.validated['auction']
-        if auction.status not in ['active.qualification', 'active.awarded']:
-            self.request.errors.add('body', 'data', 'Can\'t update complaint in current ({}) auction status'.format(auction.status))
-            self.request.errors.status = 403
-            return
-        if any([i.status != 'active' for i in auction.lots if i.id == self.request.validated['award'].lotID]):
-            self.request.errors.add('body', 'data', 'Can update complaint only in active lot status')
-            self.request.errors.status = 403
-            return
-        if self.context.status not in ['draft', 'claim', 'answered', 'pending']:
-            self.request.errors.add('body', 'data', 'Can\'t update complaint in current ({}) status'.format(self.context.status))
-            self.request.errors.status = 403
-            return
         data = self.request.validated['data']
         complaintPeriod = self.request.validated['award'].complaintPeriod
         is_complaintPeriod = complaintPeriod.startDate < get_now() and complaintPeriod.endDate > get_now() if complaintPeriod.endDate else complaintPeriod.startDate < get_now()

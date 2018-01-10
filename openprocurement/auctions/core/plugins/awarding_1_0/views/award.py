@@ -16,6 +16,8 @@ from openprocurement.auctions.core.utils import (
 from openprocurement.auctions.core.validation import (
     validate_award_data,
     validate_patch_award_data,
+    validate_award_data_post_common,
+    validate_patch_award_data_patch_common,
 )
 
 
@@ -76,7 +78,8 @@ class AuctionAwardResource(APIResource):
         """
         return {'data': [i.serialize("view") for i in self.request.validated['auction'].awards]}
 
-    @json_view(content_type="application/json", permission='create_award', validators=(validate_award_data,))
+    @json_view(content_type="application/json", permission='create_award',
+               validators=(validate_award_data, validate_award_data_post_common))
     def collection_post(self):
         """Accept or reject bidder application
 
@@ -157,24 +160,19 @@ class AuctionAwardResource(APIResource):
             }
 
         """
-        auction = self.request.validated['auction']
-        if auction.status != 'active.qualification':
-            self.request.errors.add('body', 'data', 'Can\'t create award in current ({}) auction status'.format(auction.status))
-            self.request.errors.status = 403
-            return
         award = self.request.validated['award']
-        if any([i.status != 'active' for i in auction.lots if i.id == award.lotID]):
-            self.request.errors.add('body', 'data', 'Can create award only in active lot status')
-            self.request.errors.status = 403
-            return
         award.complaintPeriod = {'startDate': get_now().isoformat()}
-        auction.awards.append(award)
+        self.request.validated['auction'].awards.append(award)
         if save_auction(self.request):
             self.LOGGER.info('Created auction award {}'.format(award.id),
-                        extra=context_unpack(self.request, {'MESSAGE_ID': 'auction_award_create'}, {'award_id': award.id}))
+                        extra=context_unpack(self.request,
+                                             {'MESSAGE_ID': 'auction_award_create'},
+                                             {'award_id': award.id}))
             self.request.response.status = 201
             route = self.request.matched_route.name.replace("collection_", "")
-            self.request.response.headers['Location'] = self.request.current_route_url(_route_name=route, award_id=award.id, _query={})
+            self.request.response.headers['Location'] = self.request.current_route_url(_route_name=route,
+                                                                                       award_id=award.id,
+                                                                                       _query={})
             return {'data': award.serialize("view")}
 
     @json_view(permission='view_auction')
@@ -229,7 +227,8 @@ class AuctionAwardResource(APIResource):
         """
         return {'data': self.request.validated['award'].serialize("view")}
 
-    @json_view(content_type="application/json", permission='edit_auction', validators=(validate_patch_award_data,))
+    @json_view(content_type="application/json", permission='edit_auction',
+               validators=(validate_patch_award_data, validate_patch_award_data_patch_common))
     def patch(self):
         """Update of award
 
@@ -288,16 +287,12 @@ class AuctionAwardResource(APIResource):
 
         """
         auction = self.request.validated['auction']
-        if auction.status not in ['active.qualification', 'active.awarded']:
-            self.request.errors.add('body', 'data', 'Can\'t update award in current ({}) auction status'.format(auction.status))
-            self.request.errors.status = 403
-            return
         award = self.request.context
+        award_status = award.status
         if any([i.status != 'active' for i in auction.lots if i.id == award.lotID]):
             self.request.errors.add('body', 'data', 'Can update award only in active lot status')
             self.request.errors.status = 403
             return
-        award_status = award.status
         apply_patch(self.request, save=False, src=self.request.context.serialize())
         if award_status == 'pending' and award.status == 'active':
             award.complaintPeriod.endDate = calculate_business_date(get_now(), STAND_STILL_TIME, auction, True)
