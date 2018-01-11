@@ -89,6 +89,10 @@ class AuctionAwardDocumentResource(APIResource):
                permission='edit_auction_award')
     def put(self):
         """Auction Award Document Update"""
+        if self.request.authenticated_role != self.request.context.author:
+            self.request.errors.add('url', 'role', 'Can update document only author')
+            self.request.errors.status = 403
+            return
         document = upload_file(self.request)
         document.author = self.request.authenticated_role
         self.request.validated['award'].documents.append(document)
@@ -103,6 +107,10 @@ class AuctionAwardDocumentResource(APIResource):
                            validate_patch_document_data_award_patch_common))
     def patch(self):
         """Auction Award Document Update"""
+        if self.request.authenticated_role != self.request.context.author:
+            self.request.errors.add('url', 'role', 'Can update document only author')
+            self.request.errors.status = 403
+            return
         if apply_patch(self.request, src=self.request.context.serialize()):
             update_file_content_type(self.request)
             self.LOGGER.info('Updated auction award document {}'.format(self.request.context.id),

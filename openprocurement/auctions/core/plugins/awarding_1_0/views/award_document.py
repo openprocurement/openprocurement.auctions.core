@@ -70,6 +70,7 @@ class AuctionAwardDocumentResource(APIResource):
     @json_view(permission='view_auction')
     def get(self):
         """Auction Award Document Read"""
+
         if self.request.params.get('download'):
             return get_file(self.request)
         document = self.request.validated['document']

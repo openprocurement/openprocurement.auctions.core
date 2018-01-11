@@ -162,7 +162,7 @@ class AuctionAwardResource(APIResource):
         """
         award = self.request.validated['award']
         award.complaintPeriod = award.signingPeriod = award.paymentPeriod = award.verificationPeriod = {'startDate': get_now()}
-        self.request.validated['award'].awards.append(award)
+        self.request.validated['auction'].awards.append(award)
         if save_auction(self.request):
             self.LOGGER.info('Created auction award {}'.format(award.id),
                         extra=context_unpack(self.request, {'MESSAGE_ID': 'auction_award_create'}, {'award_id': award.id}))
