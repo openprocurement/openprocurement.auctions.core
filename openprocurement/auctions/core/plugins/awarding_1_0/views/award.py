@@ -12,6 +12,7 @@ from openprocurement.api.utils import (
 from openprocurement.auctions.core.utils import (
     apply_patch,
     save_auction,
+    opresource,
 )
 from openprocurement.auctions.core.validation import (
     validate_award_data,
@@ -19,6 +20,13 @@ from openprocurement.auctions.core.validation import (
 )
 
 
+@opresource(
+    name='belowThreshold:Auction Awards',
+    collection_path='/auctions/{auction_id}/awards',
+    path='/auctions/{auction_id}/awards/{award_id}',
+    awardingType='awarding_1_0',
+    description="Auction awards"
+)
 class AuctionAwardResource(APIResource):
 
     @json_view(permission='view_auction')
@@ -355,3 +363,4 @@ class AuctionAwardResource(APIResource):
             self.LOGGER.info('Updated auction award {}'.format(self.request.context.id),
                         extra=context_unpack(self.request, {'MESSAGE_ID': 'auction_award_patch'}))
             return {'data': award.serialize("view")}
+
