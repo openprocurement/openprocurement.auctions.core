@@ -91,7 +91,7 @@ ENV/
 
 # Buildout
 bin/
-
+src/
 cover/
 output.html
 

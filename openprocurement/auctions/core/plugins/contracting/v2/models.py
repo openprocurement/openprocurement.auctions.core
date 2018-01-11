@@ -12,7 +12,7 @@ from openprocurement.auctions.core.models import (
 from openprocurement.auctions.core.validation import (
     validate_disallow_dgfPlatformLegalDetails
 )
-from openprocurement.auctions.core.plugins.contracting.flash.models import (
+from openprocurement.auctions.core.plugins.contracting.v1.models import (
     Contract as BaseContract
 )
 
