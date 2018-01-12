@@ -23,7 +23,7 @@ from openprocurement.auctions.core.validation import (
 
 
 @opresource(
-    name='belowThreshold:Auction Awards',
+    name='awarding_1_0:Auction Awards',
     collection_path='/auctions/{auction_id}/awards',
     path='/auctions/{auction_id}/awards/{award_id}',
     awardingType='awarding_1_0',

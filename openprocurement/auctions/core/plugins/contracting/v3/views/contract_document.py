@@ -19,11 +19,13 @@ from openprocurement.auctions.core.utils import (
 )
 
 
-@opresource(name='awarding_1_0:Auction Contract Documents',
-            collection_path='/auctions/{auction_id}/contracts/{contract_id}/documents',
-            path='/auctions/{auction_id}/contracts/{contract_id}/documents/{document_id}',
-            awardingType='awarding_1_0',
-            description="Auction contract documents")
+@opresource(
+    name='awarding_3_0:Auction Contract Documents',
+    collection_path='/auctions/{auction_id}/contracts/{contract_id}/documents',
+    path='/auctions/{auction_id}/contracts/{contract_id}/documents/{document_id}',
+    awardingType='awarding_3_0',
+    description="Financial auction contract documents"
+)
 class BaseAuctionAwardContractDocumentResource(APIResource):
 
     def validate_contract_document(self, operation):
@@ -109,3 +111,4 @@ class BaseAuctionAwardContractDocumentResource(APIResource):
             self.LOGGER.info('Updated auction contract document {}'.format(self.request.context.id),
                         extra=context_unpack(self.request, {'MESSAGE_ID': 'auction_contract_document_patch'}))
             return {'data': self.request.context.serialize("view")}
+

@@ -24,7 +24,7 @@ from openprocurement.auctions.core.validation import (
 
 
 @opresource(
-    name='belowThreshold:Auction Award Complaints',
+    name='awarding_1_0:Auction Award Complaints',
     collection_path='/auctions/{auction_id}/awards/{award_id}/complaints',
     path='/auctions/{auction_id}/awards/{award_id}/complaints/{complaint_id}',
     awardingType='awarding_1_0',
