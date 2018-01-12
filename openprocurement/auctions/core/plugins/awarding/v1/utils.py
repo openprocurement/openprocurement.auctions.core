@@ -1,7 +1,10 @@
 # -*- coding: utf-8 -*-
-from openprocurement.api.models import TZ
 from barbecue import chef
-from openprocurement.api.models import get_now
+
+from openprocurement.api.models import TZ, get_now
+from openprocurement.api.utils import (
+    get_awarding_type_by_procurement_method_type
+)
 
 
 def next_check_awarding(auction, checks):
@@ -40,6 +43,9 @@ def next_check_awarding(auction, checks):
 
 def add_next_award(request):
     auction = request.validated['auction']
+    awarding_type = get_awarding_type_by_procurement_method_type(
+        auction.procurementMethodType
+    )
     now = get_now()
     if not auction.awardPeriod:
         auction.awardPeriod = type(auction).awardPeriod({})
@@ -92,7 +98,11 @@ def add_next_award(request):
                     }
                 })
                 auction.awards.append(award)
-                request.response.headers['Location'] = request.route_url('{}:Auction Awards'.format(auction.procurementMethodType), auction_id=auction.id, award_id=award['id'])
+                request.response.headers['Location'] = request.route_url(
+                    '{}:Auction Awards'.format(awarding_type),
+                    auction_id=auction.id,
+                    award_id=award['id']
+                )
                 statuses.add('pending')
             else:
                 statuses.add('unsuccessful')
@@ -119,7 +129,11 @@ def add_next_award(request):
                     }
                 })
                 auction.awards.append(award)
-                request.response.headers['Location'] = request.route_url('{}:Auction Awards'.format(auction.procurementMethodType), auction_id=auction.id, award_id=award['id'])
+                request.response.headers['Location'] = request.route_url(
+                    '{}:Auction Awards'.format(awarding_type),
+                    auction_id=auction.id,
+                    award_id=award['id']
+                )
         if auction.awards[-1].status == 'pending':
             auction.awardPeriod.endDate = None
             auction.status = 'active.qualification'

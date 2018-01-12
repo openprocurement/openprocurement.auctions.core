@@ -20,25 +20,12 @@ from openprocurement.auctions.core.utils import (
 from openprocurement.api.views.complaint_document import STATUS4ROLE
 
 
-
 @opresource(
-    name='dgfInsider:Auction Award Complaint Documents',
-    collection_path='/auctions/{auction_id}/awards/{award_id}/complaints/{complaint_id}/documents',
-    path='/auctions/{auction_id}/awards/{award_id}/complaints/{complaint_id}/documents/{document_id}',
-    awardingType='awarding_2_0',
-    description="Insider auction award complaint documents"
-)
-@opresource(
-    name='dgfFinancialAssets:Auction Award Complaint Documents',
-    collection_path='/auctions/{auction_id}/awards/{award_id}/complaints/{complaint_id}/documents',
-    path='/auctions/{auction_id}/awards/{award_id}/complaints/{complaint_id}/documents/{document_id}',
-    awardingType='awarding_2_0',
-    description="Financial auction award complaint documents"
-)
-@opresource(
-    name='dgfOtherAssets:Auction Award Complaint Documents',
-    collection_path='/auctions/{auction_id}/awards/{award_id}/complaints/{complaint_id}/documents',
-    path='/auctions/{auction_id}/awards/{award_id}/complaints/{complaint_id}/documents/{document_id}',
+    name='awarding_2_0:Auction Award Complaint Documents',
+    collection_path='/auctions/{auction_id}/awards/{award_id}/'
+                    'complaints/{complaint_id}/documents',
+    path='/auctions/{auction_id}/awards/{award_id}/'
+         'complaints/{complaint_id}/documents/{document_id}',
     awardingType='awarding_2_0',
     description="Auction award complaint documents"
 )

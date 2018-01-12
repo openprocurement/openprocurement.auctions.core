@@ -19,25 +19,12 @@ from openprocurement.auctions.core.validation import (
 )
 
 
+
 @opresource(
-    name='dgfInsider:Auction Contracts',
+    name='awarding_2_0:Auction Contracts',
     collection_path='/auctions/{auction_id}/contracts',
     path='/auctions/{auction_id}/contracts/{contract_id}',
-    auctionsprocurementMethodType="dgfInsider",
-    description="Insider auction contracts"
-)
-@opresource(
-    name='dgfOtherAssets:Auction Contracts',
-    collection_path='/auctions/{auction_id}/contracts',
-    path='/auctions/{auction_id}/contracts/{contract_id}',
-    auctionsprocurementMethodType="dgfOtherAssets",
-    description="Auction contracts"
-)
-@opresource(
-    name='dgfFinancialAssets:Auction Contracts',
-    collection_path='/auctions/{auction_id}/contracts',
-    path='/auctions/{auction_id}/contracts/{contract_id}',
-    auctionsprocurementMethodType="dgfFinancialAssets",
+    awardingType='awarding_2_0',
     description=" Financial auction contracts"
 )
 class BaseAuctionAwardContractResource(APIResource):

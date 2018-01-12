@@ -19,21 +19,7 @@ from openprocurement.auctions.core.validation import (
 
 
 @opresource(
-    name='dgfInsider:Auction Award Complaints',
-    collection_path='/auctions/{auction_id}/awards/{award_id}/complaints',
-    path='/auctions/{auction_id}/awards/{award_id}/complaints/{complaint_id}',
-    awardingType='awarding_2_0',
-    description="Insider auction award complaints"
-)
-@opresource(
-    name='dgfFinancialAssets:Auction Award Complaints',
-    collection_path='/auctions/{auction_id}/awards/{award_id}/complaints',
-    path='/auctions/{auction_id}/awards/{award_id}/complaints/{complaint_id}',
-    awardingType='awarding_2_0',
-    description="Financial auction award complaints"
-)
-@opresource(
-    name='dgfOtherAssets:Auction Award Complaints',
+    name='awarding_2_0:Auction Award Complaints',
     collection_path='/auctions/{auction_id}/awards/{award_id}/complaints',
     path='/auctions/{auction_id}/awards/{award_id}/complaints/{complaint_id}',
     awardingType='awarding_2_0',

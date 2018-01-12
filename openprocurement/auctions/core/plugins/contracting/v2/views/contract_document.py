@@ -20,24 +20,12 @@ from openprocurement.auctions.core.utils import (
 
 
 @opresource(
-    name='dgfInsider:Auction Contract Documents',
+    name='awarding_2_0:Auction Contract Documents',
     collection_path='/auctions/{auction_id}/contracts/{contract_id}/documents',
     path='/auctions/{auction_id}/contracts/{contract_id}/documents/{document_id}',
-    auctionsprocurementMethodType="dgfInsider",
-    description="Insider auction contract documents"
+    awardingType='awarding_2_0',
+    description="Financial auction contract documents"
 )
-@opresource(
-    name='dgfOtherAssets:Auction Contract Documents',
-    collection_path='/auctions/{auction_id}/contracts/{contract_id}/documents',
-    path='/auctions/{auction_id}/contracts/{contract_id}/documents/{document_id}',
-    auctionsprocurementMethodType="dgfOtherAssets",
-    description="Auction contract documents"
-)
-@opresource(name='dgfFinancialAssets:Auction Contract Documents',
-            collection_path='/auctions/{auction_id}/contracts/{contract_id}/documents',
-            path='/auctions/{auction_id}/contracts/{contract_id}/documents/{document_id}',
-            auctionsprocurementMethodType="dgfFinancialAssets",
-            description="Financial auction contract documents")
 class BaseAuctionAwardContractDocumentResource(APIResource):
 
     def validate_contract_document(self, operation):
