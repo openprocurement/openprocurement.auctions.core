@@ -24,6 +24,7 @@ class Root(object):
         (Allow, 'g:brokers', 'create_auction'),
         (Allow, 'g:auction', 'auction'),
         (Allow, 'g:auction', 'upload_auction_documents'),
+        (Allow, 'g:auction', 'edit_auction'),
         (Allow, 'g:contracting', 'extract_credentials'),
         (Allow, 'g:chronograph', 'edit_auction'),
         (Allow, 'g:convoy', 'edit_auction'),
