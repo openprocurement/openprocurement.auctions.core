@@ -346,4 +346,3 @@ class AuctionAwardResource(APIResource):
             self.LOGGER.info('Updated auction award {}'.format(self.request.context.id),
                              extra=context_unpack(self.request, {'MESSAGE_ID': 'auction_award_patch'}))
             return {'data': award.serialize("view")}
-

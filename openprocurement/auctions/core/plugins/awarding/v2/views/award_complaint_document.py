@@ -98,4 +98,3 @@ class AuctionAwardComplaintDocumentResource(APIResource):
             self.LOGGER.info('Updated auction award complaint document {}'.format(self.request.context.id),
                         extra=context_unpack(self.request, {'MESSAGE_ID': 'auction_award_complaint_document_patch'}))
             return {'data': self.request.context.serialize("view")}
-
