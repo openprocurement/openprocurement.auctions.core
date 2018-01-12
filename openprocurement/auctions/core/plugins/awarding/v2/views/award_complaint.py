@@ -9,7 +9,8 @@ from openprocurement.api.utils import (
 from openprocurement.auctions.core.utils import (
     apply_patch,
     save_auction,
-    check_auction_status
+    check_auction_status,
+    opresource,
 )
 from openprocurement.auctions.core.validation import (
     validate_complaint_data,
@@ -19,6 +20,27 @@ from openprocurement.auctions.core.validation import (
 )
 
 
+@opresource(
+    name='dgfInsider:Auction Award Complaints',
+    collection_path='/auctions/{auction_id}/awards/{award_id}/complaints',
+    path='/auctions/{auction_id}/awards/{award_id}/complaints/{complaint_id}',
+    awardingType='awarding_2_0',
+    description="Insider auction award complaints"
+)
+@opresource(
+    name='dgfFinancialAssets:Auction Award Complaints',
+    collection_path='/auctions/{auction_id}/awards/{award_id}/complaints',
+    path='/auctions/{auction_id}/awards/{award_id}/complaints/{complaint_id}',
+    awardingType='awarding_2_0',
+    description="Financial auction award complaints"
+)
+@opresource(
+    name='dgfOtherAssets:Auction Award Complaints',
+    collection_path='/auctions/{auction_id}/awards/{award_id}/complaints',
+    path='/auctions/{auction_id}/awards/{award_id}/complaints/{complaint_id}',
+    awardingType='awarding_2_0',
+    description="Auction award complaints"
+)
 class AuctionAwardComplaintResource(APIResource):
 
     @json_view(content_type="application/json", permission='nobody',

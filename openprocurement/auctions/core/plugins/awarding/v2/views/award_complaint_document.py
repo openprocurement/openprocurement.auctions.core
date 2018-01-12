@@ -20,9 +20,31 @@ from openprocurement.auctions.core.validation import (
 from openprocurement.auctions.core.utils import (
     apply_patch,
     save_auction,
+    opresource,
 )
 
 
+@opresource(
+    name='dgfInsider:Auction Award Complaint Documents',
+    collection_path='/auctions/{auction_id}/awards/{award_id}/complaints/{complaint_id}/documents',
+    path='/auctions/{auction_id}/awards/{award_id}/complaints/{complaint_id}/documents/{document_id}',
+    awardingType='awarding_2_0',
+    description="Insider auction award complaint documents"
+)
+@opresource(
+    name='dgfFinancialAssets:Auction Award Complaint Documents',
+    collection_path='/auctions/{auction_id}/awards/{award_id}/complaints/{complaint_id}/documents',
+    path='/auctions/{auction_id}/awards/{award_id}/complaints/{complaint_id}/documents/{document_id}',
+    awardingType='awarding_2_0',
+    description="Financial auction award complaint documents"
+)
+@opresource(
+    name='dgfOtherAssets:Auction Award Complaint Documents',
+    collection_path='/auctions/{auction_id}/awards/{award_id}/complaints/{complaint_id}/documents',
+    path='/auctions/{auction_id}/awards/{award_id}/complaints/{complaint_id}/documents/{document_id}',
+    awardingType='awarding_2_0',
+    description="Auction award complaint documents"
+)
 class AuctionAwardComplaintDocumentResource(APIResource):
 
     @json_view(permission='view_auction')
@@ -89,3 +111,4 @@ class AuctionAwardComplaintDocumentResource(APIResource):
             self.LOGGER.info('Updated auction award complaint document {}'.format(self.request.context.id),
                         extra=context_unpack(self.request, {'MESSAGE_ID': 'auction_award_complaint_document_patch'}))
             return {'data': self.request.context.serialize("view")}
+

@@ -22,9 +22,17 @@ from openprocurement.auctions.core.validation import (
 from openprocurement.auctions.core.utils import (
     apply_patch,
     save_auction,
+    opresource,
 )
 
 
+@opresource(
+    name='belowThreshold:Auction Award Complaint Documents',
+    collection_path='/auctions/{auction_id}/awards/{award_id}/complaints/{complaint_id}/documents',
+    path='/auctions/{auction_id}/awards/{award_id}/complaints/{complaint_id}/documents/{document_id}',
+    awardingType='awarding_1_0',
+    description="Auction award complaint documents"
+)
 class AuctionAwardComplaintDocumentResource(APIResource):
 
     @json_view(permission='view_auction')
