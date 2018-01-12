@@ -21,21 +21,7 @@ from openprocurement.auctions.core.plugins.awarding.v2.utils import (
 
 
 @opresource(
-    name='dgfInsider:Auction Awards',
-    collection_path='/auctions/{auction_id}/awards',
-    path='/auctions/{auction_id}/awards/{award_id}',
-    awardingType='awarding_2_0',
-    description="Insider auction awards"
-)
-@opresource(
-    name='dgfFinancialAssets:Auction Awards',
-    collection_path='/auctions/{auction_id}/awards',
-    path='/auctions/{auction_id}/awards/{award_id}',
-    awardingType='awarding_2_0',
-    description="Financial auction awards"
-)
-@opresource(
-    name='dgfOtherAssets:Auction Awards',
+    name='awarding_2_0:Auction Awards',
     collection_path='/auctions/{auction_id}/awards',
     path='/auctions/{auction_id}/awards/{award_id}',
     awardingType='awarding_2_0',

@@ -20,21 +20,7 @@ from openprocurement.auctions.core.utils import (
 
 
 @opresource(
-    name='dgfInsider:Auction Award Documents',
-    collection_path='/auctions/{auction_id}/awards/{award_id}/documents',
-    path='/auctions/{auction_id}/awards/{award_id}/documents/{document_id}',
-    awardingType='awarding_2_0',
-    description="Insider auction award documents"
-)
-@opresource(
-    name='dgfFinancialAssets:Auction Award Documents',
-    collection_path='/auctions/{auction_id}/awards/{award_id}/documents',
-    path='/auctions/{auction_id}/awards/{award_id}/documents/{document_id}',
-    awardingType='awarding_2_0',
-    description="Financial auction award documents"
-)
-@opresource(
-    name='dgfOtherAssets:Auction Award Documents',
+    name='awarding_2_0:Auction Award Documents',
     collection_path='/auctions/{auction_id}/awards/{award_id}/documents',
     path='/auctions/{auction_id}/awards/{award_id}/documents/{document_id}',
     awardingType='awarding_2_0',
