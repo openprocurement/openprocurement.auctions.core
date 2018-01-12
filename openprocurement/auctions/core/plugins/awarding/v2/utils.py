@@ -1,4 +1,7 @@
-from openprocurement.api.utils import get_now
+from openprocurement.api.utils import (
+    get_now,
+    get_awarding_type_by_procurement_method_type,
+)
 from openprocurement.api.models import TZ
 from barbecue import chef
 
@@ -8,6 +11,9 @@ def create_awards_dgf(request):
     auction.status = 'active.qualification'
     now = get_now()
     auction.awardPeriod = type(auction).awardPeriod({'startDate': now})
+    awarding_type = get_awarding_type_by_procurement_method_type(
+        auction.procurementMethodType
+    )
 
     bids = chef(auction.bids, auction.features or [], [], True)
 
@@ -27,13 +33,19 @@ def create_awards_dgf(request):
             award.complaintPeriod.endDate = now
         if award.status == 'pending.verification':
             award.signingPeriod = award.paymentPeriod = award.verificationPeriod = {'startDate': now}
-            request.response.headers['Location'] = request.route_url('{}:Auction Awards'.format(auction.procurementMethodType), auction_id=auction.id, award_id=award['id'])
+            request.response.headers['Location'] = request.route_url(
+                '{}:Auction Awards'.format(awarding_type),
+                auction_id=auction.id, award_id=award['id']
+            )
         auction.awards.append(award)
 
 
 def create_awards_insider(request):
     auction = request.validated['auction']
     auction.status = 'active.qualification'
+    awarding_type = get_awarding_type_by_procurement_method_type(
+        auction.procurementMethodType
+    )
     now = get_now()
     auction.awardPeriod = type(auction).awardPeriod({'startDate': now})
     valid_bids = [bid for bid in auction.bids if bid['status'] != 'invalid']
@@ -52,20 +64,31 @@ def create_awards_insider(request):
         })
         if award.status == 'pending.verification':
             award.signingPeriod = award.paymentPeriod = award.verificationPeriod = {'startDate': now}
-            request.response.headers['Location'] = request.route_url('{}:Auction Awards'.format(auction.procurementMethodType), auction_id=auction.id, award_id=award['id'])
+            request.response.headers['Location'] = request.route_url(
+                '{}:Auction Awards'.format(awarding_type),
+                auction_id=auction.id,
+                award_id=award['id']
+            )
         auction.awards.append(award)
 
 
 def switch_to_next_award(request):
     auction = request.validated['auction']
     now = get_now()
+    awarding_type = get_awarding_type_by_procurement_method_type(
+        auction.procurementMethodType
+    )
     waiting_awards = [i for i in auction.awards if i['status'] == 'pending.waiting']
     if waiting_awards:
         award = waiting_awards[0]
         award.status = 'pending.verification'
         award.signingPeriod = award.paymentPeriod = award.verificationPeriod = {'startDate': now}
         award = award.serialize()
-        request.response.headers['Location'] = request.route_url('{}:Auction Awards'.format(auction.procurementMethodType), auction_id=auction.id, award_id=award['id'])
+        request.response.headers['Location'] = request.route_url(
+            '{}:Auction Awards'.format(awarding_type),
+            auction_id=auction.id,
+            award_id=award['id']
+        )
 
     elif all([award.status in ['cancelled', 'unsuccessful'] for award in auction.awards]):
         auction.awardPeriod.endDate = now
