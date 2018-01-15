@@ -2,7 +2,9 @@
 from schematics.exceptions import ValidationError
 
 from openprocurement.api.models import get_now
-from openprocurement.api.utils import update_logging_context, error_handler
+from openprocurement.api.utils import (
+    update_logging_context, error_handler, raise_operation_error
+)
 from openprocurement.api.validation import validate_json_data, validate_data
 from openprocurement.api.views.complaint_document import STATUS4ROLE
 
@@ -151,8 +153,7 @@ def validate_award_data_post_common(request):
                            'Can create award only in active lot status')
     else:
         return
-    request.errors.status = 403
-    raise error_handler(request.errors)
+    raise_operation_error(request)
 
 
 def validate_patch_award_data_patch_common(request):
@@ -160,8 +161,7 @@ def validate_patch_award_data_patch_common(request):
     if auction.status not in ['active.qualification', 'active.awarded']:
         request.errors.add('body', 'data',
                            'Can\'t update award in current ({}) auction status'.format(auction.status))
-        request.errors.status = 403
-        raise error_handler(request.errors)
+        raise_operation_error(request)
 
 
 def validate_complaint_data_post_common(request):
@@ -180,8 +180,7 @@ def validate_complaint_data_post_common(request):
         request.errors.add('body', 'data','Can add complaint only in complaintPeriod')
     else:
         return
-    request.errors.status = 403
-    raise error_handler(request.errors)
+    raise_operation_error(request)
 
 
 def validate_file_upload_post_common(request):
@@ -200,8 +199,7 @@ def validate_file_upload_post_common(request):
                            ' complaint status'.format(request.context.status))
     else:
         return
-    request.errors.status = 403
-    raise error_handler(request.errors)
+    raise_operation_error(request)
 
 
 def validate_file_update_put_common(request):
@@ -222,31 +220,29 @@ def validate_file_update_put_common(request):
                            ' complaint status'.format(request.validated['complaint'].status))
     else:
         return
-    request.errors.status = 403
-    raise error_handler(request.errors)
+    raise_operation_error(request)
 
 
 def validate_patch_document_data_patch_common(request):
     if request.authenticated_role != request.context.author:
         request.errors.add('url', 'role', 'Can update document only author')
-    if request.validated['auction_status'] not in ['active.qualification',
+    elif request.validated['auction_status'] not in ['active.qualification',
                                                    'active.awarded']:
         request.errors.add('body', 'data',
                            'Can\'t update document in current ({})'
                            ' auction status'.format(request.validated['auction_status']))
-    if any([i.status != 'active' for i in request.validated['auction'].lots
+    elif any([i.status != 'active' for i in request.validated['auction'].lots
             if i.id == request.validated['award'].lotID]):
         request.errors.add('body', 'data',
                            'Can update document only in active lot status')
-    if request.validated['complaint'].status not in STATUS4ROLE.get(
+    elif request.validated['complaint'].status not in STATUS4ROLE.get(
             request.authenticated_role, []):
         request.errors.add('body', 'data',
                            'Can\'t update document in current ({})'
                            ' complaint status'.format(request.validated['complaint'].status))
     else:
         return
-    request.errors.status = 403
-    raise error_handler(request.errors)
+    raise_operation_error(request)
 
 
 def validate_award_document(request, operation):
@@ -260,7 +256,7 @@ def validate_award_document(request, operation):
                            'Can {} document only in active lot status'.format(operation))
     else:
         return True
-    request.errors.status = 403
+    raise_operation_error(request)
 
 
 def validate_file_upload_award_post_common(request):
@@ -268,20 +264,14 @@ def validate_file_upload_award_post_common(request):
 
 
 def validate_file_update_award_put_common(request):
-    if request.errors.status != 400:
-        return
     validate_award_document(request, 'update')
 
 
 def validate_patch_document_data_award_patch_common(request):
-    if request.errors.status != 400:
-        return
     validate_award_document(request, 'update')
 
 
 def validate_patch_complaint_data_patch_common(request):
-    if request.errors.status != 400:
-        return
     auction = request.validated['auction']
     if auction.status not in ['active.qualification', 'active.awarded']:
         request.errors.add('body', 'data', 'Can\'t update complaint in current'
@@ -295,7 +285,7 @@ def validate_patch_complaint_data_patch_common(request):
                                            ' ({}) status'.format(request.context.status))
     else:
         return
-    request.errors.status = 403
+    raise_operation_error(request)
 
 
 def validate_question_data(request):
