@@ -8,7 +8,7 @@ from schematics.types.compound import ModelType
 from schematics.exceptions import ValidationError
 
 from openprocurement.api.models import (
-    Award,
+    Award as BaseAward,
     Value,
     Organization,
     IsoDateTimeType,
@@ -24,7 +24,7 @@ from openprocurement.auctions.core.models import (
 )
 
 
-class Award(Award):
+class Award(BaseAward):
     id = MD5Type(required=True, default=lambda: uuid4().hex)
     bid_id = MD5Type(required=True)
     lotID = MD5Type()
