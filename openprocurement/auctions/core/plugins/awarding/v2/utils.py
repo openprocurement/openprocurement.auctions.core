@@ -5,13 +5,13 @@ from openprocurement.api.utils import (
     get_awarding_type_by_procurement_method_type,
 )
 from openprocurement.auctions.core.plugins.awarding.v2.constants import (
-    START_NUMBER_OF_AWARDS
+    NUMBER_OF_BIDS_TO_BE_QUALIFIED
 )
 
 
 def create_awards_dgf(request):
     """
-        Function create START_NUMBER_OF_AWARDS awards objects
+        Function create NUMBER_OF_BIDS_TO_BE_QUALIFIED awards objects
         First award always in pending.verification status
         others in pending.waiting status
     """
@@ -25,7 +25,7 @@ def create_awards_dgf(request):
 
     bids = chef(auction.bids, auction.features or [], [], True)
 
-    for i in xrange(0, START_NUMBER_OF_AWARDS):
+    for i in xrange(0, NUMBER_OF_BIDS_TO_BE_QUALIFIED):
         status = 'pending.waiting'
         if i == 0:
             status = 'pending.verification'
