@@ -1,11 +1,9 @@
 # -*- coding: utf-8 -*-
-from openprocurement.api.models import (
-    get_now
-)
 from openprocurement.api.utils import (
     json_view,
     context_unpack,
     APIResource,
+    get_now,
     set_ownership
 )
 from openprocurement.auctions.core.utils import (
@@ -15,22 +13,21 @@ from openprocurement.auctions.core.utils import (
     opresource,
 )
 from openprocurement.auctions.core.validation import (
-    validate_patch_complaint_data,
-    validate_complaint_data
+    validate_complaint_data,
+    validate_patch_complaint_data
 )
 
 
-
 @opresource(
-    name='awarding_1_0:Auction Award Complaints',
+    name='awarding_3_0:Auction Award Complaints',
     collection_path='/auctions/{auction_id}/awards/{award_id}/complaints',
     path='/auctions/{auction_id}/awards/{award_id}/complaints/{complaint_id}',
-    awardingType='awarding_1_0',
+    awardingType='awarding_3_0',
     description="Auction award complaints"
 )
 class AuctionAwardComplaintResource(APIResource):
 
-    @json_view(content_type="application/json", permission='create_award_complaint', validators=(validate_complaint_data,))
+    @json_view(content_type="application/json", permission='nobody', validators=(validate_complaint_data,))
     def collection_post(self):
         """Post a complaint for award
         """

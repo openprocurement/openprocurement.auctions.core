@@ -5,12 +5,12 @@ from openprocurement.api.utils import (
     APIResource,
     get_file,
     upload_file,
-    update_file_content_type,
+    update_file_content_type
 )
 from openprocurement.api.validation import (
     validate_file_update,
     validate_file_upload,
-    validate_patch_document_data,
+    validate_patch_document_data
 )
 from openprocurement.auctions.core.utils import (
     apply_patch,
@@ -20,15 +20,19 @@ from openprocurement.auctions.core.utils import (
 
 
 @opresource(
-    name='awarding_1_0:Auction Award Documents',
+    name='awarding_3_0:Auction Award Documents',
     collection_path='/auctions/{auction_id}/awards/{award_id}/documents',
     path='/auctions/{auction_id}/awards/{award_id}/documents/{document_id}',
-    awardingType='awarding_1_0',
+    awardingType='awarding_3_0',
     description="Auction award documents"
 )
 class AuctionAwardDocumentResource(APIResource):
 
     def validate_award_document(self, operation):
+        if operation == 'update' and self.request.authenticated_role != self.context.author:
+            self.request.errors.add('url', 'role', 'Can update document only author')
+            self.request.errors.status = 403
+            return
         if self.request.validated['auction_status'] != 'active.qualification':
             self.request.errors.add('body', 'data', 'Can\'t {} document in current ({}) auction status'.format(operation,
                                                                                                               self.request.validated[
@@ -54,13 +58,14 @@ class AuctionAwardDocumentResource(APIResource):
             ]).values(), key=lambda i: i['dateModified'])
         return {'data': collection_data}
 
-    @json_view(validators=(validate_file_upload,), permission='edit_auction')
+    @json_view(validators=(validate_file_upload,), permission='edit_auction_award')
     def collection_post(self):
         """Auction Award Document Upload
         """
         if not self.validate_award_document('add'):
             return
         document = upload_file(self.request)
+        document.author = self.request.authenticated_role
         self.context.documents.append(document)
         if save_auction(self.request):
             self.LOGGER.info('Created auction award document {}'.format(document.id),
@@ -84,19 +89,20 @@ class AuctionAwardDocumentResource(APIResource):
         ]
         return {'data': document_data}
 
-    @json_view(validators=(validate_file_update,), permission='edit_auction')
+    @json_view(validators=(validate_file_update,), permission='edit_auction_award')
     def put(self):
         """Auction Award Document Update"""
         if not self.validate_award_document('update'):
             return
         document = upload_file(self.request)
+        document.author = self.request.authenticated_role
         self.request.validated['award'].documents.append(document)
         if save_auction(self.request):
             self.LOGGER.info('Updated auction award document {}'.format(self.request.context.id),
                         extra=context_unpack(self.request, {'MESSAGE_ID': 'auction_award_document_put'}))
             return {'data': document.serialize("view")}
 
-    @json_view(content_type="application/json", validators=(validate_patch_document_data,), permission='edit_auction')
+    @json_view(content_type="application/json", validators=(validate_patch_document_data,), permission='edit_auction_award')
     def patch(self):
         """Auction Award Document Update"""
         if not self.validate_award_document('update'):
@@ -106,3 +112,4 @@ class AuctionAwardDocumentResource(APIResource):
             self.LOGGER.info('Updated auction award document {}'.format(self.request.context.id),
                         extra=context_unpack(self.request, {'MESSAGE_ID': 'auction_award_document_patch'}))
             return {'data': self.request.context.serialize("view")}
+

@@ -19,10 +19,10 @@ from openprocurement.auctions.core.utils import (
 )
 
 
-@opresource(name='belowThreshold:Auction Contract Documents',
+@opresource(name='awarding_1_0:Auction Contract Documents',
             collection_path='/auctions/{auction_id}/contracts/{contract_id}/documents',
             path='/auctions/{auction_id}/contracts/{contract_id}/documents/{document_id}',
-            auctionsprocurementMethodType="belowThreshold",
+            awardingType='awarding_1_0',
             description="Auction contract documents")
 class BaseAuctionAwardContractDocumentResource(APIResource):
 

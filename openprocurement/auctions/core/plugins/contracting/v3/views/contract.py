@@ -10,7 +10,7 @@ from openprocurement.auctions.core.utils import (
     save_auction,
     opresource,
 )
-from openprocurement.auctions.core.plugins.contracting.v2.utils import (
+from openprocurement.auctions.core.plugins.contracting.v3.utils import (
     check_auction_status,
 )
 from openprocurement.auctions.core.validation import (
@@ -21,10 +21,10 @@ from openprocurement.auctions.core.validation import (
 
 
 @opresource(
-    name='awarding_2_0:Auction Contracts',
+    name='awarding_3_0:Auction Contracts',
     collection_path='/auctions/{auction_id}/contracts',
     path='/auctions/{auction_id}/contracts/{contract_id}',
-    awardingType='awarding_2_0',
+    awardingType='awarding_3_0',
     description=" Financial auction contracts"
 )
 class BaseAuctionAwardContractResource(APIResource):

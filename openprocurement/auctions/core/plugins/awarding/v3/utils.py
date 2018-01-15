@@ -1,20 +1,13 @@
 from barbecue import chef
+
 from openprocurement.api.models import TZ
 from openprocurement.api.utils import (
     get_now,
     get_awarding_type_by_procurement_method_type,
 )
-from openprocurement.auctions.core.plugins.awarding.v2.constants import (
-    START_NUMBER_OF_AWARDS
-)
 
 
 def create_awards_dgf(request):
-    """
-        Function create START_NUMBER_OF_AWARDS awards objects
-        First award always in pending.verification status
-        others in pending.waiting status
-    """
     auction = request.validated['auction']
     auction.status = 'active.qualification'
     now = get_now()
@@ -25,10 +18,7 @@ def create_awards_dgf(request):
 
     bids = chef(auction.bids, auction.features or [], [], True)
 
-    for i in xrange(0, START_NUMBER_OF_AWARDS):
-        status = 'pending.waiting'
-        if i == 0:
-            status = 'pending.verification'
+    for i, status in enumerate(['pending.verification', 'pending.waiting']):
         bid = bids[i].serialize()
         award = type(auction).awards.model_class({
             '__parent__': request.context,

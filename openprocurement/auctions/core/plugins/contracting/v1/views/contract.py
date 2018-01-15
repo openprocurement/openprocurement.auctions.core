@@ -17,10 +17,10 @@ from openprocurement.auctions.core.validation import (
 )
 
 
-@opresource(name='belowThreshold:Auction Contracts',
+@opresource(name='awarding_1_0:Auction Contracts',
             collection_path='/auctions/{auction_id}/contracts',
             path='/auctions/{auction_id}/contracts/{contract_id}',
-            auctionsprocurementMethodType="belowThreshold",
+            awardingType='awarding_1_0',
             description="Auction contracts")
 class BaseAuctionAwardContractResource(APIResource):
 
