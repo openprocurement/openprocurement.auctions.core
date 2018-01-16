@@ -14,7 +14,7 @@ from openprocurement.auctions.core.plugins.awarding.v2.constants import (
 def create_awards_dgf(request):
     """
         Function create NUMBER_OF_BIDS_TO_BE_QUALIFIED awards objects
-        First award always in pending.verification status
+        First award always in pending status
         others in pending.waiting status
     """
     auction = request.validated['auction']
@@ -30,7 +30,7 @@ def create_awards_dgf(request):
     for i in xrange(0, NUMBER_OF_BIDS_TO_BE_QUALIFIED):
         status = 'pending.waiting'
         if i == 0:
-            status = 'pending.verification'
+            status = 'pending'
         bid = bids[i].serialize()
         award = type(auction).awards.model_class({
             '__parent__': request.context,
@@ -44,7 +44,7 @@ def create_awards_dgf(request):
         if bid['status'] == 'invalid':
             award.status = 'unsuccessful'
             award.complaintPeriod.endDate = now
-        if award.status == 'pending.verification':
+        if award.status == 'pending':
             award.signingPeriod = award.paymentPeriod = award.verificationPeriod = {'startDate': now}
             request.response.headers['Location'] = request.route_url(
                 '{}:Auction Awards'.format(awarding_type),
@@ -64,7 +64,7 @@ def create_awards_insider(request):
     valid_bids = [bid for bid in auction.bids if bid['status'] != 'invalid']
     bids = chef(valid_bids, auction.features or [], [], True)
 
-    for bid, status in zip(bids, ['pending.verification', 'pending.waiting']):
+    for bid, status in zip(bids, ['pending', 'pending.waiting']):
         bid = bid.serialize()
         award = type(auction).awards.model_class({
             '__parent__': request.context,
@@ -75,7 +75,7 @@ def create_awards_insider(request):
             'suppliers': bid['tenderers'],
             'complaintPeriod': {'startDate': now}
         })
-        if award.status == 'pending.verification':
+        if award.status == 'pending':
             award.signingPeriod = award.paymentPeriod = award.verificationPeriod = {'startDate': now}
             request.response.headers['Location'] = request.route_url(
                 '{}:Auction Awards'.format(awarding_type),
@@ -94,7 +94,7 @@ def switch_to_next_award(request):
     waiting_awards = [i for i in auction.awards if i['status'] == 'pending.waiting']
     if waiting_awards:
         award = waiting_awards[0]
-        award.status = 'pending.verification'
+        award.status = 'pending'
         award.signingPeriod = award.paymentPeriod = award.verificationPeriod = {'startDate': now}
         award = award.serialize()
         request.response.headers['Location'] = request.route_url(
@@ -119,10 +119,8 @@ def check_auction_protocol(award):
 def next_check_awarding(auction, checks):
     if not auction.lots and auction.status == 'active.qualification':
         for award in auction.awards:
-            if award.status == 'pending.verification':
+            if award.status == 'pending':
                 checks.append(award.verificationPeriod.endDate.astimezone(TZ))
-            elif award.status == 'pending.payment':
-                checks.append(award.paymentPeriod.endDate.astimezone(TZ))
     elif not auction.lots and auction.status == 'active.awarded' and not any([
             i.status in auction.block_complaint_status
             for i in auction.complaints

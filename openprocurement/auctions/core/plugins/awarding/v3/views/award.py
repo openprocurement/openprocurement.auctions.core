@@ -315,15 +315,14 @@ class AuctionAwardResource(APIResource):
                 self.request.errors.add('body', 'data', 'Only bid owner may cancel award in current ({}) status'.format(award_status))
                 self.request.errors.status = 403
                 return
-        elif award_status == 'pending.verification' and award.status == 'pending.payment':
+        elif award_status == 'pending' and award.status == 'active':
             if check_auction_protocol(award):
                 award.verificationPeriod.endDate = now
             else:
-                self.request.errors.add('body', 'data', 'Can\'t switch award status to (pending.payment) before auction owner load auction protocol')
+                self.request.errors.add('body', 'data', 'Can\'t switch award status to (active) before auction owner load auction protocol')
                 self.request.errors.status = 403
                 return
-        elif award_status == 'pending.payment' and award.status == 'active' and award.paymentPeriod.endDate > now:
-            award.complaintPeriod.endDate = award.paymentPeriod.endDate = now
+            award.complaintPeriod.endDate = now
             auction.contracts.append(type(auction).contracts.model_class({
                 'awardID': award.id,
                 'suppliers': award.suppliers,
@@ -334,10 +333,8 @@ class AuctionAwardResource(APIResource):
             auction.status = 'active.awarded'
             auction.awardPeriod.endDate = now
         elif award_status != 'pending.waiting' and award.status == 'unsuccessful':
-            if award_status == 'pending.verification':
+            if award_status == 'pending':
                 award.verificationPeriod.endDate = now
-            elif award_status == 'pending.payment':
-                award.paymentPeriod.endDate = now
             elif award_status == 'active':
                 award.signingPeriod.endDate = now
                 auction.awardPeriod.endDate = None
