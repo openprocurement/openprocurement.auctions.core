@@ -172,3 +172,4 @@ def invalidate_bids_under_threshold(auction):
     for bid in auction['bids']:
         if bid['value']['amount'] < value_threshold:
             bid['status'] = 'invalid'
+
