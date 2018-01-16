@@ -5,6 +5,7 @@ from openprocurement.api.utils import (
     get_now,
     get_awarding_type_by_procurement_method_type,
 )
+from openprocurement.auctions.core.models import get_auction
 
 
 def create_awards_dgf(request):
@@ -162,3 +163,12 @@ def invalidate_bids_under_threshold(auction):
     for bid in auction['bids']:
         if bid['value']['amount'] < value_threshold:
             bid['status'] = 'invalid'
+
+def get_pending_award(child_of_auction):
+    auction = get_auction(child_of_auction)
+    awards = auction.awards
+    for award in awards:
+        if award.status == 'pending':
+            return award
+    return None
+
