@@ -572,13 +572,6 @@ def invalid_patch_auction_award(self):
                      "Can't switch award (pending) status to (pending.waiting) status")
 
     response = self.app.patch_json('/auctions/{}/awards/{}'.format(self.auction_id, self.first_award_id),
-                                   {"data": {"status": "active"}}, status=403)
-    self.assertEqual(response.status, '403 Forbidden')
-    self.assertEqual(response.content_type, 'application/json')
-    self.assertEqual(response.json['errors'][0]["description"],
-                     "Can't switch award (pending) status to (active) status")
-
-    response = self.app.patch_json('/auctions/{}/awards/{}'.format(self.auction_id, self.first_award_id),
                                    {"data": {"status": "cancelled"}}, status=403)
     self.assertEqual(response.status, '403 Forbidden')
     self.assertEqual(response.content_type, 'application/json')
