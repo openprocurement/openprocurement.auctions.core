@@ -15,7 +15,6 @@ from openprocurement.auctions.core.validation import (
     validate_patch_award_data,
 )
 from openprocurement.auctions.core.plugins.awarding.v3.utils import (
-    switch_to_next_award,
     check_auction_protocol
 )
 
@@ -343,7 +342,7 @@ class AuctionAwardResource(APIResource):
                     if i.awardID == award.id:
                         i.status = 'cancelled'
             award.complaintPeriod.endDate = now
-            switch_to_next_award(self.request)
+            self.request.content_configurator.back_to_awarding()
         elif award_status != award.status:
             self.request.errors.add('body', 'data', 'Can\'t switch award ({}) status to ({}) status'.format(award_status, award.status))
             self.request.errors.status = 403
