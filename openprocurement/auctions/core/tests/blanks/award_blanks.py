@@ -857,6 +857,26 @@ def complate_auction_with_second_award1(self):
     self.assertEqual(response.content_type, 'application/json')
     self.assertEqual(response.json['data']["value"]["amount"], self.second_award['value']['amount'])
 
+    response = self.app.get(
+        '/auctions/{0}'.format(
+            self.auction_id,
+        )
+    )
+    # find new contract instance
+    for contract in response.json['data']['contracts']:
+        if contract['awardID'] == self.second_award['id']:
+            auto_created_contract = contract
+    # find updated award instance
+    for award in response.json['data']['awards']:
+        if award['id'] == self.second_award['id']:
+            updated_award = award
+
+    # check if signingPeriod is copied from award
+    self.assertEqual(
+        auto_created_contract['signingPeriod'],
+        updated_award['signingPeriod']
+    )
+
 
 def complate_auction_with_second_award2(self):
     self.upload_auction_protocol(self.first_award)
