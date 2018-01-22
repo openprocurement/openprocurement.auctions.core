@@ -12,11 +12,17 @@ from openprocurement.auctions.core.plugins.contracting.v3.models import (
 from openprocurement.api.models import Period
 
 
-class TestContractingV3Validators(BaseWebTest):
+contract_data = {
+    'awardID': '774f344a615692604de040918a72b149' # random md5
+}
 
-    contract_data = {
-        'awardID': '774f344a615692604de040918a72b149' # random md5
-    }
+class TestContractingV3Prolongation(BaseWebTest):
+
+    def test_datePublished(self):
+        pass
+
+
+class TestContractingV3Contract(BaseWebTest):
 
     def test_datePaid_good_date(self):
         start_of_signing_period = datetime(2000, 1, 1)
@@ -29,7 +35,7 @@ class TestContractingV3Validators(BaseWebTest):
         period.endDate = end_of_signing_period
 
 
-        contract = Contract(self.contract_data)
+        contract = Contract(contract_data)
         contract.signingPeriod = period
         period.validate()
 
@@ -40,7 +46,7 @@ class TestContractingV3Validators(BaseWebTest):
         contract.validate()
 
     def test_datePaid_wrong_date(self):
-        contract = Contract(self.contract_data)
+        contract = Contract(contract_data)
         period = Period()
         period.startDate = datetime(2000, 1, 1)
         period.endDate = datetime(2000, 1, 10)
@@ -51,19 +57,10 @@ class TestContractingV3Validators(BaseWebTest):
             contract.validate()
 
     def test_datePaid_when_signingPeriod_None(self):
-        contract = Contract(self.contract_data)
+        contract = Contract(contract_data)
         period = Period()
         period.startDate = datetime(2000, 1, 1)
         period.endDate = datetime(2000, 1, 10)
         contract.signingPeriod = period
         contract.datePaid = None
         contract.validate()
-
-def suite():
-    tests = unittest.TestSuite()
-    tests.addTest(unittest.makeSuite(TestContractingV3Validators))
-    return tests
-
-
-if __name__ == '__main__':
-    unittest.main(defaultTest='suite')
