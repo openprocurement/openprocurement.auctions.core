@@ -49,8 +49,8 @@ class Contract(BaseContract):
         if target_signingPeriod == None or \
             value == None:
             return None
-        if value < data.get('signingPeriod').get('startDate'):
+        if value > data.get('signingPeriod').get('startDate'):
             raise ValidationError(
-                'datePaid must be less than start of signingPeriod'
+                'datePaid must not greater than start of signingPeriod'
             )
 
