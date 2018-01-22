@@ -31,8 +31,10 @@ def includeme(config):
     config.add_route_predicate('auctionsprocurementMethodType', isAuction)
     config.add_request_method(extract_auction, 'auction', reify=True)
     config.add_request_method(auction_from_data)
-    config.add_directive('add_auction_procurementMethodType',
-                         register_auction_procurementMethodType)
+    config.add_directive(
+        'add_auction_procurementMethodType',
+         register_auction_procurementMethodType
+    )
     config.scan("openprocurement.auctions.core.views")
     
     # register Adapters

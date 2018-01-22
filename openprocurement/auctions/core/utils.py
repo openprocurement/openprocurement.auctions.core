@@ -413,3 +413,7 @@ def read_json(name):
     return loads(data)
 
 
+def get_related_contract_of_award(award, auction):
+    for contract in auction['contracts']:
+        if contract['awardID'] == award['id']:
+            return contract
