@@ -102,7 +102,7 @@ def next_check_awarding(auction, checks):
             if a.complaintPeriod.endDate
         ]
         for contract in auction.contracts:
-            if contract.status == 'active':
+            if contract.status == 'pending':
                 checks.append(contract.signingPeriod.endDate.astimezone(TZ))
 
         last_award_status = auction.awards[-1].status if auction.awards else ''
@@ -141,14 +141,42 @@ def invalidate_bids_under_threshold(auction):
         if bid['value']['amount'] < value_threshold:
             bid['status'] = 'invalid'
 
+def get_award_contracts(award):
+    auction = award.__parent__
+    contracts = list()
+    
+    for contract in auction['contracts']:
+        if contract.awardID == award.id:
+            contracts.append(contract)
+
+    return contracts
+
+def check_contract_overdue(contract, now):
+    return (
+        contract.status == 'pending' and
+        contract['signingPeriod']['endDate'] < now
+    )
+
+def check_protocol_overdue(award, now):
+    return (
+        award.status == 'pending' and
+        award['verificationPeriod']['endDate'] < now
+    )
 
 def check_award_status(request, award, now):
     """Checking protocol and contract loading by the owner in time."""
     auction = request.validated['auction']
-    protocol_overdue = (award.status == 'pending' and
-                        award['verificationPeriod']['endDate'] < now)
-    contract_overdue = (award.status == 'active' and
-                        award['signingPeriod']['endDate'] < now)
+
+    protocol_overdue = check_protocol_overdue(award, now)
+
+    # seek for contract overdue
+    contracts = get_award_contracts(award)
+    contract_overdue = None
+    for contract in contracts:
+        contract_overdue = check_contract_overdue(contract, now)
+        if contract_overdue:
+            break
+
     if protocol_overdue or contract_overdue:
         if award.status == 'active':
             auction.awardPeriod.endDate = None
