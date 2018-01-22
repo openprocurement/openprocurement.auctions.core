@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from openprocurement.auctions.core.utils import get_related_contract_of_award
 # AuctionAwardSwitchResourceTest
 
 
@@ -44,7 +45,12 @@ def switch_active_to_unsuccessful(self):
     self.assertEqual(response.json['data']["status"], "active")
 
     auction = self.db.get(self.auction_id)
-    auction['awards'][0]['signingPeriod']['endDate'] = auction['awards'][0]['signingPeriod']['startDate']
+    related_contract = get_related_contract_of_award(
+        auction['awards'][0],
+        auction
+    )
+    related_contract['signingPeriod']['endDate'] =\
+            related_contract['signingPeriod']['startDate']
     self.db.save(auction)
 
     self.app.authorization = ('Basic', ('chronograph', ''))
@@ -116,7 +122,13 @@ def switch_suspended_active_to_unsuccessful(self):
     self.assertEqual(response.json['data']["status"], "active")
 
     auction = self.db.get(self.auction_id)
-    auction['awards'][0]['signingPeriod']['endDate'] = auction['awards'][0]['signingPeriod']['startDate']
+    related_contract = get_related_contract_of_award(
+        auction['awards'][0],
+        auction
+    )
+    related_contract['signingPeriod']['endDate'] =\
+            related_contract['signingPeriod']['startDate']
+    related_contract['signingPeriod']['endDate'] = related_contract['signingPeriod']['startDate']
     self.db.save(auction)
 
     self.app.authorization = ('Basic', ('administrator', ''))
@@ -192,7 +204,12 @@ def switch_active_to_unsuccessful_2(self):
     self.assertEqual(response.json['data']["status"], "active")
 
     auction = self.db.get(self.auction_id)
-    auction['awards'][0]['signingPeriod']['endDate'] = auction['awards'][0]['signingPeriod']['startDate']
+    related_contract = get_related_contract_of_award(
+        auction['awards'][0],
+        auction
+    )
+    related_contract['signingPeriod']['endDate'] =\
+            related_contract['signingPeriod']['startDate']
     self.db.save(auction)
 
     self.app.authorization = ('Basic', ('chronograph', ''))

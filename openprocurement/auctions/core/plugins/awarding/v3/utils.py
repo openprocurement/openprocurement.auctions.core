@@ -6,6 +6,7 @@ from openprocurement.api.utils import (
     get_awarding_type_by_procurement_method_type
 )
 
+from openprocurement.auctions.core.utils import get_related_contract_of_award
 from openprocurement.auctions.core.plugins.awarding.v2.constants import (
     NUMBER_OF_BIDS_TO_BE_QUALIFIED
 )
@@ -102,7 +103,7 @@ def next_check_awarding(auction, checks):
             if a.complaintPeriod.endDate
         ]
         for contract in auction.contracts:
-            if contract.status == 'active':
+            if contract.status == 'pending':
                 checks.append(contract.signingPeriod.endDate.astimezone(TZ))
 
         last_award_status = auction.awards[-1].status if auction.awards else ''
@@ -141,14 +142,32 @@ def invalidate_bids_under_threshold(auction):
         if bid['value']['amount'] < value_threshold:
             bid['status'] = 'invalid'
 
+def check_contract_overdue(contract, now):
+    return (
+        contract.status == 'pending' and
+        contract['signingPeriod']['endDate'] < now
+    )
+
+def check_protocol_overdue(award, now):
+    return (
+        award.status == 'pending' and
+        award['verificationPeriod']['endDate'] < now
+    )
 
 def check_award_status(request, award, now):
     """Checking protocol and contract loading by the owner in time."""
     auction = request.validated['auction']
-    protocol_overdue = (award.status == 'pending' and
-                        award['verificationPeriod']['endDate'] < now)
-    contract_overdue = (award.status == 'active' and
-                        award['signingPeriod']['endDate'] < now)
+
+    protocol_overdue = check_protocol_overdue(award, now)
+
+    # seek for contract overdue
+    related_contract = get_related_contract_of_award(award, auction)
+
+    contract_overdue = check_contract_overdue(
+        related_contract, 
+        now
+    ) if related_contract else None # award could have not a contract
+
     if protocol_overdue or contract_overdue:
         if award.status == 'active':
             auction.awardPeriod.endDate = None
