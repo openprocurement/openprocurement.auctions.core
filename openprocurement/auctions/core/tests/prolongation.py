@@ -10,8 +10,11 @@ from openprocurement.auctions.core.tests.blanks.prolongation_blanks import (
     get_list_of_documents,
     patch_document,
     apply_prolongation_triple_times,
+<<<<<<< HEAD
     apply_applied_prolongation,
     create_applied_prolongation,
+=======
+>>>>>>> f3ed869... Add Prolongation views
 )
 
 
@@ -55,6 +58,7 @@ class AuctionContractProlongationResourceTestMixin(object):
     test_apply_prolongation_triple_times = snitch(
         apply_prolongation_triple_times
     )
+<<<<<<< HEAD
 
     test_apply_applied_prolongation = snitch(
         apply_applied_prolongation
@@ -63,3 +67,5 @@ class AuctionContractProlongationResourceTestMixin(object):
     test_create_applied_prolongation = snitch(
         create_applied_prolongation
     )
+=======
+>>>>>>> f3ed869... Add Prolongation views

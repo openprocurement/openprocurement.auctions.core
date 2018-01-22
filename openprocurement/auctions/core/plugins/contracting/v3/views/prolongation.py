@@ -10,6 +10,12 @@ from openprocurement.auctions.core.utils import (
     save_auction,
     opresource,
 )
+<<<<<<< HEAD
+=======
+from openprocurement.auctions.core.plugins.contracting.v3.utils import (
+    check_auction_status,
+)
+>>>>>>> f3ed869... Add Prolongation views
 from openprocurement.auctions.core.validation import (
     validate_prolongation_data,
     validate_patch_prolongation_data,
@@ -17,9 +23,12 @@ from openprocurement.auctions.core.validation import (
 from openprocurement.auctions.core.plugins.contracting.v3.models import(
     Prolongation
 )
+<<<<<<< HEAD
 from openprocurement.auctions.core.plugins.contracting.v3.utils.prolongation import (
     ProlongationManager
 )
+=======
+>>>>>>> f3ed869... Add Prolongation views
 
 
 @opresource(
@@ -42,11 +51,20 @@ class AuctionAwardContractProlongationResource(APIResource):
         contract = self.request.validated['contract']
 
         new_prolongation = self.request.validated['prolongation']
+<<<<<<< HEAD
         contract.prolongations.append(new_prolongation)
 
         if save_auction(self.request):
             self.LOGGER.info(
                 'Created auction contract prolongation with ID {0}'.format(new_prolongation.id),
+=======
+        new_prolongation.__parent__.prolongations.append(new_prolongation)
+
+        if save_auction(self.request):
+            self.LOGGER.info(
+                'Created auction contract prolongation with ID {0}'.\
+                    format(new_prolongation.id),
+>>>>>>> f3ed869... Add Prolongation views
                 extra=context_unpack(
                     self.request,
                     {'MESSAGE_ID': 'contract_prolongation_create'},
@@ -54,9 +72,16 @@ class AuctionAwardContractProlongationResource(APIResource):
                 ),
             )
             self.request.response.status = 201
+<<<<<<< HEAD
             
             self.request.response.headers['Location'] = self.request.current_route_url(
                     _route_name=self.request.matched_route.name,
+=======
+            route = self.request.matched_route.name
+            self.request.response.headers['Location'] = \
+                self.request.current_route_url(
+                    _route_name=route,
+>>>>>>> f3ed869... Add Prolongation views
                     contract_id=contract.id,
                     _query={}
                 )
@@ -87,6 +112,7 @@ class AuctionAwardContractProlongationResource(APIResource):
             Fields, except on `status`, can be updated only when
             Prolongation has status `draft`.
         """
+<<<<<<< HEAD
         new_status = self.request.validated['data'].get('status')
 
         if new_status == 'applied':
@@ -100,6 +126,19 @@ class AuctionAwardContractProlongationResource(APIResource):
                 return
             save_auction(self.request)
         apply_patch(self.request)
+=======
+        old_prolongation = self.request.context
+        new_status = self.request.validated['data'].get('status')
+
+        is_status_change = (new_status != old_prolongation.status)
+
+        if not is_status_change and old_prolongation.status == 'draft':
+            apply_patch(self.request) # apply patch only in `draft`
+        if new_status == 'applied':
+            # this method checks intention of long apply
+            old_prolongation.apply()
+            save_auction(self.request)
+>>>>>>> f3ed869... Add Prolongation views
 
         self.LOGGER.info(
             'Updated prolongation {}'.format(

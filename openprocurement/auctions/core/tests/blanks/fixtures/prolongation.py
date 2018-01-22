@@ -10,7 +10,11 @@ def add_document_to_prolongation(
     prolongation_id,
 ):
     add_document_response = test_case.app.post(
+<<<<<<< HEAD
         PATHS['prolongation_documents'].format(
+=======
+        PATHS['documents'].format(
+>>>>>>> f3ed869... Add Prolongation views
             auction_id=auction_id,
             contract_id=contract_id,
             prolongation_id=prolongation_id

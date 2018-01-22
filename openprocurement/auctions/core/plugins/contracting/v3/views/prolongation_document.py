@@ -20,9 +20,12 @@ from openprocurement.auctions.core.utils import (
 from openprocurement.auctions.core.plugins.contracting.v3.validators import (
     validate_contract_document
 )
+<<<<<<< HEAD
 from openprocurement.auctions.core.plugins.contracting.v3.utils.prolongation import (
     ProlongationManager
 )
+=======
+>>>>>>> f3ed869... Add Prolongation views
 
 
 @opresource(
@@ -43,6 +46,7 @@ class BaseAuctionAwardContractDocumentResource(APIResource):
     def collection_post(self):
         """Auction Contract Prolongation Document Upload
         """
+<<<<<<< HEAD
         if not validate_contract_document(self.request, 'add'):
             return
         document = upload_file(self.request)
@@ -53,6 +57,12 @@ class BaseAuctionAwardContractDocumentResource(APIResource):
                 'Document can be added only in `draft` status.'
             )
 
+=======
+        if not validate_contract_document(self, 'add'):
+            return
+        document = upload_file(self.request)
+        self.context.add_document(document)
+>>>>>>> f3ed869... Add Prolongation views
         if save_auction(self.request):
             self.LOGGER.info(
                 'Created auction contract document {}'.format(
@@ -60,13 +70,29 @@ class BaseAuctionAwardContractDocumentResource(APIResource):
                 ),
                 extra=context_unpack(
                     self.request,
+<<<<<<< HEAD
                     {'MESSAGE_ID': 'auction_contract_prolongation_document_create'},
+=======
+                    {
+                        'MESSAGE_ID':
+                            'auction_contract_prolongation_document_create'
+                    },
+>>>>>>> f3ed869... Add Prolongation views
                     {'document_id': document.id}
                 )
             )
             self.request.response.status = 201
+<<<<<<< HEAD
             document_route = self.request.matched_route.name.replace("collection_", "")
             self.request.response.headers['Location'] = self.request.current_route_url(
+=======
+            document_route = self.request.matched_route.name.replace(
+                "collection_",
+                ""
+            )
+            self.request.response.headers['Location'] = self.request.\
+                    current_route_url(
+>>>>>>> f3ed869... Add Prolongation views
                         _route_name=document_route,
                         document_id=document.id,
                         _query={}
@@ -108,7 +134,11 @@ class BaseAuctionAwardContractDocumentResource(APIResource):
     )
     def patch(self):
         """Auction Contract Document Update"""
+<<<<<<< HEAD
         if not validate_contract_document(self.request, 'update'):
+=======
+        if not validate_contract_document(self, 'update'):
+>>>>>>> f3ed869... Add Prolongation views
             return
         if apply_patch(
             self.request,
@@ -121,7 +151,13 @@ class BaseAuctionAwardContractDocumentResource(APIResource):
                 ),
                 extra=context_unpack(
                     self.request,
+<<<<<<< HEAD
                     {'MESSAGE_ID': 'auction_contract_prolongation_document_patch'}
+=======
+                    {'MESSAGE_ID':
+                        'auction_contract_prolongation_document_patch'
+                    }
+>>>>>>> f3ed869... Add Prolongation views
                 )
             )
             return {'data': self.request.context.serialize("view")}
