@@ -45,6 +45,7 @@ nosetests.xml
 coverage.xml
 *,cover
 .hypothesis/
+erl_crash.dump
 
 # Translations
 *.mo
