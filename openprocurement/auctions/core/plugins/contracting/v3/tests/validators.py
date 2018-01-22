@@ -18,16 +18,25 @@ class TestContractingV3Validators(BaseWebTest):
     }
 
     def test_datePaid_good_date(self):
-        contract = Contract(self.contract_data)
+        start_of_signing_period = datetime(2000, 1, 1)
+        end_of_signing_period = datetime(2000, 1, 10)
+        good_datepaid1 = datetime(1999, 12, 31)
+        good_datepaid2 = datetime(2000, 1, 1)
         period = Period()
-        period.startDate = datetime(2000, 1, 1)
-        period.endDate = datetime(2000, 1, 10)
+
+        period.startDate = start_of_signing_period
+        period.endDate = end_of_signing_period
+
+
+        contract = Contract(self.contract_data)
         contract.signingPeriod = period
         period.validate()
-        contract.datePaid = datetime(2000, 1, 5)
+
+        contract.datePaid = good_datepaid1
         contract.validate()
-        self.db.commit()
-        self.assertEqual(contract.signingPeriod.startDate, datetime(2000, 1, 1))
+        # datePaid must be not greater than start of signingPeriod
+        contract.datePaid = good_datepaid2
+        contract.validate()
 
     def test_datePaid_wrong_date(self):
         contract = Contract(self.contract_data)
@@ -37,7 +46,7 @@ class TestContractingV3Validators(BaseWebTest):
         contract.signingPeriod = period
         self.db.commit()
         with self.assertRaises(ValidationError) as context:
-            contract.datePaid = datetime(1999, 12, 31)
+            contract.datePaid = datetime(2000, 1, 5)
             contract.validate()
 
     def test_datePaid_when_signingPeriod_None(self):
