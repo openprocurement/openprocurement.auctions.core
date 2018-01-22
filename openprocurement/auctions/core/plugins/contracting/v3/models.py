@@ -1,6 +1,8 @@
 # -*- coding:utf-8 -*-
+from schematics.types import StringType
 from schematics.types.compound import ModelType
 from schematics.types.serializable import serializable
+from schematics.models import Model
 from schematics.exceptions import ValidationError
 from schematics.transforms import (
     blacklist,
@@ -11,6 +13,7 @@ from openprocurement.api.models import (
     ListType,
     Period,
     IsoDateTimeType,
+    get_now,
 )
 from openprocurement.auctions.core.models import (
     dgfOrganization as Organization,
@@ -26,6 +29,47 @@ from openprocurement.api.models import (
 )
 
 
+class Prolongation(Model):
+    _crearedDate = IsoDateTimeType(default=get_now())
+    decisionID = StringType(required=True)
+    status = StringType(
+        choices=[
+            'draft',
+            'applied',
+            'deleted',
+        ],
+        default='draft'
+    )
+    reason = StringType(
+        choices=[
+            'dgfPaymentImpossibility',
+            'dgfLackOfDocuments',
+            'dgfLegalObstacles',
+            'other'
+        ]
+    )
+    description = StringType(
+        required=True,
+        min_length=10
+    )
+    dayPublished = IsoDateTimeType() # TODO: add validation
+    documents = ModelType(Document) # TODO: add validation
+
+    class Options:
+        roles = {
+            'view': blacklist('_created'),
+        }
+
+    def validate_dayPublished(self, value, data):
+        time_limit = PROLONGATION['DAY_PUBLISHED_LIMIT']
+        if value > self._created + time_limit:
+            raise ValidationError(
+                'dayPublished must be not later than {0} days after '
+                'creation of prolongation'.format(time_limit.days)
+            )
+        pass
+
+
 class Contract(BaseContract):
     """
         Contract for Contracting 3.0 procedure
@@ -35,6 +79,7 @@ class Contract(BaseContract):
     complaints = ListType(ModelType(Complaint), default=list())
     signingPeriod = ModelType(Period)
     datePaid = IsoDateTimeType()
+    prolondation = ModelType(Prolongation)
     documents = ListType(
         ModelType(Document),
         default=list(),
