@@ -101,9 +101,9 @@ def next_check_awarding(auction, checks):
             for a in auction.awards
             if a.complaintPeriod.endDate
         ]
-        for award in auction.awards:
-            if award.status == 'active':
-                checks.append(award.signingPeriod.endDate.astimezone(TZ))
+        for contract in auction.contracts:
+            if contract.status == 'active':
+                checks.append(contract.signingPeriod.endDate.astimezone(TZ))
 
         last_award_status = auction.awards[-1].status if auction.awards else ''
         if standStillEnds and last_award_status == 'unsuccessful':
