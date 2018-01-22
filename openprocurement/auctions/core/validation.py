@@ -351,6 +351,53 @@ def validate_contract_data(request):
     return validate_data(request, model)
 
 
+def validate_prolongation_data(request):
+    if request.validated['auction_status'] not in \
+        ['active.qualification', 'active.awarded']:
+        request.errors.add(
+            'body',
+            'data',
+            'Can\'t create prolongation in current ({}) auction status'\
+                .format(request.validated['auction_status']))
+        request.errors.status = 403
+        return
+    update_logging_context(request, {'prolongation_id': '__new__'})
+    model = type(request.auction).contracts.model_class.\
+        prolongations.model_class
+    return validate_data(request, model)
+
+
+def validate_patch_prolongation_data(request):
+    if request.validated['auction_status'] not in \
+        ['active.qualification', 'active.awarded']:
+        request.errors.add(
+            'body',
+            'data',
+            'Can\'t update prolongation in current ({}) auction status'\
+                .format(request.validated['auction_status']))
+        request.errors.status = 403
+        return
+    auction = request.validated['auction']
+    if any([
+        i.status != 'active' for i in auction.lots \
+            if i.id in [
+                a.lotID for a in auction.awards if \
+                    a.id == request.context.awardID
+            ]
+    ]):
+        request.errors.add(
+            'body',
+            'data',
+            'Can update prolongation only in active lot status'
+        )
+        request.errors.status = 403
+        return
+        data = request.validated['data']
+    model = type(request.auction).contracts.model_class.\
+        prolongations.model_class
+    return validate_data(request, model, True)
+
+
 def validate_patch_contract_data(request):
     model = type(request.auction).contracts.model_class
     return validate_data(request, model, True)
