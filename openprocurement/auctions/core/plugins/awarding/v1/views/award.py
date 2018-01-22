@@ -316,7 +316,7 @@ class AuctionAwardResource(APIResource):
                 'date': get_now(),
                 'items': [i for i in auction.items if i.relatedLot == award.lotID ],
                 'contractID': '{}-{}{}'.format(auction.auctionID, self.server_id, len(auction.contracts) + 1) }))
-            self.request.content_configurator.add_award()
+            self.request.content_configurator.start_awarding()
         elif award_status == 'active' and award.status == 'cancelled':
             now = get_now()
             if award.complaintPeriod.endDate > now:
@@ -329,10 +329,10 @@ class AuctionAwardResource(APIResource):
             for i in auction.contracts:
                 if i.awardID == award.id:
                     i.status = 'cancelled'
-            self.request.content_configurator.add_award()
+            self.request.content_configurator.back_to_awarding()
         elif award_status == 'pending' and award.status == 'unsuccessful':
             award.complaintPeriod.endDate = calculate_business_date(get_now(), STAND_STILL_TIME, auction, True)
-            self.request.content_configurator.add_award()
+            self.request.content_configurator.back_to_awarding()
         elif award_status == 'unsuccessful' and award.status == 'cancelled' and any([i.status in ['claim', 'answered', 'pending', 'resolved'] for i in award.complaints]):
             if auction.status == 'active.awarded':
                 auction.status = 'active.qualification'
@@ -354,7 +354,7 @@ class AuctionAwardResource(APIResource):
             for i in auction.contracts:
                 if i.awardID in cancelled_awards:
                     i.status = 'cancelled'
-            self.request.content_configurator.add_award()
+            self.request.content_configurator.back_to_awarding()
         elif self.request.authenticated_role != 'Administrator' and not(award_status == 'pending' and award.status == 'pending'):
             self.request.errors.add('body', 'data', 'Can\'t update award in current ({}) status'.format(award_status))
             self.request.errors.status = 403
