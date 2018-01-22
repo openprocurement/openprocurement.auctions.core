@@ -87,6 +87,8 @@ def factory(request):
         contract = get_item(auction, 'contract', request)
         if request.matchdict.get('document_id'):
             return get_item(contract, 'document', request)
+        if request.matchdict.get('prolongation_id'):
+            return get_item(contract, 'prolongation', request)
         else:
             return contract
     elif request.matchdict.get('bid_id'):

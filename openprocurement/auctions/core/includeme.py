@@ -25,12 +25,21 @@ def includeme(config):
     config.add_route_predicate('auctionsprocurementMethodType', isAuction)
     config.add_request_method(extract_auction, 'auction', reify=True)
     config.add_request_method(auction_from_data)
-    config.add_directive('add_auction_procurementMethodType',
-                         register_auction_procurementMethodType)
+    config.add_directive(
+        'add_auction_procurementMethodType',
+         register_auction_procurementMethodType
+    )
     config.scan("openprocurement.auctions.core.views")
-    config.registry.registerAdapter(AuctionConfigurator, (IAuction, IRequest),
-                                    IContentConfigurator)
-    config.add_request_method(get_content_configurator, 'content_configurator', reify=True)
+    config.registry.registerAdapter(
+        AuctionConfigurator,
+        (IAuction, IRequest),
+        IContentConfigurator
+    )
+    config.add_request_method(
+        get_content_configurator,
+        'content_configurator',
+        reify=True
+    )
     plugins = config.registry.settings.get('plugins') and \
               config.registry.settings['plugins'].split(',')
     for entry_point in iter_entry_points('openprocurement.auctions.core.plugins'):
