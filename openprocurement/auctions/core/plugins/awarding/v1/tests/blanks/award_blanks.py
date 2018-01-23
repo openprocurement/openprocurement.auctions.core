@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from openprocurement.auctions.flash.tests.base import test_organization
+from openprocurement.auctions.core.plugins.awarding.v1.tests.base import test_organization
 
 # AuctionAwardResourceTest
 
