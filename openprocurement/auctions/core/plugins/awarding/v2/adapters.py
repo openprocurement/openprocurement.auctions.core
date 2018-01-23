@@ -1,5 +1,5 @@
-from openprocurement.auctions.core.plugins.awarding.v2.models import Award
-from openprocurement.auctions.core.plugins.awarding.v2.utils import (
+from .models import Award
+from .utils import (
     create_awards,
     switch_to_next_award
 )

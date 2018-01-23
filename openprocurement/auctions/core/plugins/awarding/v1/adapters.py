@@ -1,7 +1,5 @@
-from openprocurement.auctions.core.plugins.awarding.v1.models import Award
-from openprocurement.auctions.core.plugins.awarding.v1.utils import (
-    add_next_award
-)
+from .models import Award
+from .utils import add_next_award
 
 
 class AwardingV1ConfiguratorMixin(object):
