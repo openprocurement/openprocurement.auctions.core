@@ -1,74 +1,51 @@
 # -*- coding: utf-8 -*-
 import unittest
 
-from openprocurement.api.utils import ROUTE_PREFIX
-from openprocurement.api.models import get_now
-from openprocurement.auctions.core.tests.base import BaseWebTest
+from openprocurement.auctions.core.tests.base import BaseWebTest, snitch
+from openprocurement.auctions.core.tests.blanks.tender_blanks import empty_listing
+from openprocurement.auctions.core.tests.blanks.auction_blanks import (
+    # AuctionAuctionResourceTest
+    get_auction_auction_not_found,
+    get_auction_auction,
+    patch_auction_auction,
+    post_auction_auction_document,
+    # AuctionLotAuctionResourceTest
+    get_auction_auction_lot,
+    patch_auction_auction_lot,
+    post_auction_auction_document_lot,
+    # AuctionMultipleLotAuctionResourceTest
+    get_auction_auction_2_lots,
+    patch_auction_auction_2_lots,
+    post_auction_auction_document_2_lots,
+)
 
 
 class AuctionResourceTest(BaseWebTest):
 
-    def test_empty_listing(self):
-        response = self.app.get('/auctions')
-        self.assertEqual(response.status, '200 OK')
-        self.assertEqual(response.content_type, 'application/json')
-        self.assertEqual(response.json['data'], [])
-        self.assertNotIn('{\n    "', response.body)
-        self.assertNotIn('callback({', response.body)
-        self.assertEqual(response.json['next_page']['offset'], '')
-        self.assertNotIn('prev_page', response.json)
+    test_empty_listing = snitch(empty_listing)
 
-        response = self.app.get('/auctions?opt_jsonp=callback')
-        self.assertEqual(response.status, '200 OK')
-        self.assertEqual(response.content_type, 'application/javascript')
-        self.assertNotIn('{\n    "', response.body)
-        self.assertIn('callback({', response.body)
 
-        response = self.app.get('/auctions?opt_pretty=1')
-        self.assertEqual(response.status, '200 OK')
-        self.assertEqual(response.content_type, 'application/json')
-        self.assertIn('{\n    "', response.body)
-        self.assertNotIn('callback({', response.body)
+class AuctionAuctionResourceTestMixin(object):
+    test_get_auction_auction_not_found = snitch(get_auction_auction_not_found)
 
-        response = self.app.get('/auctions?opt_jsonp=callback&opt_pretty=1')
-        self.assertEqual(response.status, '200 OK')
-        self.assertEqual(response.content_type, 'application/javascript')
-        self.assertIn('{\n    "', response.body)
-        self.assertIn('callback({', response.body)
+    test_get_auction_auction = snitch(get_auction_auction)
+    test_patch_auction_auction = snitch(patch_auction_auction)
+    test_post_auction_auction_document = snitch(post_auction_auction_document)
 
-        response = self.app.get('/auctions?offset=2015-01-01T00:00:00+02:00&descending=1&limit=10')
-        self.assertEqual(response.status, '200 OK')
-        self.assertEqual(response.content_type, 'application/json')
-        self.assertEqual(response.json['data'], [])
-        self.assertIn('descending=1', response.json['next_page']['uri'])
-        self.assertIn('limit=10', response.json['next_page']['uri'])
-        self.assertNotIn('descending=1', response.json['prev_page']['uri'])
-        self.assertIn('limit=10', response.json['prev_page']['uri'])
 
-        response = self.app.get('/auctions?feed=changes')
-        self.assertEqual(response.status, '200 OK')
-        self.assertEqual(response.content_type, 'application/json')
-        self.assertEqual(response.json['data'], [])
-        self.assertEqual(response.json['next_page']['offset'], '')
-        self.assertNotIn('prev_page', response.json)
+class AuctionLotAuctionResourceTestMixin(object):
+    test_get_auction_auction_not_found = snitch(get_auction_auction_not_found)
 
-        response = self.app.get('/auctions?feed=changes&offset=0', status=404)
-        self.assertEqual(response.status, '404 Not Found')
-        self.assertEqual(response.content_type, 'application/json')
-        self.assertEqual(response.json['status'], 'error')
-        self.assertEqual(response.json['errors'], [
-            {u'description': u'Offset expired/invalid', u'location': u'params', u'name': u'offset'}
-        ])
+    test_get_auction_auction_lots = snitch(get_auction_auction_lot)
+    test_patch_auction_auction_lots = snitch(patch_auction_auction_lot)
+    test_post_auction_auction_document_lots = snitch(post_auction_auction_document_lot)
 
-        response = self.app.get('/auctions?feed=changes&descending=1&limit=10')
-        self.assertEqual(response.status, '200 OK')
-        self.assertEqual(response.content_type, 'application/json')
-        self.assertEqual(response.json['data'], [])
-        self.assertIn('descending=1', response.json['next_page']['uri'])
-        self.assertIn('limit=10', response.json['next_page']['uri'])
-        self.assertNotIn('descending=1', response.json['prev_page']['uri'])
-        self.assertIn('limit=10', response.json['prev_page']['uri'])
 
+class AuctionMultipleLotAuctionResourceTestMixin(object):
+    test_post_auction_auction_document = snitch(get_auction_auction_not_found)
+    test_get_auction_auction_multiple_lot = snitch(get_auction_auction_2_lots)
+    test_patch_auction_auction_multiple_lot = snitch(patch_auction_auction_2_lots)
+    test_post_auction_auction_document_multiple_lot = snitch(post_auction_auction_document_2_lots)
 
 
 def suite():

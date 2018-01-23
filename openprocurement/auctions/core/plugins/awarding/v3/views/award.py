@@ -16,8 +16,7 @@ from openprocurement.auctions.core.validation import (
     validate_award_data_post_common,
     validate_patch_award_data_patch_common,
 )
-from openprocurement.auctions.core.plugins.awarding.v2.utils import (
-    switch_to_next_award,
+from openprocurement.auctions.core.plugins.awarding.v3.utils import (
     check_auction_protocol
 )
 
@@ -291,45 +290,81 @@ class AuctionAwardResource(APIResource):
 
         """
         auction = self.request.validated['auction']
-        award = self.request.context
-        award_status = award.status
-        now = get_now()
-        if award_status in ['unsuccessful', 'cancelled']:
-            self.request.errors.add('body', 'data', 'Can\'t update award in current ({}) status'.format(award_status))
+        if auction.status not in ['active.qualification', 'active.awarded']:
+            self.request.errors.add(
+                'body',
+                'data',
+                'Can\'t update award in current ({}) auction status' \
+                    .format(auction.status)
+            )
             self.request.errors.status = 403
             return
+        award = self.request.context
+        current_award_status = award.status
+        now = get_now()
+        if current_award_status in ['unsuccessful', 'cancelled']:
+            self.request.errors.add(
+                'body',
+                'data',
+                'Can\'t update award in current ({}) status' \
+                    .format(current_award_status)
+            )
+            self.request.errors.status = 403
+            return
+
         apply_patch(self.request, save=False, src=self.request.context.serialize())
-        if award_status == 'pending.waiting' and award.status == 'cancelled':
+        new_award_status = award.status
+
+        if current_award_status == 'pending.waiting' and \
+            new_award_status == 'cancelled':
             if self.request.authenticated_role == 'bid_owner':
                 award.complaintPeriod.endDate = now
             else:
-                self.request.errors.add('body', 'data', 'Only bid owner may cancel award in current ({}) status'.format(award_status))
+                self.request.errors.add(
+                    'body',
+                    'data',
+                    'Only bid owner may cancel award in current ({}) status' \
+                        .format(current_award_status)
+                )
                 self.request.errors.status = 403
                 return
-        elif award_status == 'pending.verification' and award.status == 'pending.payment':
+
+        elif current_award_status == 'pending' and new_award_status == 'active':
             if check_auction_protocol(award):
                 award.verificationPeriod.endDate = now
             else:
-                self.request.errors.add('body', 'data', 'Can\'t switch award status to (pending.payment) before auction owner load auction protocol')
+                self.request.errors.add(
+                    'body',
+                    'data',
+                    'Can\'t switch award status to (active) before'
+                    ' auction owner load auction protocol'
+                )
                 self.request.errors.status = 403
                 return
-        elif award_status == 'pending.payment' and award.status == 'active' and award.paymentPeriod.endDate > now:
-            award.complaintPeriod.endDate = award.paymentPeriod.endDate = now
+
+            award.complaintPeriod.endDate = now
             auction.contracts.append(type(auction).contracts.model_class({
                 'awardID': award.id,
                 'suppliers': award.suppliers,
                 'value': award.value,
                 'date': get_now(),
-                'items': [i for i in auction.items if i.relatedLot == award.lotID],
-                'contractID': '{}-{}{}'.format(auction.auctionID, self.server_id, len(auction.contracts) + 1)}))
+                'items': [
+                    i for i in auction.items if i.relatedLot == award.lotID
+                ],
+                'contractID': '{}-{}{}'.format(
+                    auction.auctionID,
+                    self.server_id,
+                    len(auction.contracts) + 1
+                ),
+                'signingPeriod': award.signingPeriod,
+            }))
             auction.status = 'active.awarded'
             auction.awardPeriod.endDate = now
-        elif award_status != 'pending.waiting' and award.status == 'unsuccessful':
-            if award_status == 'pending.verification':
+        elif current_award_status != 'pending.waiting' and \
+            new_award_status == 'unsuccessful':
+            if current_award_status == 'pending':
                 award.verificationPeriod.endDate = now
-            elif award_status == 'pending.payment':
-                award.paymentPeriod.endDate = now
-            elif award_status == 'active':
+            elif current_award_status == 'active':
                 award.signingPeriod.endDate = now
                 auction.awardPeriod.endDate = None
                 auction.status = 'active.qualification'
@@ -337,12 +372,25 @@ class AuctionAwardResource(APIResource):
                     if i.awardID == award.id:
                         i.status = 'cancelled'
             award.complaintPeriod.endDate = now
-            switch_to_next_award(self.request)
-        elif award_status != award.status:
-            self.request.errors.add('body', 'data', 'Can\'t switch award ({}) status to ({}) status'.format(award_status, award.status))
+            self.request.content_configurator.back_to_awarding()
+        elif current_award_status != new_award_status:
+            self.request.errors.add(
+                'body',
+                'data',
+                'Can\'t switch award ({0}) status to ({1}) status'.format(
+                    current_award_status,
+                    new_award_status
+                )
+            )
             self.request.errors.status = 403
             return
+
         if save_auction(self.request):
-            self.LOGGER.info('Updated auction award {}'.format(self.request.context.id),
-                             extra=context_unpack(self.request, {'MESSAGE_ID': 'auction_award_patch'}))
+            self.LOGGER.info(
+                'Updated auction award {}'.format(self.request.context.id),
+                 extra=context_unpack(
+                     self.request,
+                     {'MESSAGE_ID': 'auction_award_patch'}
+                 )
+            )
             return {'data': award.serialize("view")}

@@ -3,11 +3,20 @@ from barbecue import chef
 from openprocurement.api.models import TZ
 from openprocurement.api.utils import (
     get_now,
-    get_awarding_type_by_procurement_method_type,
+    get_awarding_type_by_procurement_method_type
+)
+
+from openprocurement.auctions.core.plugins.awarding.v2.constants import (
+    NUMBER_OF_BIDS_TO_BE_QUALIFIED
 )
 
 
-def create_awards_dgf(request):
+def create_awards(request):
+    """
+        Function create NUMBER_OF_BIDS_TO_BE_QUALIFIED awards objects
+        First award always in pending.verification status
+        others in pending.waiting status
+    """
     auction = request.validated['auction']
     auction.status = 'active.qualification'
     now = get_now()
@@ -15,10 +24,13 @@ def create_awards_dgf(request):
     awarding_type = get_awarding_type_by_procurement_method_type(
         auction.procurementMethodType
     )
+    valid_bids = [bid for bid in auction.bids if bid['value'] is not None]
+    bids = chef(valid_bids, auction.features or [], [], True)
 
-    bids = chef(auction.bids, auction.features or [], [], True)
-
-    for i, status in enumerate(['pending.verification', 'pending.waiting']):
+    for i in xrange(0, NUMBER_OF_BIDS_TO_BE_QUALIFIED):
+        status = 'pending.waiting'
+        if i == 0:
+            status = 'pending.verification'
         bid = bids[i].serialize()
         award = type(auction).awards.model_class({
             '__parent__': request.context,
@@ -37,38 +49,6 @@ def create_awards_dgf(request):
             request.response.headers['Location'] = request.route_url(
                 '{}:Auction Awards'.format(awarding_type),
                 auction_id=auction.id, award_id=award['id']
-            )
-        auction.awards.append(award)
-
-
-def create_awards_insider(request):
-    auction = request.validated['auction']
-    auction.status = 'active.qualification'
-    awarding_type = get_awarding_type_by_procurement_method_type(
-        auction.procurementMethodType
-    )
-    now = get_now()
-    auction.awardPeriod = type(auction).awardPeriod({'startDate': now})
-    valid_bids = [bid for bid in auction.bids if bid['status'] != 'invalid']
-    bids = chef(valid_bids, auction.features or [], [], True)
-
-    for bid, status in zip(bids, ['pending.verification', 'pending.waiting']):
-        bid = bid.serialize()
-        award = type(auction).awards.model_class({
-            '__parent__': request.context,
-            'bid_id': bid['id'],
-            'status': status,
-            'date': now,
-            'value': bid['value'],
-            'suppliers': bid['tenderers'],
-            'complaintPeriod': {'startDate': now}
-        })
-        if award.status == 'pending.verification':
-            award.signingPeriod = award.paymentPeriod = award.verificationPeriod = {'startDate': now}
-            request.response.headers['Location'] = request.route_url(
-                '{}:Auction Awards'.format(awarding_type),
-                auction_id=auction.id,
-                award_id=award['id']
             )
         auction.awards.append(award)
 

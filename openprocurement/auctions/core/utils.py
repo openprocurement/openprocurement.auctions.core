@@ -143,7 +143,7 @@ def check_bids(request):
         if not set([i.status for i in auction.lots]).difference(set(['unsuccessful', 'cancelled'])):
             auction.status = 'unsuccessful'
         elif max([i.numberOfBids for i in auction.lots if i.status == 'active']) < 2:
-            request.content_configurator.add_award()
+            request.content_configurator.start_awarding()
 
     else:
         if auction.numberOfBids < 2 and auction.auctionPeriod and auction.auctionPeriod.startDate:
@@ -152,7 +152,7 @@ def check_bids(request):
             auction.status = 'unsuccessful'
         if auction.numberOfBids == 1:
             # auction.status = 'active.qualification'
-            request.content_configurator.add_award()
+            request.content_configurator.start_awarding()
 
 
 def check_complaint_status(request, complaint, now=None):
