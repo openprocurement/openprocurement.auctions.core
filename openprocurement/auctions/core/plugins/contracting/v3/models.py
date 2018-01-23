@@ -21,12 +21,15 @@ from openprocurement.auctions.core.models import (
 from openprocurement.auctions.core.validation import (
     validate_disallow_dgfPlatformLegalDetails
 )
-from openprocurement.auctions.core.plugins.contracting.v1.models import (
+from openprocurement.api.models import (
     Contract as BaseContract
 )
 
 
 class Contract(BaseContract):
+    """
+        Contract for Contracting 3.0 procedure
+    """
     items = ListType(ModelType(Item))
     suppliers = ListType(ModelType(Organization), min_size=1, max_size=1)
     complaints = ListType(ModelType(Complaint), default=list())
