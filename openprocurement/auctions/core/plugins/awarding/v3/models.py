@@ -9,12 +9,10 @@ from schematics.types.serializable import serializable
 from openprocurement.api.models import (
     ModelType,
     ListType,
-    Period
-)
-from openprocurement.api.utils import calculate_business_date
-from openprocurement.auctions.core.plugins.awarding.v1.models import (
+    Period,
     Award as BaseAward
 )
+from openprocurement.api.utils import calculate_business_date
 from openprocurement.auctions.core.models import (
     get_auction,
     dgfDocument as Document,
@@ -33,6 +31,9 @@ from openprocurement.auctions.core.plugins.awarding.v3.constants import (
 
 
 class Award(BaseAward):
+    """
+        Award model for Awawrding 3.0 procedure
+    """
     class Options:
         roles = {
             'create': blacklist('id', 'status', 'date', 'documents', 'complaints', 'complaintPeriod', 'verificationPeriod', 'signingPeriod'),
