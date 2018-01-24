@@ -3,7 +3,7 @@ from schematics.exceptions import ValidationError
 
 from openprocurement.api.models import get_now
 from openprocurement.api.utils import (
-    update_logging_context, error_handler, raise_operation_error
+    update_logging_context, error_handler
 )
 from openprocurement.api.validation import validate_json_data, validate_data
 from openprocurement.api.views.complaint_document import STATUS4ROLE
@@ -153,7 +153,8 @@ def validate_award_data_post_common(request):
                            'Can create award only in active lot status')
     else:
         return
-    raise_operation_error(request)
+    request.errors.status = 403
+    raise error_handler(request.errors)
 
 
 def validate_patch_award_data_patch_common(request):
@@ -161,7 +162,8 @@ def validate_patch_award_data_patch_common(request):
     if auction.status not in ['active.qualification', 'active.awarded']:
         request.errors.add('body', 'data',
                            'Can\'t update award in current ({}) auction status'.format(auction.status))
-        raise_operation_error(request)
+        request.errors.status = 403
+        raise error_handler(request.errors)
 
 
 def validate_complaint_data_post_common(request):
@@ -180,7 +182,8 @@ def validate_complaint_data_post_common(request):
         request.errors.add('body', 'data','Can add complaint only in complaintPeriod')
     else:
         return
-    raise_operation_error(request)
+    request.errors.status = 403
+    raise error_handler(request.errors)
 
 
 def validate_file_upload_post_common(request):
@@ -199,7 +202,8 @@ def validate_file_upload_post_common(request):
                            ' complaint status'.format(request.context.status))
     else:
         return
-    raise_operation_error(request)
+    request.errors.status = 403
+    raise error_handler(request.errors)
 
 
 def validate_file_update_put_common(request):
@@ -220,7 +224,8 @@ def validate_file_update_put_common(request):
                            ' complaint status'.format(request.validated['complaint'].status))
     else:
         return
-    raise_operation_error(request)
+    request.errors.status = 403
+    raise error_handler(request.errors)
 
 
 def validate_patch_document_data_patch_common(request):
@@ -242,7 +247,8 @@ def validate_patch_document_data_patch_common(request):
                            ' complaint status'.format(request.validated['complaint'].status))
     else:
         return
-    raise_operation_error(request)
+    request.errors.status = 403
+    raise error_handler(request.errors)
 
 
 def validate_award_document(request, operation):
@@ -256,7 +262,8 @@ def validate_award_document(request, operation):
                            'Can {} document only in active lot status'.format(operation))
     else:
         return True
-    raise_operation_error(request)
+    request.errors.status = 403
+    raise error_handler(request.errors)
 
 
 def validate_file_upload_award_post_common(request):
@@ -285,7 +292,8 @@ def validate_patch_complaint_data_patch_common(request):
                                            ' ({}) status'.format(request.context.status))
     else:
         return
-    raise_operation_error(request)
+    request.errors.status = 403
+    raise error_handler(request.errors)
 
 
 def validate_question_data(request):
