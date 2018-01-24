@@ -9,12 +9,10 @@ from schematics.types.serializable import serializable
 from openprocurement.api.models import (
     ModelType,
     ListType,
-    Period
-)
-from openprocurement.api.utils import calculate_business_date
-from openprocurement.auctions.core.plugins.awarding.v1.models import (
+    Period,
     Award as BaseAward
 )
+from openprocurement.api.utils import calculate_business_date
 from openprocurement.auctions.core.models import (
     get_auction,
     dgfDocument as Document,
@@ -33,10 +31,13 @@ from openprocurement.auctions.core.plugins.awarding.v3.constants import (
 
 
 class Award(BaseAward):
+    """
+        Award model for Awawrding 3.0 procedure
+    """
     class Options:
         roles = {
-            'create': blacklist('id', 'status', 'date', 'documents', 'complaints', 'complaintPeriod', 'verificationPeriod', 'paymentPeriod', 'signingPeriod'),
-            'Administrator': whitelist('verificationPeriod', 'paymentPeriod', 'signingPeriod'),
+            'create': blacklist('id', 'status', 'date', 'documents', 'complaints', 'complaintPeriod', 'verificationPeriod', 'signingPeriod'),
+            'Administrator': whitelist('verificationPeriod', 'signingPeriod'),
         }
 
     def __local_roles__(self):
@@ -55,14 +56,12 @@ class Award(BaseAward):
                 bid_owner_token = bid.owner_token
         return [(Allow, '{}_{}'.format(bid_owner, bid_owner_token), 'edit_auction_award')]
 
-    # pending status is deprecated. Only for backward compatibility with awarding 1.0
-    status = StringType(required=True, choices=['pending.waiting', 'pending.verification', 'pending.payment', 'unsuccessful', 'active', 'cancelled', 'pending'], default='pending.verification')
+    status = StringType(required=True, choices=['pending.waiting', 'unsuccessful', 'active', 'cancelled', 'pending'], default='pending')
     suppliers = ListType(ModelType(Organization), min_size=1, max_size=1)
     complaints = ListType(ModelType(Complaint), default=list())
     documents = ListType(ModelType(Document), default=list(), validators=[validate_disallow_dgfPlatformLegalDetails])
     items = ListType(ModelType(Item))
     verificationPeriod = ModelType(Period)
-    paymentPeriod = ModelType(Period)
     signingPeriod = ModelType(Period)
 
     @serializable(serialized_name="verificationPeriod", serialize_when_none=False)
@@ -76,18 +75,6 @@ class Award(BaseAward):
             round_to_18_hour_delta = period.endDate.replace(hour=18, minute=0, second=0) - period.endDate
             period.endDate = calculate_business_date(period.endDate, round_to_18_hour_delta, auction, False)
 
-        return period.to_primitive()
-
-    @serializable(serialized_name="paymentPeriod", serialize_when_none=False)
-    def award_paymentPeriod(self):
-        period = self.paymentPeriod
-        if not period:
-            return
-        if not period.endDate:
-            auction = get_auction(self)
-            period.endDate = calculate_business_date(period.startDate, AWARD_PAYMENT_TIME, auction, True)
-            round_to_18_hour_delta = period.endDate.replace(hour=18, minute=0, second=0) - period.endDate
-            period.endDate = calculate_business_date(period.endDate, round_to_18_hour_delta, auction, False)
         return period.to_primitive()
 
     @serializable(serialized_name="signingPeriod", serialize_when_none=False)
