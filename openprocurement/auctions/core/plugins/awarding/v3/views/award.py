@@ -13,6 +13,8 @@ from openprocurement.auctions.core.utils import (
 from openprocurement.auctions.core.validation import (
     validate_award_data,
     validate_patch_award_data,
+    validate_award_data_post_common,
+    validate_patch_award_data_patch_common,
 )
 from openprocurement.auctions.core.plugins.awarding.v3.utils import (
     check_auction_protocol
@@ -83,7 +85,8 @@ class AuctionAwardResource(APIResource):
         """
         return {'data': [i.serialize("view") for i in self.request.validated['auction'].awards]}
 
-    @json_view(content_type="application/json", permission='create_award', validators=(validate_award_data,))
+    @json_view(content_type="application/json", permission='create_award',
+               validators=(validate_award_data, validate_award_data_post_common))
     def collection_post(self):
         """Accept or reject bidder application
 
@@ -164,24 +167,22 @@ class AuctionAwardResource(APIResource):
             }
 
         """
-        auction = self.request.validated['auction']
-        if auction.status != 'active.qualification':
-            self.request.errors.add('body', 'data', 'Can\'t create award in current ({}) auction status'.format(auction.status))
-            self.request.errors.status = 403
-            return
         award = self.request.validated['award']
-        if any([i.status != 'active' for i in auction.lots if i.id == award.lotID]):
-            self.request.errors.add('body', 'data', 'Can create award only in active lot status')
-            self.request.errors.status = 403
-            return
-        award.complaintPeriod = award.signingPeriod = award.paymentPeriod = award.verificationPeriod = {'startDate': get_now()}
-        auction.awards.append(award)
+        period = {'startDate': get_now()}
+        award.complaintPeriod = award.signingPeriod = period
+        award.paymentPeriod = award.verificationPeriod = period
+        self.request.validated['auction'].awards.append(award)
         if save_auction(self.request):
             self.LOGGER.info('Created auction award {}'.format(award.id),
-                        extra=context_unpack(self.request, {'MESSAGE_ID': 'auction_award_create'}, {'award_id': award.id}))
+                        extra=context_unpack(self.request,
+                                             {'MESSAGE_ID': 'auction_award_create'},
+                                             {'award_id': award.id}))
             self.request.response.status = 201
             route = self.request.matched_route.name.replace("collection_", "")
-            self.request.response.headers['Location'] = self.request.current_route_url(_route_name=route, award_id=award.id, _query={})
+            headers_locations = self.request.current_route_url(_route_name=route,
+                                                               award_id=award.id,
+                                                               _query={})
+            self.request.response.headers['Location'] = headers_locations
             return {'data': award.serialize("view")}
 
     @json_view(permission='view_auction')
@@ -236,7 +237,8 @@ class AuctionAwardResource(APIResource):
         """
         return {'data': self.request.validated['award'].serialize("view")}
 
-    @json_view(content_type="application/json", permission='edit_auction_award', validators=(validate_patch_award_data,))
+    @json_view(content_type="application/json", permission='edit_auction_award',
+               validators=(validate_patch_award_data, validate_patch_award_data_patch_common))
     def patch(self):
         """Update of award
 
@@ -295,17 +297,6 @@ class AuctionAwardResource(APIResource):
 
         """
         auction = self.request.validated['auction']
-
-        if auction.status not in ['active.qualification', 'active.awarded']:
-            self.request.errors.add(
-                'body',
-                'data',
-                'Can\'t update award in current ({}) auction status' \
-                    .format(auction.status)
-            )
-            self.request.errors.status = 403
-            return
-
         award = self.request.context
         current_award_status = award.status
         now = get_now()
@@ -313,8 +304,7 @@ class AuctionAwardResource(APIResource):
             self.request.errors.add(
                 'body',
                 'data',
-                'Can\'t update award in current ({}) status' \
-                    .format(current_award_status)
+                'Can\'t update award in current ({}) status' .format(current_award_status)
             )
             self.request.errors.status = 403
             return
@@ -407,4 +397,3 @@ class AuctionAwardResource(APIResource):
                  )
             )
             return {'data': award.serialize("view")}
-
