@@ -1,7 +1,8 @@
 from .models import Award
 from .utils import (
     create_awards,
-    switch_to_next_award
+    switch_to_next_award,
+    check_award_status
 )
 
 
@@ -24,3 +25,7 @@ class AwardingV2ConfiguratorMixin(object):
             Call when we need to qualify another biddder
         """
         return switch_to_next_award(self.request)
+
+    def check_award_status(self, request, award, now):
+        """Checking required documents loading and payment receiving in time."""
+        return check_award_status(request, award, now)
