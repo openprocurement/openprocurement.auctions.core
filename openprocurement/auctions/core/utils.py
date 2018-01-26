@@ -7,6 +7,7 @@ from json import dumps
 from jsonpointer import resolve_pointer
 from logging import getLogger
 from openprocurement.api.models import get_now, TZ, COMPLAINT_STAND_STILL_TIME
+from openprocurement.api.validation import error_handler
 from openprocurement.api.utils import (generate_id, calculate_business_date, apply_data_patch,
                                        get_revision_changes, set_modetest_titles, update_logging_context,
                                        context_unpack)
@@ -313,26 +314,6 @@ def check_auction_status(request):
             LOGGER.info('Switched auction {} to {}'.format(auction.id, 'unsuccessful'),
                         extra=context_unpack(request, {'MESSAGE_ID': 'switched_auction_complete'}))
             auction.status = 'complete'
-
-
-def error_handler(errors, request_params=True):
-    params = {
-        'ERROR_STATUS': errors.status
-    }
-    if request_params:
-        params['ROLE'] = str(errors.request.authenticated_role)
-        if errors.request.params:
-            params['PARAMS'] = str(dict(errors.request.params))
-    if errors.request.matchdict:
-        for x, j in errors.request.matchdict.items():
-            params[x.upper()] = j
-    if 'auction' in errors.request.validated:
-        params['AUCTION_REV'] = errors.request.validated['auction'].rev
-        params['AUCTIONID'] = errors.request.validated['auction'].auctionID
-        params['AUCTION_STATUS'] = errors.request.validated['auction'].status
-    LOGGER.info('Error on processing request "{}"'.format(dumps(errors, indent=4)),
-                extra=context_unpack(errors.request, {'MESSAGE_ID': 'error_handler'}, params))
-    return json_error(errors)
 
 
 opresource = partial(resource, error_handler=error_handler, factory=factory)

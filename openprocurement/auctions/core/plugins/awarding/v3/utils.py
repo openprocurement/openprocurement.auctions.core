@@ -142,3 +142,21 @@ def invalidate_bids_under_threshold(auction):
         if bid['value']['amount'] < value_threshold:
             bid['status'] = 'invalid'
 
+
+def check_award_status(request, award, now):
+    """Checking protocol and contract loading by the owner in time."""
+    auction = request.validated['auction']
+    protocol_overdue = (award.status == 'pending' and
+                        award['verificationPeriod']['endDate'] < now)
+    contract_overdue = (award.status == 'active' and
+                        award['signingPeriod']['endDate'] < now)
+    if protocol_overdue or contract_overdue:
+        if award.status == 'active':
+            auction.awardPeriod.endDate = None
+            auction.status = 'active.qualification'
+            for contract in auction.contracts:
+                if contract.awardID == award.id:
+                    contract.status = 'cancelled'
+        award.status = 'unsuccessful'
+        award.complaintPeriod.endDate = now
+        request.content_configurator.back_to_awarding()

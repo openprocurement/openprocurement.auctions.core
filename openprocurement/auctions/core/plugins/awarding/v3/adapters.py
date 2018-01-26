@@ -31,7 +31,11 @@ class AwardingV3ConfiguratorMixin(object):
         """
         return switch_to_next_award(self.request)
 
+    def check_award_status(self, request, award, now):
+        """Checking protocol and contract loading by the owner in time."""
+        return check_award_status(request, award, now)
 
+      
 class AwardingNextCheckV3(AuctionAwardingNextCheckAdapter):
     """Use next_check_awarding from V3 awarding"""
     def add_awarding_checks(self, auction):

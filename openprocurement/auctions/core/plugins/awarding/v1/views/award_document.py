@@ -11,6 +11,12 @@ from openprocurement.api.validation import (
     validate_file_update,
     validate_file_upload,
     validate_patch_document_data,
+
+)
+from openprocurement.auctions.core.validation import (
+    validate_file_upload_award_post_common,
+    validate_file_update_award_put_common,
+    validate_patch_document_data_award_patch_common
 )
 from openprocurement.auctions.core.utils import (
     apply_patch,
@@ -54,12 +60,11 @@ class AuctionAwardDocumentResource(APIResource):
             ]).values(), key=lambda i: i['dateModified'])
         return {'data': collection_data}
 
-    @json_view(validators=(validate_file_upload,), permission='edit_auction')
+    @json_view(validators=(validate_file_upload, validate_file_upload_award_post_common),
+               permission='edit_auction')
     def collection_post(self):
         """Auction Award Document Upload
         """
-        if not self.validate_award_document('add'):
-            return
         document = upload_file(self.request)
         self.context.documents.append(document)
         if save_auction(self.request):
@@ -73,6 +78,7 @@ class AuctionAwardDocumentResource(APIResource):
     @json_view(permission='view_auction')
     def get(self):
         """Auction Award Document Read"""
+
         if self.request.params.get('download'):
             return get_file(self.request)
         document = self.request.validated['document']
@@ -84,11 +90,10 @@ class AuctionAwardDocumentResource(APIResource):
         ]
         return {'data': document_data}
 
-    @json_view(validators=(validate_file_update,), permission='edit_auction')
+    @json_view(validators=(validate_file_update, validate_file_update_award_put_common),
+               permission='edit_auction')
     def put(self):
         """Auction Award Document Update"""
-        if not self.validate_award_document('update'):
-            return
         document = upload_file(self.request)
         self.request.validated['award'].documents.append(document)
         if save_auction(self.request):
@@ -96,11 +101,12 @@ class AuctionAwardDocumentResource(APIResource):
                         extra=context_unpack(self.request, {'MESSAGE_ID': 'auction_award_document_put'}))
             return {'data': document.serialize("view")}
 
-    @json_view(content_type="application/json", validators=(validate_patch_document_data,), permission='edit_auction')
+    @json_view(content_type="application/json",
+               permission='edit_auction',
+               validators=(validate_patch_document_data,
+                           validate_patch_document_data_award_patch_common))
     def patch(self):
         """Auction Award Document Update"""
-        if not self.validate_award_document('update'):
-            return
         if apply_patch(self.request, src=self.request.context.serialize()):
             update_file_content_type(self.request)
             self.LOGGER.info('Updated auction award document {}'.format(self.request.context.id),

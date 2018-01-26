@@ -30,7 +30,11 @@ class AwardingV2ConfiguratorMixin(object):
         """
         return switch_to_next_award(self.request)
 
+    def check_award_status(self, request, award, now):
+        """Checking required documents loading and payment receiving in time."""
+        return check_award_status(request, award, now)
 
+      
 class AwardingNextCheckV2(AuctionAwardingNextCheckAdapter):
     """Use next_check_awarding from V2 awarding"""
     def add_awarding_checks(self, auction):
