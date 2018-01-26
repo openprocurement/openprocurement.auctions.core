@@ -1,7 +1,12 @@
 from .models import Award
 from .utils import (
     create_awards,
-    switch_to_next_award
+    switch_to_next_award,
+    next_check_awarding
+)
+
+from openprocurement.auctions.core.adapters import (
+    AuctionAwardingNextCheckAdapter
 )
 
 
@@ -25,3 +30,9 @@ class AwardingV3ConfiguratorMixin(object):
             Call when we need to qualify another biddder
         """
         return switch_to_next_award(self.request)
+
+
+class AwardingNextCheckV3(AuctionAwardingNextCheckAdapter):
+    """Use next_check_awarding from V3 awarding"""
+    def add_awarding_checks(self, auction):
+        return next_check_awarding(auction)

@@ -7,10 +7,11 @@ from openprocurement.api.utils import (
 )
 
 
-def next_check_awarding(auction, checks):
+def next_check_awarding(auction):
     '''
         Awarding part of generating next_check field
     '''
+    checks = []
     auction_complaints_status = any([i.status in auction.block_complaint_status for i in auction.complaints])
     auction_award_complaints_status = any([i.status in auction.block_complaint_status for a in auction.awards for i in a.complaints])
     auction_complaint_and_relatedLot = any([i.status in auction.block_complaint_status and i.relatedLot is None for i in auction.complaints])
@@ -38,7 +39,7 @@ def next_check_awarding(auction, checks):
             last_award_status = lot_awards[-1].status if lot_awards else ''
             if not pending_complaints and not pending_awards_complaints and standStillEnds and last_award_status == 'unsuccessful':
                 checks.append(max(standStillEnds))
-    return checks
+    return min(checks) if checks else None
 
 
 def add_next_award(request):

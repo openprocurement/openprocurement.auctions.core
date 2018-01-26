@@ -84,7 +84,8 @@ def check_auction_protocol(award):
     return False
 
 
-def next_check_awarding(auction, checks):
+def next_check_awarding(auction):
+    checks = []
     if not auction.lots and auction.status == 'active.qualification':
         for award in auction.awards:
             if award.status == 'pending':
@@ -132,7 +133,7 @@ def next_check_awarding(auction, checks):
             last_award_status = lot_awards[-1].status if lot_awards else ''
             if not pending_complaints and not pending_awards_complaints and standStillEnds and last_award_status == 'unsuccessful':
                 checks.append(max(standStillEnds))
-    return checks
+    return min(checks) if checks else None
 
 
 def invalidate_bids_under_threshold(auction):
