@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
+import json
 from openprocurement.api.models import get_now
-
 # CreateAuctionAwardTest
 
 
@@ -223,6 +223,58 @@ def create_auction_award(self):
     self.assertEqual(response.json['data']['status'], u'active.awarded')
 
 # AuctionAwardProcessTest
+
+
+def patch_auction_award_participant_disqualification(self):
+    self.upload_auction_protocol(self.first_award)
+
+    # set award status "active"
+    url = '/auctions/{}/awards/{}'.format(self.auction_id, self.first_award_id)
+    json_data = {'data': {'status': 'active'}}
+    response = self.app.patch_json(url, json_data)
+    self.assertEqual(response.status, '200 OK')
+
+    # get auction
+    url = '/auctions/{}'.format(self.auction_id)
+    response = self.app.get(url)
+    self.assertEqual(response.status, '200 OK')
+
+    # upload contract into Contract
+    data = json.loads(response.body)
+    contract = data['data']['contracts'][0]
+    url = '/auctions/{}/contracts/{}/documents'.format(self.auction_id,
+                                                       contract['id'])
+    json_data = {
+        'data': {
+            'url': self.generate_docservice_url(),
+            'title': 'informative title',
+            'hash': 'md5:00000000000000000000000000000000',
+            'format': 'application/msword'
+        }
+    }
+    response = self.app.post_json(url, json_data)
+    self.assertEqual(response.status, '201 Created')
+
+    # set dateSigned to contract
+    json_data = {'data': {'dateSigned': get_now().isoformat()}}
+    url = '/auctions/{}/contracts/{}'.format(self.auction_id, contract['id'])
+    response = self.app.patch_json(url, json_data)
+    self.assertEqual(response.status, '200 OK')
+    # try participant_disqualification
+    url = '/auctions/{}/awards/{}'.format(self.auction_id, self.first_award_id)
+    json_data = {
+        'data': {
+            'status': 'unsuccessful',
+            'description': 'Candidate is strange',
+            'title': 'Disqualified'
+        }
+    }
+    response = self.app.patch_json(url, json_data,  status=403)
+    self.assertEqual(response.status, '403 Forbidden')
+    self.assertEqual(response.content_type, 'application/json')
+    self.assertEqual(response.json['errors'][0]["description"],
+                     'Contract signature date should be after award'
+                     ' complaint period end date')
 
 
 def invalid_patch_auction_award(self):

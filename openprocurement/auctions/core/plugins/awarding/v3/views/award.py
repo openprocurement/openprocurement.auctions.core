@@ -369,6 +369,12 @@ class AuctionAwardResource(APIResource):
             auction.awardPeriod.endDate = now
         elif current_award_status != 'pending.waiting' and \
             new_award_status == 'unsuccessful':
+            if any([getattr(contract, 'dateSigned', False) for contract in auction.contracts]):
+                self.request.errors.add('body', 'data',
+                                        'Contract signature date should be after'
+                                        ' award complaint period end date')
+                self.request.errors.status = 403
+                return
             if current_award_status == 'pending':
                 award.verificationPeriod.endDate = now
             elif current_award_status == 'active':
