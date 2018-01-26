@@ -10,8 +10,14 @@ from openprocurement.auctions.core.utils import (
     isAuction,
     auction_from_data
 )
-from openprocurement.auctions.core.adapters import AuctionConfigurator
-from openprocurement.api.interfaces import IContentConfigurator
+from openprocurement.auctions.core.adapters import (
+    AuctionConfigurator,
+    AuctionAwardingNextCheckAdapter
+)
+from openprocurement.api.interfaces import (
+    IContentConfigurator,
+    IAwardingNextCheck
+)
 from openprocurement.auctions.core.models import IAuction
 from openprocurement.api.utils import get_content_configurator
 
@@ -28,8 +34,19 @@ def includeme(config):
     config.add_directive('add_auction_procurementMethodType',
                          register_auction_procurementMethodType)
     config.scan("openprocurement.auctions.core.views")
-    config.registry.registerAdapter(AuctionConfigurator, (IAuction, IRequest),
-                                    IContentConfigurator)
+    
+    # register Adapters
+    config.registry.registerAdapter(
+        AuctionConfigurator,
+        (IAuction, IRequest),
+        IContentConfigurator
+    )
+    config.registry.registerAdapter(
+        AuctionAwardingNextCheckAdapter,
+        (IAuction, ),
+        IAwardingNextCheck
+    )
+
     config.add_request_method(get_content_configurator, 'content_configurator', reify=True)
     plugins = config.registry.settings.get('plugins') and \
               config.registry.settings['plugins'].split(',')
