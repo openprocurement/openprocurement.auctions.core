@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-import json
 from openprocurement.api.models import get_now
 # CreateAuctionAwardTest
 
@@ -240,7 +239,7 @@ def patch_auction_award_participant_disqualification(self):
     self.assertEqual(response.status, '200 OK')
 
     # upload contract into Contract
-    data = json.loads(response.body)
+    data = response.json
     contract = data['data']['contracts'][0]
     url = '/auctions/{}/contracts/{}/documents'.format(self.auction_id,
                                                        contract['id'])
