@@ -363,9 +363,8 @@ class AuctionAwardResource(APIResource):
                 award.verificationPeriod.endDate = now
             elif current_award_status == 'active':
                 contract = None
-                for item in auction.contracts:
-                    if item.awardID == award.id:
-                        contract = item
+                for contract in auction.contracts:
+                    if contract.awardID == award.id:
                         break
                 if getattr(contract, 'dateSigned', False):
                     err_message = 'Contract signature date should be' \
