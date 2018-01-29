@@ -31,7 +31,7 @@ from openprocurement.auctions.core.tests.blanks.award_blanks import (
     patch_auction_award_2_lot_complaint_document,
     create_auction_2_lot_award_document,
     put_auction_2_lot_award_document,
-    patch_auction_2_lot_award_document,
+    patch_auction_2_lot_award_document
 )
 
 
