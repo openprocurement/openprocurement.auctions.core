@@ -1,3 +1,4 @@
+from itertools import izip_longest
 from barbecue import chef
 
 from openprocurement.api.models import TZ
@@ -29,11 +30,11 @@ def create_awards(request):
     bids_to_qualify = NUMBER_OF_BIDS_TO_BE_QUALIFIED \
         if (len(bids) > NUMBER_OF_BIDS_TO_BE_QUALIFIED) \
         else len(bids)
-    for i in xrange(0, bids_to_qualify):
-        status = 'pending.waiting'
-        if i == 0:
-            status = 'pending'
-        bid = bids[i].serialize()
+
+    for bid, status in izip_longest(bids[:bids_to_qualify],
+                                    ['pending'],
+                                    fillvalue='pending.waiting'):
+        bid = bid.serialize()
         award = type(auction).awards.model_class({
             '__parent__': request.context,
             'bid_id': bid['id'],
