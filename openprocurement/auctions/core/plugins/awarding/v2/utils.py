@@ -26,8 +26,10 @@ def create_awards(request):
     )
     valid_bids = [bid for bid in auction.bids if bid['value'] is not None]
     bids = chef(valid_bids, auction.features or [], [], True)
-
-    for i in xrange(0, NUMBER_OF_BIDS_TO_BE_QUALIFIED):
+    bids_to_qualify = NUMBER_OF_BIDS_TO_BE_QUALIFIED \
+        if (len(bids) > NUMBER_OF_BIDS_TO_BE_QUALIFIED) \
+        else len(bids)
+    for i in xrange(0, bids_to_qualify):
         status = 'pending.waiting'
         if i == 0:
             status = 'pending.verification'
