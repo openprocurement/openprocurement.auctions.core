@@ -367,8 +367,8 @@ class AuctionAwardResource(APIResource):
                     if contract.awardID == award.id:
                         break
                 if getattr(contract, 'dateSigned', False):
-                    err_message = 'Contract signature date should be' \
-                                  ' after award complaint period end date'
+                    err_message = 'You cannot disqualify the bidder whose' \
+                                  ' contract has already been activated.'
                     self.request.errors.add('body', 'data', err_message)
                     self.request.errors.status = 403
                     return

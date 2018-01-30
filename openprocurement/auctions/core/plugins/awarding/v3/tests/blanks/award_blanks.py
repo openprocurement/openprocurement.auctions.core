@@ -272,8 +272,8 @@ def patch_auction_award_participant_disqualification(self):
     self.assertEqual(response.status, '403 Forbidden')
     self.assertEqual(response.content_type, 'application/json')
     self.assertEqual(response.json['errors'][0]["description"],
-                     'Contract signature date should be after award'
-                     ' complaint period end date')
+                     'You cannot disqualify the bidder whose'
+                     ' contract has already been activated.')
 
 
 def invalid_patch_auction_award(self):
