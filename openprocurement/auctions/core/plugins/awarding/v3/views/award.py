@@ -362,6 +362,16 @@ class AuctionAwardResource(APIResource):
             if current_award_status == 'pending':
                 award.verificationPeriod.endDate = now
             elif current_award_status == 'active':
+                contract = None
+                for contract in auction.contracts:
+                    if contract.awardID == award.id:
+                        break
+                if getattr(contract, 'dateSigned', False):
+                    err_message = 'You cannot disqualify the bidder whose' \
+                                  ' contract has already been activated.'
+                    self.request.errors.add('body', 'data', err_message)
+                    self.request.errors.status = 403
+                    return
                 award.signingPeriod.endDate = now
                 auction.awardPeriod.endDate = None
                 auction.status = 'active.qualification'

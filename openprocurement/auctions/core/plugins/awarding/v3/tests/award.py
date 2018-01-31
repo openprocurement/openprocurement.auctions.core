@@ -16,7 +16,8 @@ from openprocurement.auctions.core.plugins.awarding.v3.tests.blanks.award_blanks
     successful_second_auction_award,
     # CreateAuctionAwardTest
     create_auction_award_invalid,
-    create_auction_award
+    create_auction_award,
+    patch_auction_award_participant_disqualification
 )
 
 
@@ -34,6 +35,7 @@ class AuctionAwardProcessTestMixin(object):
     test_unsuccessful_auction4 = snitch(unsuccessful_auction4)
     test_unsuccessful_auction5 = snitch(unsuccessful_auction5)
     test_get_auction_awards = snitch(get_auction_awards)
+    test_patch_auction_award_participant_disqualification = snitch(patch_auction_award_participant_disqualification)
 
 
 class CreateAuctionAwardTestMixin(object):
