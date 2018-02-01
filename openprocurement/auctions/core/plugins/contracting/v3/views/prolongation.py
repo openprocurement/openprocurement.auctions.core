@@ -10,15 +10,16 @@ from openprocurement.auctions.core.utils import (
     save_auction,
     opresource,
 )
-from openprocurement.auctions.core.plugins.contracting.v3.utils import (
-    check_auction_status,
-)
 from openprocurement.auctions.core.validation import (
     validate_prolongation_data,
     validate_patch_prolongation_data,
 )
 from openprocurement.auctions.core.plugins.contracting.v3.models import(
     Prolongation
+)
+from openprocurement.auctions.core.plugins.\
+        contracting.v3.utils.prolongation import (
+    ProlongationManager
 )
 
 
@@ -98,7 +99,8 @@ class AuctionAwardContractProlongationResource(APIResource):
             apply_patch(self.request) # apply patch only in `draft`
         if new_status == 'applied':
             # this method checks intention of long apply
-            old_prolongation.apply()
+            managed_prolongation = ProlongationManager(old_prolongation)
+            managed_prolongation.apply()
             save_auction(self.request)
 
         self.LOGGER.info(

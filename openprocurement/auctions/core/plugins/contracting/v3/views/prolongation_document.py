@@ -20,6 +20,10 @@ from openprocurement.auctions.core.utils import (
 from openprocurement.auctions.core.plugins.contracting.v3.validators import (
     validate_contract_document
 )
+from openprocurement.auctions.core.plugins.\
+        contracting.v3.utils.prolongation import (
+    ProlongationManager
+)
 
 
 @opresource(
@@ -43,7 +47,8 @@ class BaseAuctionAwardContractDocumentResource(APIResource):
         if not validate_contract_document(self, 'add'):
             return
         document = upload_file(self.request)
-        self.context.add_document(document)
+        managed_prolongation = ProlongationManager(self.context)
+        managed_prolongation.add_document(document)
         if save_auction(self.request):
             self.LOGGER.info(
                 'Created auction contract document {}'.format(

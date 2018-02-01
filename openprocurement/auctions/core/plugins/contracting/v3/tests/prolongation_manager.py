@@ -1,26 +1,32 @@
 from datetime import datetime, timedelta
 from schematics.exceptions import ValidationError
 
+from openprocurement.api.models import Period
+from openprocurement.api.utils import calculate_business_date
+
 from openprocurement.auctions.core.tests.base import BaseWebTest
 from openprocurement.auctions.core.plugins.contracting.v3.models import (
     Contract,
     Prolongation,
     ProlongationDocument,
 )
-from openprocurement.auctions.core.constants import (
+from openprocurement.auctions.core.plugins.\
+        contracting.v3.utils.prolongation import (
+    ProlongationManager
+)
+from openprocurement.auctions.core.plugins.\
+        contracting.v3.constants import (
     PROLONGATION_SHORT_PERIOD,
     PROLONGATION_LONG_PERIOD,
     PROLONGATION_DATE_PUBLISHED_LIMIT_PERIOD,
 )
-from openprocurement.api.models import Period
-from openprocurement.api.utils import calculate_business_date
 
 contract_data = {
     'awardID': '774f344a615692604de040918a72b149'  # random md5
 }
 
 
-class TestContractingV3Prolongation(BaseWebTest):
+class TestContractingV3ProlongationManager(BaseWebTest):
 
     def fixture_required_data(self):
         return {
@@ -96,8 +102,10 @@ class TestContractingV3Prolongation(BaseWebTest):
     def test_delete_when_applied(self):
         contract, prolongation = self.fixture_created()
         prolongation.status = 'applied'
+
+        managed_prolongation = ProlongationManager(prolongation)
         with self.assertRaises(Exception) as context:  # noqa: F841
-            prolongation.delete()
+            managed_prolongation.delete()
 
     def test_apply_short(self):
         contract, prolongation = self.fixture_created()
@@ -107,7 +115,8 @@ class TestContractingV3Prolongation(BaseWebTest):
             contract.signingPeriod.startDate,
             PROLONGATION_SHORT_PERIOD
         )
-        prolongation._apply_short()
+        managed_prolongation = ProlongationManager(prolongation)
+        managed_prolongation._apply_short()
 
         self.assertEqual(
             prolongation.status,
@@ -139,7 +148,9 @@ class TestContractingV3Prolongation(BaseWebTest):
         previous_short_prolongation = self.fixture_created()[0]
         previous_short_prolongation.status = 'applied'
         contract.prolongations.append(previous_short_prolongation)
-        prolongation._apply_long()
+
+        managed_prolongation = ProlongationManager(prolongation)
+        managed_prolongation._apply_long()
         self.assertEqual(
             previous_short_prolongation.status,
             'applied'
@@ -166,7 +177,8 @@ class TestContractingV3Prolongation(BaseWebTest):
     def test_apply_when_need_to_apply_short(self):
         contract, prolongation = self.fixture_created()
 
-        prolongation.apply()
+        managed_prolongation = ProlongationManager(prolongation)
+        managed_prolongation.apply()
 
         self.assertEqual(
             prolongation.status,
@@ -184,7 +196,8 @@ class TestContractingV3Prolongation(BaseWebTest):
             'draft'
         )
 
-        prolongation.apply()
+        managed_prolongation = ProlongationManager(prolongation)
+        managed_prolongation.apply()
 
         self.assertEqual(
             prolongation.status,
@@ -200,7 +213,9 @@ class TestContractingV3Prolongation(BaseWebTest):
 
         prolongation.documents = []
         document = ProlongationDocument()
-        prolongation.add_document(document)
+
+        managed_prolongation = ProlongationManager(prolongation)
+        managed_prolongation.add_document(document)
         self.assertEqual(
             prolongation.documents[0],
             document
@@ -210,55 +225,16 @@ class TestContractingV3Prolongation(BaseWebTest):
         contract, prolongation = self.fixture_created()
 
         prolongation.status = 'applied'
+
+        managed_prolongation = ProlongationManager(prolongation)
         document = ProlongationDocument()
         with self.assertRaises(ValidationError) as context:
-            prolongation.add_document(document)
+            managed_prolongation.add_document(document)
 
     def test_apply_without_documents(self):
         contract, prolongation = self.fixture_created()
 
         prolongation.documents = []
+        managed_prolongation = ProlongationManager(prolongation)
         with self.assertRaises(ValidationError) as context:
-            prolongation.apply()
-
-class TestContractingV3Contract(BaseWebTest):
-
-    def test_datePaid_good_date(self):
-        start_of_signing_period = datetime(2000, 1, 1)
-        end_of_signing_period = datetime(2000, 1, 10)
-        good_datepaid1 = datetime(1999, 12, 31)
-        good_datepaid2 = datetime(2000, 1, 1)
-        period = Period()
-
-        period.startDate = start_of_signing_period
-        period.endDate = end_of_signing_period
-
-        contract = Contract(contract_data)
-        contract.signingPeriod = period
-        period.validate()
-
-        contract.datePaid = good_datepaid1
-        contract.validate()
-        # datePaid must be not greater than start of signingPeriod
-        contract.datePaid = good_datepaid2
-        contract.validate()
-
-    def test_datePaid_wrong_date(self):
-        contract = Contract(contract_data)
-        period = Period()
-        period.startDate = datetime(2000, 1, 1)
-        period.endDate = datetime(2000, 1, 10)
-        contract.signingPeriod = period
-        self.db.commit()
-        with self.assertRaises(ValidationError) as context:  # noqa: F841
-            contract.datePaid = datetime(2000, 1, 5)
-            contract.validate()
-
-    def test_datePaid_when_signingPeriod_None(self):
-        contract = Contract(contract_data)
-        period = Period()
-        period.startDate = datetime(2000, 1, 1)
-        period.endDate = datetime(2000, 1, 10)
-        contract.signingPeriod = period
-        contract.datePaid = None
-        contract.validate()
+            managed_prolongation.apply()

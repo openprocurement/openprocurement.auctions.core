@@ -3,7 +3,8 @@ from openprocurement.auctions.core.plugins.contracting.v3.models import (
     Contract,
     ProlongationDocument,
 )
-from openprocurement.auctions.core.constants import (
+from openprocurement.auctions.core.plugins.\
+        contracting.v3.constants import (
     PROLONGATION_SHORT_PERIOD,
     PROLONGATION_LONG_PERIOD,
 )
