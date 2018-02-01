@@ -2,7 +2,11 @@ from .models import Award
 from .utils import (
     create_awards,
     switch_to_next_award,
-    check_award_status
+    next_check_awarding
+)
+
+from openprocurement.auctions.core.adapters import (
+    AuctionAwardingNextCheckAdapter
 )
 
 
@@ -30,3 +34,9 @@ class AwardingV3ConfiguratorMixin(object):
     def check_award_status(self, request, award, now):
         """Checking protocol and contract loading by the owner in time."""
         return check_award_status(request, award, now)
+
+      
+class AwardingNextCheckV3(AuctionAwardingNextCheckAdapter):
+    """Use next_check_awarding from V3 awarding"""
+    def add_awarding_checks(self, auction):
+        return next_check_awarding(auction)
