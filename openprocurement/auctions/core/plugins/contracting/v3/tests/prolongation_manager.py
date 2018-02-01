@@ -116,7 +116,7 @@ class TestContractingV3ProlongationManager(BaseWebTest):
             PROLONGATION_SHORT_PERIOD
         )
         managed_prolongation = ProlongationManager(prolongation)
-        managed_prolongation._apply_short()
+        managed_prolongation.apply()
 
         self.assertEqual(
             prolongation.status,
@@ -150,7 +150,7 @@ class TestContractingV3ProlongationManager(BaseWebTest):
         contract.prolongations.append(previous_short_prolongation)
 
         managed_prolongation = ProlongationManager(prolongation)
-        managed_prolongation._apply_long()
+        managed_prolongation.apply()
         self.assertEqual(
             previous_short_prolongation.status,
             'applied'
