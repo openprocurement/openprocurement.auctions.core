@@ -2,16 +2,15 @@
 import unittest
 
 from openprocurement.auctions.core.tests import auctions
-from openprocurement.auctions.core.plugins.contracting.v3.tests.models import (
-    TestContractingV3Prolongation,
-    TestContractingV3Contract,
+from openprocurement.auctions.core.plugins.\
+        contracting.v3.tests.main import (
+    contracting_v3_test_suite
 )
 
 def suite():
     suite = unittest.TestSuite()
     suite.addTest(auctions.suite())
-    suite.addTest(TestContractingV3Contract.suite())
-    suite.addTest(TestContractingV3Prolongation.suite())
+    suite.addTest(contracting_v3_test_suite())
     return suite
 
 

@@ -29,7 +29,8 @@ from openprocurement.auctions.core.models import (
     dgfDocument as BaseDocument,
     dgfComplaint as Complaint,
 )
-from openprocurement.auctions.core.constants import (
+from openprocurement.auctions.core.plugins.\
+        contracting.v3.constants import (
     PROLONGATION_SHORT_PERIOD,
     PROLONGATION_LONG_PERIOD,
     PROLONGATION_DATE_PUBLISHED_LIMIT_PERIOD,
@@ -82,52 +83,6 @@ class Prolongation(Model):
             'create': blacklist('id', 'dateCreated',),
             'edit': blacklist('id', 'dateCreated',),
         }
-
-    def _apply_short(self):
-        """Apply short-time prolongation to related Contract instance
-        """
-        self.status = 'applied'
-        contract = self.__parent__
-        contract.signingPeriod.endDate = calculate_business_date(
-            contract.signingPeriod.startDate,
-            PROLONGATION_SHORT_PERIOD
-        )
-
-    def _apply_long(self):
-        """Apply long-time prolongation to related Contract instance
-        """
-        self.status = 'applied'
-        contract = self.__parent__
-        contract.signingPeriod.endDate = calculate_business_date(
-            contract.signingPeriod.startDate,
-            PROLONGATION_LONG_PERIOD
-        )
-
-    def apply(self):
-        """Choose order of prolongation and apply right"""
-        self._check_documents_are_present()
-        applied_prolongations_count = len([
-            p for p in self.__parent__.prolongations
-            if p.status == 'applied'
-        ])
-        if applied_prolongations_count == 0:
-            self._apply_short()
-        elif applied_prolongations_count == 1:
-            self._apply_long()
-
-    def add_document(self, document):
-        if self.status == 'draft':
-            self.documents.append(document)
-        else:
-            raise ValidationError(
-                'Document can be added only in `draft` status.'
-            )
-
-    def _check_documents_are_present(self):
-        if len(self.documents) == 0:
-            raise ValidationError(
-                'Prolongation must have documents to apply'
-            )
 
     def validate_datePublished(self, data, value):
         """Check if datePublished attribute is valid
