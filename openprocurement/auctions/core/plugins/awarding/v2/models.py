@@ -32,7 +32,7 @@ from openprocurement.auctions.core.plugins.awarding.v2.constants import (
 
 class Award(BaseAward):
     """
-        Award model for Awarding 3.0 procedure 
+        Award model for Awarding 2.0 procedure 
     """
     class Options:
         roles = {

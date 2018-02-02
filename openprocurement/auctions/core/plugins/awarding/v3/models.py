@@ -36,7 +36,7 @@ class Award(BaseAward):
     """
     class Options:
         roles = {
-            'create': blacklist('id', 'status', 'date', 'documents', 'complaints', 'complaintPeriod', 'verificationPeriod', 'signingPeriod'),
+            'create': blacklist('id', 'status', 'date', 'documents', 'complaints', 'complaintPeriod', 'verificationPeriod', 'signingPeriod', 'paymentPeriod'),
             'Administrator': whitelist('verificationPeriod', 'signingPeriod'),
         }
 
@@ -63,6 +63,7 @@ class Award(BaseAward):
     items = ListType(ModelType(Item))
     verificationPeriod = ModelType(Period)
     signingPeriod = ModelType(Period)
+    paymentPeriod = ModelType(Period)
 
     @serializable(serialized_name="verificationPeriod", serialize_when_none=False)
     def award_verificationPeriod(self):

@@ -1,81 +1,54 @@
-from barbecue import chef
 from uuid import uuid4
-
 from openprocurement.api.utils import get_now
-from openprocurement.auctions.core.plugins.awarding.v3.utils import invalidate_bids_under_threshold
 
 
-def switch_auction_to_unsuccessful(auction):
-    if auction.get('suspended'):
-        return
-    actual_award = [a for a in auction["awards"] if a['status'] in ['active', 'pending']][0]
-    if auction['status'] == 'active.awarded':
-        for i in auction['contracts']:
-            if i['awardID'] == actual_award['id']:
-                i['status'] = 'cancelled'
-    actual_award['status'] = 'unsuccessful'
-    auction['awardPeriod']['endDate'] = actual_award['complaintPeriod']['endDate'] = get_now().isoformat()
-    auction['status'] = 'unsuccessful'
+def migrate_awarding2_to_awarding3(auction,
+                                   server_id,
+                                   procurementMethodTypes):
+    """Migrate util from awarding v2 to awarding v3
 
-
-def migrate_awarding_1_0_to_awarding_2_0(auction):
-    if auction['procurementMethodType'] not in ['dgfOtherAssets', 'dgfFinancialAssets'] \
+       1. Rename pending.verification to pending.
+       2. Remove pending.payment status with contract creation
+       3. Adding signingPeriod to contract from award object
+    """
+    if auction['procurementMethodType'] not in procurementMethodTypes\
                 or auction['status'] not in ['active.qualification', 'active.awarded'] \
                 or 'awards' not in auction:
         return
     now = get_now().isoformat()
-    awards = auction["awards"]
-    unique_awards = len(set([a['bid_id'] for a in awards]))
 
-    if unique_awards > 2:
-        switch_auction_to_unsuccessful(auction)
-    else:
-        invalidate_bids_under_threshold(auction)
-        award = [a for a in awards if a['status'] in ['active', 'pending']][0]
-        for bid in auction['bids']:
-            if bid['id'] == award['bid_id'] and bid['status'] == 'invalid':
-                switch_auction_to_unsuccessful(auction)
-
-    if auction['status'] != 'unsuccessful':
-        award = [a for a in awards if a['status'] in ['active', 'pending']][0]
-
-        award_create_date = award['complaintPeriod']['startDate']
-
-        award.update({
-            'verificationPeriod': {
-                'startDate': award_create_date,
-                'endDate': award_create_date
-            },
-            'paymentPeriod': {
-                'startDate': award_create_date,
-            },
-            'signingPeriod': {
-                'startDate': award_create_date,
+    for award in auction['awards']:
+        if award['status'] == 'pending.verification':
+            # Rename pending.verification to pending status
+            award['status'] = 'pending'
+        elif award['status'] == 'pending.payment':
+            # Remove pending.payment status
+            award['status'] = 'active'
+            # Create contract for award in pending.payment
+            contract = {
+               'id': uuid4().hex,
+               'awardID': award['id'],
+               'suppliers': award['suppliers'],
+               'value': award['value'],
+               'date': now,
+               'items': [
+                   i for i in auction['items']
+                ],
+               'contractID': '{}-{}{}'.format(
+                    auction['auctionID'],
+                    server_id,
+                    len(auction.get('contracts', [])) + 1
+                ),
+               'signingPeriod': award['signingPeriod']
             }
-        })
+            if auction.get('contracts', ''):
+                auction['contracts'].append(contract)
+            else:
+                auction['contracts'] = [contract]
 
-        if award['status'] == 'pending':
-            award['status'] = 'pending.payment'
-
-        elif award['status'] == 'active':
-            award['verificationPeriod']['endDate'] = award['paymentPeriod']['endDate'] = now
-
-        if unique_awards == 1:
-            bid = chef(auction['bids'], auction.get('features'), [], True)[1]
-
-            award = {
-                'id': uuid4().hex,
-                'bid_id': bid['id'],
-                'status': 'pending.waiting',
-                'date': awards[0]['date'],
-                'value': bid['value'],
-                'suppliers': bid['tenderers'],
-                'complaintPeriod': {
-                    'startDate': awards[0]['date']
-                }
-            }
-            if bid['status'] == 'invalid':
-                award['status'] = 'unsuccessful'
-                award['complaintPeriod']['endDate'] = now
-
-            awards.append(award)
+        # Migrate signingPeriod from Award to Contract
+        contracts = auction.get('contracts', '')
+        if contracts:
+            for contract in contracts:
+                award = filter(lambda x: x['id'] == contract['awardID'], auction['awards'])[0]
+                contract.update({'signingPeriod': award['signingPeriod']})
