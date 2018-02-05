@@ -1,3 +1,7 @@
+from uuid import uuid4
+
+from openprocurement.api.utils import get_now
+
 from openprocurement.auctions.core.tests.base import snitch
 from openprocurement.auctions.core.plugins.awarding.v2.tests.blanks.award_blanks import (
     # AuctionAwardProcessTest
@@ -18,6 +22,30 @@ from openprocurement.auctions.core.plugins.awarding.v2.tests.blanks.award_blanks
     create_auction_award_invalid,
     create_auction_award
 )
+
+
+def award_fixture(auction, status, bid_index):
+    now = get_now()
+    return {
+        "id": uuid4().hex,
+        "date": now.isoformat(),
+        "bid_id": auction["bids"][bid_index]["id"],
+        "status": status,
+        "suppliers": auction["bids"][bid_index]["tenderers"],
+        'value': auction['value'],
+        "complaintPeriod": {
+            "startDate": now.isoformat(),
+        },
+        "paymentPeriod": {
+            "startDate": now.isoformat()
+        },
+        "signingPeriod": {
+            "startDate": now.isoformat()
+        },
+        "verificationPeriod": {
+            "startDate": now.isoformat()
+        }
+    }
 
 
 class AuctionAwardProcessTestMixin(object):
