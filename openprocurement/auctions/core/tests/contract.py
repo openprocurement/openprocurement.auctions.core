@@ -17,6 +17,7 @@ from openprocurement.auctions.core.tests.blanks.contract_blanks import (
     put_auction_2_lot_contract_document,
     patch_auction_2_lot_contract_document,
     patch_date_paid,
+    patch_signing_period,
 )
 
 
@@ -26,7 +27,8 @@ class AuctionContractResourceTestMixin(object):
     test_create_auction_contract_in_complete_status = snitch(create_auction_contract_in_complete_status)
     test_get_auction_contract = snitch(get_auction_contract)
     test_get_auction_contracts = snitch(get_auction_contracts)
-    test_patch_date_paid = snitch (patch_date_paid)
+    test_patch_date_paid = snitch(patch_date_paid)
+    test_patch_signing_period = snitch(patch_signing_period)
 
 
 class AuctionContractDocumentResourceTestMixin(object):
