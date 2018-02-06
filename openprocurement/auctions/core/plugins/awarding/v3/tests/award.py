@@ -17,7 +17,8 @@ from openprocurement.auctions.core.plugins.awarding.v3.tests.blanks.award_blanks
     # CreateAuctionAwardTest
     create_auction_award_invalid,
     create_auction_award,
-    patch_auction_award_participant_disqualification
+    patch_auction_award_participant_disqualification,
+    award_activation_creates_contract,
 )
 
 
@@ -41,3 +42,6 @@ class AuctionAwardProcessTestMixin(object):
 class CreateAuctionAwardTestMixin(object):
     test_create_auction_award_invalid = snitch(create_auction_award_invalid)
     test_create_auction_award = snitch(create_auction_award)
+    test_award_activation_creates_contract = snitch(
+        award_activation_creates_contract
+    )

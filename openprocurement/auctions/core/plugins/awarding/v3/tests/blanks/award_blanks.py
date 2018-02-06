@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 from openprocurement.api.models import get_now
+
+from openprocurement.auctions.core.utils import get_related_contract_of_award
 # CreateAuctionAwardTest
 
 
@@ -220,6 +222,86 @@ def create_auction_award(self):
     self.assertEqual(response.status, '200 OK')
     self.assertEqual(response.content_type, 'application/json')
     self.assertEqual(response.json['data']['status'], u'active.awarded')
+
+def award_activation_creates_contract(self):
+    request_path = '/auctions/{}/awards'.format(self.auction_id)
+    now = get_now()
+    response = self.app.post_json(
+        request_path,
+        {'data': {
+            'suppliers': [self.initial_organization],
+            'bid_id': self.initial_bids[0]['id']
+        }}
+    )
+    award = response.json['data']
+
+    pre_award_activation_auction_response = self.app.get(
+        '/auctions/{0}'.format(
+            self.auction_id
+        )
+    )
+    pre_award_activation_auction = pre_award_activation_auction_response\
+        .json['data']
+    self.assertEqual(
+        pre_award_activation_auction.get('contracts'),
+        None
+    )
+
+    response = self.app.post(
+        '/auctions/{}/awards/{}/documents?acc_token={}'.format(
+            self.auction_id,
+            award['id'],
+            self.auction_token
+        ),
+        upload_files=[(
+            'file',
+            'auction_protocol.pdf',
+            'content'
+        )]
+    )
+    doc_id = response.json["data"]['id']
+    key = response.json["data"]["url"].split('?')[-1]
+
+    response = self.app.patch_json(
+        '/auctions/{}/awards/{}/documents/{}?acc_token={}'.format(
+            self.auction_id,
+            award['id'],
+            doc_id,
+            self.auction_token
+        ),
+        {"data": {
+            "description": "auction protocol",
+            "documentType": 'auctionProtocol'
+        }}
+    )
+
+    response = self.app.patch_json(
+        '/auctions/{}/awards/{}'.format(
+            self.auction_id,
+            award['id']
+        ),
+        {"data": {
+            "status": "active"
+        }}
+    )
+    self.assertEqual(response.json['data']['status'], u'active')
+
+    post_award_activation_auction_response = self.app.get(
+        '/auctions/{0}'.format(
+            self.auction_id
+        )
+    )
+    post_award_activation_auction = post_award_activation_auction_response\
+        .json['data']
+    contract = post_award_activation_auction.get('contracts')[0]
+    self.assertEqual(
+        contract['signingPeriod'],
+        award['signingPeriod']
+    )
+    self.assertEqual(
+        contract['status'],
+        'pending'
+    )
 
 # AuctionAwardProcessTest
 
