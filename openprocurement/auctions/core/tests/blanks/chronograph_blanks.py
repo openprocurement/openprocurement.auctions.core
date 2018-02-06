@@ -205,7 +205,14 @@ def contract_signing_period_switch_to_qualification(self):
         {'data': {'id': self.auction_id}}
     )
     status = response.json['data']['status']
-    self.assertEqual(status, 'active.qualification')
+    self.assertEqual(
+        status,
+        'active.qualification'
+    )
+    self.assertEqual(
+        response.json['data']['contracts'][0]['status'],
+        'cancelled'
+    )
 
 def contract_signing_period_switch_to_complete(self):
     auction = self.db.get(self.auction_id)
