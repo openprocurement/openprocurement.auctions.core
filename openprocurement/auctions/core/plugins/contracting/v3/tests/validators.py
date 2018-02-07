@@ -1,3 +1,4 @@
+import unittest
 from datetime import datetime
 from schematics.exceptions import ValidationError
 
@@ -58,3 +59,11 @@ class TestContractingV3Validators(BaseWebTest):
         contract.datePaid = None
         contract.validate()
 
+def suite():
+    tests = unittest.TestSuite()
+    tests.addTest(unittest.makeSuite(TestContractingV3Validators))
+    return tests
+
+
+if __name__ == '__main__':
+    unittest.main(defaultTest='suite')
