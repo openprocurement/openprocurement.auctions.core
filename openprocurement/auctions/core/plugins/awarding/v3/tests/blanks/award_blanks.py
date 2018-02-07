@@ -976,3 +976,23 @@ def get_auction_awards(self):
         {u'description': u'Not Found', u'location':
             u'url', u'name': u'auction_id'}
     ])
+
+
+def created_awards_have_periods_set(self):
+    awards = [self.first_award,]
+    periods = ['signingPeriod', 'verificationPeriod']
+    dates = ['startDate', 'endDate']
+
+    for count, award in enumerate(awards):
+        for period in periods:
+            for date in dates:
+                self.assertNotEqual(
+                    award.get(period, {}).get(date),
+                    None,
+                    'Date not set in {0} award '
+                    '{1}.{2}'.format(
+                        count,
+                        period,
+                        date
+                    )
+                )
