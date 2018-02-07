@@ -10,7 +10,8 @@ from openprocurement.auctions.core.plugins.contracting.v3.constants import (
     PROLONGATION_LONG_PERIOD,
 )
 from openprocurement.api.utils import calculate_business_date
-from openprocurement.auctions.core.tests.blanks.constants import (
+from openprocurement.auctions.core.plugins.\
+        contracting.v3.tests.constants import (
     PATHS
 )
 from openprocurement.auctions.core.tests.blanks.fixtures.prolongation import (
