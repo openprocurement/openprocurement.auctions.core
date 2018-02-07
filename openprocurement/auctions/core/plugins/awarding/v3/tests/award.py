@@ -21,6 +21,7 @@ from openprocurement.auctions.core.plugins.awarding.v3.tests.blanks.award_blanks
     award_activation_creates_contract,
     created_awards_have_periods_set,
     created_awards_statuses,
+    verification_period_length,
 )
 
 
@@ -61,6 +62,9 @@ class AuctionAwardProcessTestMixin(object):
     )
     test_created_awards_statuses = snitch(
         created_awards_statuses
+    )
+    test_verification_period_length = snitch(
+        verification_period_length
     )
 
 
