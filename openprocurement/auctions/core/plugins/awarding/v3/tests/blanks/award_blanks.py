@@ -1,7 +1,11 @@
 # -*- coding: utf-8 -*-
-from openprocurement.api.models import get_now
+from openprocurement.api.models import get_now, Period
 
 from openprocurement.auctions.core.utils import get_related_contract_of_award
+from openprocurement.auctions.core.plugins.\
+        awarding.v3.constants import (
+    VERIFY_AUCTION_PROTOCOL_TIME
+)
 # CreateAuctionAwardTest
 
 
@@ -1006,4 +1010,12 @@ def created_awards_statuses(self):
     self.assertEqual(
         self.second_award['status'],
         'pending.waiting'
+    )
+
+def verification_period_length(self):
+    period = Period(self.first_award['verificationPeriod'])
+    period_length = period.endDate - period.startDate
+    self.assertLessEqual(
+        period_length.days,
+        VERIFY_AUCTION_PROTOCOL_TIME.days + 2,  # 2 stands for holidays
     )
