@@ -996,3 +996,14 @@ def created_awards_have_periods_set(self):
                         date
                     )
                 )
+
+
+def created_awards_statuses(self):
+    self.assertEqual(
+        self.first_award['status'],
+        'pending'
+    )
+    self.assertEqual(
+        self.second_award['status'],
+        'pending.waiting'
+    )

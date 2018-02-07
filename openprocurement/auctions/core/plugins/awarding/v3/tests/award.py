@@ -20,6 +20,7 @@ from openprocurement.auctions.core.plugins.awarding.v3.tests.blanks.award_blanks
     patch_auction_award_participant_disqualification,
     award_activation_creates_contract,
     created_awards_have_periods_set,
+    created_awards_statuses,
 )
 
 
@@ -57,6 +58,9 @@ class AuctionAwardProcessTestMixin(object):
 
     test_created_awards_have_periods_set = snitch(
         created_awards_have_periods_set
+    )
+    test_created_awards_statuses = snitch(
+        created_awards_statuses
     )
 
 
