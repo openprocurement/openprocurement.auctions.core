@@ -89,7 +89,7 @@ def create_auction_contract(self):
     award = get_related_award_of_contract(contract, auction)
     self.assertEqual(
         award['signingPeriod'],
-        contract['signingPeriod']
+        contract['signingPeriod'],
         'signingPeriod wasn\'t copied'
     )
 
