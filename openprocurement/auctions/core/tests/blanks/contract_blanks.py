@@ -2,6 +2,7 @@
 from datetime import timedelta
 
 from openprocurement.api.models import get_now
+from openprocurement.auctions.core.utils import get_related_award_of_contract
 
 # AuctionContractResourceTest
 
@@ -79,10 +80,18 @@ def create_auction_contract_invalid(self):
 
 def create_auction_contract(self):
     auction = self.db.get(self.auction_id)
+    # Contract was created on setUp stage
     contract = auction['contracts'][0]
     self.assertIn('id', contract)
     self.assertIn('value', contract)
     self.assertIn('suppliers', contract)
+
+    award = get_related_award_of_contract(contract, auction)
+    self.assertEqual(
+        award['signingPeriod'],
+        contract['signingPeriod']
+        'signingPeriod wasn\'t copied'
+    )
 
     auction['contracts'][-1]["status"] = "terminated"
     self.db.save(auction)
