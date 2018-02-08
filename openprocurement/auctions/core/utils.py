@@ -440,3 +440,9 @@ def get_related_contract_of_award(award_id, auction):
     for contract in auction['contracts']:
         if contract['awardID'] == award_id:
             return contract
+
+
+def get_related_award_of_contract(contract, auction):
+    for award in auction['awards']:
+        if contract['awardID'] == award['id']:
+            return award
