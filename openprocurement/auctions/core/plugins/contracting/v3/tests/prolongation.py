@@ -1,5 +1,5 @@
 from openprocurement.auctions.core.tests.base import snitch
-from openprocurement.auctions.core.tests.blanks.prolongation_blanks import (
+from openprocurement.auctions.core.plugins.contracting.v3.tests.blanks.prolongation_blanks import (
     get_prolongations_for_contract,
     get_prolongation_by_id,
     patch_prolongation_fields,
