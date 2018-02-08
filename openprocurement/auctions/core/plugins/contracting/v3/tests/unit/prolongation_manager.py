@@ -48,6 +48,7 @@ class TestContractingV3ProlongationManager(BaseWebTest):
             'startDate': '2000-01-01T10:00:00+02:00',
             'endDate': '2000-01-10T10:00:00+02:00'
         })
+
         prolongation = Prolongation(self.fixture_required_data())
         contract.prolongations.append(contract)
         prolongation.__parent__ = contract  # mock
