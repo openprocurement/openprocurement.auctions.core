@@ -43,7 +43,7 @@ class AuctionAwardContractProlongationResource(APIResource):
         contract = self.request.validated['contract']
 
         new_prolongation = self.request.validated['prolongation']
-        new_prolongation.__parent__.prolongations.append(new_prolongation)
+        contract.prolongations.append(new_prolongation)
 
         if save_auction(self.request):
             self.LOGGER.info(
@@ -56,10 +56,10 @@ class AuctionAwardContractProlongationResource(APIResource):
                 ),
             )
             self.request.response.status = 201
-            route = self.request.matched_route.name
+            
             self.request.response.headers['Location'] = \
                 self.request.current_route_url(
-                    _route_name=route,
+                    _route_name=self.request.matched_route.name,
                     contract_id=contract.id,
                     _query={}
                 )
