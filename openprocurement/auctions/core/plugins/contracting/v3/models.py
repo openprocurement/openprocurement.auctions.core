@@ -93,12 +93,17 @@ class Prolongation(Model):
         """
         if not data.get('datePublished'):
             return
-        if value + PROLONGATION_DATE_PUBLISHED_LIMIT_PERIOD <\
+
+        offset_from_date_created = calculate_business_date(
+            value,
+            PROLONGATION_DATE_PUBLISHED_LIMIT_PERIOD
+        )
+        if offset_from_date_created <\
                 data['dateCreated']:
             raise ValidationError(
                 'datePublished must be no less on {limit} days, '
                 'than dateCreated'.format(
-                    limit=PROLONGATION_DATE_PUBLISHED_LIMIT_PERIOD
+                    limit=PROLONGATION_DATE_PUBLISHED_LIMIT_PERIOD.days
                 )
             )
 
