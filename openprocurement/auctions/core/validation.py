@@ -392,7 +392,6 @@ def validate_patch_prolongation_data(request):
         )
         request.errors.status = 403
         return
-        data = request.validated['data']
     model = type(request.auction).contracts.model_class.\
         prolongations.model_class
     return validate_data(request, model, True)
