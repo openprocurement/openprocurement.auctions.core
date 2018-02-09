@@ -48,6 +48,13 @@ ProlongationDocument = Document
 
 
 class Prolongation(Model):
+
+    class Options:
+        roles = {
+            'create': blacklist('id', 'dateCreated',),
+            'edit': blacklist('id', 'dateCreated',),
+        }
+
     id = MD5Type(required=True, default=lambda: uuid4().hex)
     dateCreated = IsoDateTimeType(default=get_now(), required=True)
     decisionID = StringType(required=True)
@@ -77,12 +84,6 @@ class Prolongation(Model):
         default=[],
         required=True
     )
-
-    class Options:
-        roles = {
-            'create': blacklist('id', 'dateCreated',),
-            'edit': blacklist('id', 'dateCreated',),
-        }
 
     def validate_datePublished(self, data, value):
         """Check if datePublished attribute is valid
