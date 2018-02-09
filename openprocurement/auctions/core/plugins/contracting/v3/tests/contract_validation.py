@@ -1,3 +1,4 @@
+from uuid import uuid4
 from datetime import datetime
 from schematics.exceptions import ValidationError
 
@@ -9,7 +10,7 @@ from openprocurement.auctions.core.plugins.contracting.v3.models import (
 )
 
 contract_data = {
-    'awardID': '774f344a615692604de040918a72b149'  # random md5
+    'awardID': uuid4().hex  # random md5
 }
 
 class TestContractingV3ContractValidation(BaseWebTest):
