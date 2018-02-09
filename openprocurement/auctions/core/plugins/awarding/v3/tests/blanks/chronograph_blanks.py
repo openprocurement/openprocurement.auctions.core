@@ -46,7 +46,7 @@ def switch_active_to_unsuccessful(self):
 
     auction = self.db.get(self.auction_id)
     related_contract = get_related_contract_of_award(
-        auction['awards'][0],
+        auction['awards'][0]['id'],
         auction
     )
     related_contract['signingPeriod']['endDate'] =\
@@ -123,7 +123,7 @@ def switch_suspended_active_to_unsuccessful(self):
 
     auction = self.db.get(self.auction_id)
     related_contract = get_related_contract_of_award(
-        auction['awards'][0],
+        auction['awards'][0]['id'],
         auction
     )
     related_contract['signingPeriod']['endDate'] =\
@@ -205,7 +205,7 @@ def switch_active_to_unsuccessful_2(self):
 
     auction = self.db.get(self.auction_id)
     related_contract = get_related_contract_of_award(
-        auction['awards'][0],
+        auction['awards'][0]['id'],
         auction
     )
     related_contract['signingPeriod']['endDate'] =\

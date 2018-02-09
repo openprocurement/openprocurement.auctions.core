@@ -165,7 +165,7 @@ def check_award_status(request, award, now):
     protocol_overdue = check_protocol_overdue(award, now)
 
     # seek for contract overdue
-    related_contract = get_related_contract_of_award(award, auction)
+    related_contract = get_related_contract_of_award(award['id'], auction)
 
     contract_overdue = check_contract_overdue(
         related_contract, 
