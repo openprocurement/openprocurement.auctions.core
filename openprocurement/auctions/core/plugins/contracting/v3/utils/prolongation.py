@@ -36,6 +36,8 @@ class ProlongationManager(object):
                 contract.signingPeriod.startDate,
                 PROLONGATION_LONG_PERIOD
             )
+        if applied_prolongations_count >= 2:
+            raise Exception("Contract can be prolongated for 2 times only.")
 
     def add_document(self, document):
         if self.prolongation.status == 'draft':

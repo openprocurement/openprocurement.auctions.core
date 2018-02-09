@@ -218,6 +218,12 @@ def apply_prolongation_triple_times(test_case):
         test_case.contract_id,
         test_case.prolongation2_id,
     )
+    add_document_to_prolongation(
+        test_case,
+        test_case.auction_id,
+        test_case.contract_id,
+        test_case.prolongation3_id,
+    )
 
     patch_data = {
         'data': {
@@ -247,11 +253,26 @@ def apply_prolongation_triple_times(test_case):
         PATHS['prolongation'].format(
             auction_id=test_case.auction_id,
             contract_id=test_case.contract_id,
-            prolongation_id=test_case.prolongation2_id
+            prolongation_id=test_case.prolongation3_id
         ),
-        patch_data
+        patch_data,
+        status=403
+    )
+    test_case.assertEqual(
+        third_patch_prolongation_response.status,
+        '403 Forbidden'
+    )
+    test_case.assertEqual(
+        third_patch_prolongation_response.content_type,
+        'application/json'
+    )
+    import ipdb; ipdb.set_trace()
+    test_case.assertEqual(
+        third_patch_prolongation_response.json['errors'][0]["description"],
+        "Contract can be prolongated for 2 times only."
     )
 
+    # check if contract signing was prolongated for the third time
     post_prolongation_contract = get_related_contract(test_case)
     test_case.assertEqual(
         post_prolongation_contract.signingPeriod.endDate,
