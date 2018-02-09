@@ -47,7 +47,7 @@ class BaseAuctionAwardContractDocumentResource(APIResource):
     def collection_post(self):
         """Auction Contract Document Upload
         """
-        if not validate_contract_document(self, 'add'):
+        if not validate_contract_document(self.request, 'add'):
             return
         document = upload_file(self.request)
         self.context.documents.append(document)
@@ -76,7 +76,7 @@ class BaseAuctionAwardContractDocumentResource(APIResource):
     @json_view(validators=(validate_file_update,), permission='edit_auction')
     def put(self):
         """Auction Contract Document Update"""
-        if not validate_contract_document(self, 'update'):
+        if not validate_contract_document(self.request, 'update'):
             return
         document = upload_file(self.request)
         self.request.validated['contract'].documents.append(document)
@@ -88,7 +88,7 @@ class BaseAuctionAwardContractDocumentResource(APIResource):
     @json_view(content_type="application/json", validators=(validate_patch_document_data,), permission='edit_auction')
     def patch(self):
         """Auction Contract Document Update"""
-        if not validate_contract_document(self, 'update'):
+        if not validate_contract_document(self.request, 'update'):
             return
         if apply_patch(self.request, src=self.request.context.serialize()):
             update_file_content_type(self.request)
