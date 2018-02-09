@@ -100,7 +100,12 @@ class AuctionAwardContractProlongationResource(APIResource):
         if new_status == 'applied':
             # this method checks intention of long apply
             managed_prolongation = ProlongationManager(old_prolongation)
-            managed_prolongation.apply()
+            try:
+                managed_prolongation.apply()
+            except Exception as e:
+                self.request.errors.add('body', 'data', e.message)
+                self.request.errors.status = 403
+                return
             save_auction(self.request)
 
         self.LOGGER.info(
