@@ -266,7 +266,6 @@ def apply_prolongation_triple_times(test_case):
         third_patch_prolongation_response.content_type,
         'application/json'
     )
-    import ipdb; ipdb.set_trace()
     test_case.assertEqual(
         third_patch_prolongation_response.json['errors'][0]["description"],
         "Contract can be prolongated for 2 times only."

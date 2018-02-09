@@ -44,7 +44,7 @@ class BaseAuctionAwardContractDocumentResource(APIResource):
     def collection_post(self):
         """Auction Contract Prolongation Document Upload
         """
-        if not validate_contract_document(self, 'add'):
+        if not validate_contract_document(self.request, 'add'):
             return
         document = upload_file(self.request)
         managed_prolongation = ProlongationManager(self.context)
@@ -111,7 +111,7 @@ class BaseAuctionAwardContractDocumentResource(APIResource):
     )
     def patch(self):
         """Auction Contract Document Update"""
-        if not validate_contract_document(self, 'update'):
+        if not validate_contract_document(self.request, 'update'):
             return
         if apply_patch(
             self.request,
