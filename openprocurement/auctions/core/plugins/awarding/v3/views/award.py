@@ -345,9 +345,7 @@ class AuctionAwardResource(APIResource):
                 'suppliers': award.suppliers,
                 'value': award.value,
                 'date': get_now(),
-                'items': [
-                    i for i in auction.items
-                ],
+                'items': auction.items,
                 'contractID': '{}-{}{}'.format(
                     auction.auctionID,
                     self.server_id,

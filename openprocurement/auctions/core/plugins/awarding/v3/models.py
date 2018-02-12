@@ -56,7 +56,7 @@ class Award(BaseAward):
                 bid_owner_token = bid.owner_token
         return [(Allow, '{}_{}'.format(bid_owner, bid_owner_token), 'edit_auction_award')]
 
-    status = StringType(required=True, choices=['pending.waiting', 'unsuccessful', 'active', 'cancelled', 'pending'], default='pending')
+    status = StringType(required=True, choices=['pending.waiting', 'unsuccessful', 'active', 'cancelled', 'pending', 'pending.payment', 'pending.verification'], default='pending') # pending.payment and pending.verification is deprecated
     suppliers = ListType(ModelType(Organization), min_size=1, max_size=1)
     complaints = ListType(ModelType(Complaint), default=list())
     documents = ListType(ModelType(Document), default=list(), validators=[validate_disallow_dgfPlatformLegalDetails])

@@ -11,14 +11,8 @@ from openprocurement.auctions.core.plugins.awarding.v2.tests.award import (
 def migrate_pendingVerification_pending(self):
     auction = self.db.get(self.auction_id)
 
-    pending_verification_award = award_fixture(
-        auction,
-        'pending.verification',
-        0)
-    pending_waiting_award = award_fixture(
-        auction,
-        'pending.waiting',
-        1)
+    pending_verification_award = award_fixture(auction, 'pending.verification', 0)
+    pending_waiting_award = award_fixture(auction, 'pending.waiting', 1)
 
     auction['awards'] = [pending_waiting_award, pending_verification_award]
     auction.update(auction)
@@ -35,15 +29,8 @@ def migrate_pendingVerification_pending(self):
 def migrate_pendingPayment_active(self):
     auction = self.db.get(self.auction_id)
 
-    pending_payment_award = award_fixture(
-        auction,
-        'pending.payment',
-        0)
-    pending_waiting_award = award_fixture(
-        auction,
-        'pending.waiting',
-        1
-    )
+    pending_payment_award = award_fixture(auction, 'pending.payment', 0)
+    pending_waiting_award = award_fixture(auction, 'pending.waiting', 1)
 
     auction['awards'] = [pending_waiting_award, pending_payment_award]
     auction.update(auction)
@@ -52,6 +39,7 @@ def migrate_pendingPayment_active(self):
 
     response = self.app.get('/auctions/{}'.format(self.auction_id))
     auction = response.json['data']
+    self.assertEqual(auction['status'], u'active.awarded')
     self.assertEqual(auction['awards'][1]['status'], u'active')
     self.assertEqual(auction['awards'][0]['status'], u'pending.waiting')
 
@@ -66,14 +54,8 @@ def migrate_contract_cancelled(self):
     auction = self.db.get(self.auction_id)
     now = get_now()
 
-    pending_verification_award = award_fixture(
-        auction,
-        'pending.verification',
-        0)
-    unsuccessful_award = award_fixture(
-        auction,
-        'unsuccessful',
-        1)
+    pending_verification_award = award_fixture(auction, 'pending.verification', 0)
+    unsuccessful_award = award_fixture(auction, 'unsuccessful', 1)
 
     auction['awards'] = [unsuccessful_award, pending_verification_award]
 
@@ -108,14 +90,8 @@ def migrate_contract_pending(self):
     auction = self.db.get(self.auction_id)
     now = get_now()
 
-    active_award = award_fixture(
-        auction,
-        'active',
-        0)
-    pending_waiting_award = award_fixture(
-        auction,
-        'pending.waiting',
-        1)
+    active_award = award_fixture(auction, 'active', 0)
+    pending_waiting_award = award_fixture(auction, 'pending.waiting', 1)
 
     auction['awards'] = [active_award, pending_waiting_award]
 

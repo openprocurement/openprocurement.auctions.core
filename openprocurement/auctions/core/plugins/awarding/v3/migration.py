@@ -24,6 +24,7 @@ def migrate_awarding2_to_awarding3(auction,
         elif award['status'] == 'pending.payment':
             # Remove pending.payment status
             award['status'] = 'active'
+            auction['status'] = 'active.awarded'
             # Create contract for award in pending.payment
             contract = {
                'id': uuid4().hex,
@@ -31,9 +32,7 @@ def migrate_awarding2_to_awarding3(auction,
                'suppliers': award['suppliers'],
                'value': award['value'],
                'date': now,
-               'items': [
-                   i for i in auction['items']
-                ],
+               'items': auction['items'],
                'contractID': '{}-{}{}'.format(
                     auction['auctionID'],
                     server_id,
@@ -41,14 +40,11 @@ def migrate_awarding2_to_awarding3(auction,
                 ),
                'signingPeriod': award['signingPeriod']
             }
-            if auction.get('contracts', ''):
-                auction['contracts'].append(contract)
-            else:
-                auction['contracts'] = [contract]
+            contracts = auction.get('contracts', [])
+            contracts.append(contract)
+            auction['contracts'] = contracts
 
         # Migrate signingPeriod from Award to Contract
-        contracts = auction.get('contracts', '')
-        if contracts:
-            for contract in contracts:
-                award = filter(lambda x: x['id'] == contract['awardID'], auction['awards'])[0]
-                contract.update({'signingPeriod': award['signingPeriod']})
+        for contract in auction.get('contracts', ''):
+            award = filter(lambda x: x['id'] == contract['awardID'], auction['awards'])[0]
+            contract.update({'signingPeriod': award['signingPeriod']})
