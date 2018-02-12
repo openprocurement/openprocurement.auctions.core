@@ -28,9 +28,7 @@ def create_awards(request):
     )
     valid_bids = [bid for bid in auction.bids if bid['value'] is not None]
     bids = chef(valid_bids, auction.features or [], [], True)
-    bids_to_qualify = NUMBER_OF_BIDS_TO_BE_QUALIFIED \
-        if (len(bids) > NUMBER_OF_BIDS_TO_BE_QUALIFIED) \
-        else len(bids)
+    bids_to_qualify = NUMBER_OF_BIDS_TO_BE_QUALIFIED if (len(bids) > NUMBER_OF_BIDS_TO_BE_QUALIFIED) else len(bids)
 
     for bid, status in izip_longest(bids[:bids_to_qualify],
                                     ['pending'],
@@ -135,7 +133,12 @@ def next_check_awarding(auction):
                 if a.complaintPeriod.endDate
             ]
             last_award_status = lot_awards[-1].status if lot_awards else ''
-            if not pending_complaints and not pending_awards_complaints and standStillEnds and last_award_status == 'unsuccessful':
+            if (
+                not pending_complaints
+                and not pending_awards_complaints
+                and standStillEnds
+                and last_award_status == 'unsuccessful'
+            ):
                 checks.append(max(standStillEnds))
     return min(checks) if checks else None
 

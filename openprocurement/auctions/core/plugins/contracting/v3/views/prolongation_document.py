@@ -20,8 +20,7 @@ from openprocurement.auctions.core.utils import (
 from openprocurement.auctions.core.plugins.contracting.v3.validators import (
     validate_contract_document
 )
-from openprocurement.auctions.core.plugins.\
-        contracting.v3.utils.prolongation import (
+from openprocurement.auctions.core.plugins.contracting.v3.utils.prolongation import (
     ProlongationManager
 )
 
@@ -68,8 +67,7 @@ class BaseAuctionAwardContractDocumentResource(APIResource):
                 "collection_",
                 ""
             )
-            self.request.response.headers['Location'] = self.request.\
-                    current_route_url(
+            self.request.response.headers['Location'] = self.request.current_route_url(
                         _route_name=document_route,
                         document_id=document.id,
                         _query={}

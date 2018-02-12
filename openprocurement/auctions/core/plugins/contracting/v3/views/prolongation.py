@@ -17,8 +17,7 @@ from openprocurement.auctions.core.validation import (
 from openprocurement.auctions.core.plugins.contracting.v3.models import(
     Prolongation
 )
-from openprocurement.auctions.core.plugins.\
-        contracting.v3.utils.prolongation import (
+from openprocurement.auctions.core.plugins.contracting.v3.utils.prolongation import (
     ProlongationManager
 )
 
@@ -47,8 +46,7 @@ class AuctionAwardContractProlongationResource(APIResource):
 
         if save_auction(self.request):
             self.LOGGER.info(
-                'Created auction contract prolongation with ID {0}'.\
-                    format(new_prolongation.id),
+                'Created auction contract prolongation with ID {0}'.format(new_prolongation.id),
                 extra=context_unpack(
                     self.request,
                     {'MESSAGE_ID': 'contract_prolongation_create'},
@@ -57,8 +55,7 @@ class AuctionAwardContractProlongationResource(APIResource):
             )
             self.request.response.status = 201
             
-            self.request.response.headers['Location'] = \
-                self.request.current_route_url(
+            self.request.response.headers['Location'] = self.request.current_route_url(
                     _route_name=self.request.matched_route.name,
                     contract_id=contract.id,
                     _query={}

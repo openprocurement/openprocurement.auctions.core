@@ -1,11 +1,9 @@
 import unittest
 
-from openprocurement.auctions.core.plugins.\
-        contracting.v3.tests.prolongation_manager import (
+from openprocurement.auctions.core.plugins.contracting.v3.tests.prolongation_manager import (
     TestContractingV3ProlongationManager,
 )
-from openprocurement.auctions.core.plugins.\
-        contracting.v3.tests.contract_validation import (
+from openprocurement.auctions.core.plugins.contracting.v3.tests.contract_validation import (
     TestContractingV3ContractValidation,
 )
 

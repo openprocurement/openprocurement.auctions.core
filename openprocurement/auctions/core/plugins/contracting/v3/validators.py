@@ -1,6 +1,8 @@
 def validate_contract_document(request, operation):
-    if request.validated['auction_status'] not in \
-        ['active.qualification', 'active.awarded']:
+    if (
+        request.validated['auction_status']
+        not in ['active.qualification', 'active.awarded']
+    ):
         request.errors.add(
             'body',
             'data',

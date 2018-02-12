@@ -3,8 +3,7 @@ from openprocurement.auctions.core.plugins.contracting.v3.models import (
     Contract,
     ProlongationDocument,
 )
-from openprocurement.auctions.core.plugins.\
-        contracting.v3.constants import (
+from openprocurement.auctions.core.plugins.contracting.v3.constants import (
     PROLONGATION_SHORT_PERIOD,
     PROLONGATION_LONG_PERIOD,
 )
@@ -406,8 +405,7 @@ def patch_document(test_case):
         prolongation_id=test_case.prolongation_id
         )
     )
-    pre_patch_doc_title = pre_patch_prolongation_response.\
-        json['data']['documents'][0]['title']
+    pre_patch_doc_title = pre_patch_prolongation_response.json['data']['documents'][0]['title']
     patch_document_response = test_case.app.patch_json(
         PATHS['document'].format(
         auction_id=test_case.auction_id,

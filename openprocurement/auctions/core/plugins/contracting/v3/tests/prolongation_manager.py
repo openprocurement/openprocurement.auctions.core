@@ -11,12 +11,10 @@ from openprocurement.auctions.core.plugins.contracting.v3.models import (
     Prolongation,
     ProlongationDocument,
 )
-from openprocurement.auctions.core.plugins.\
-        contracting.v3.utils.prolongation import (
+from openprocurement.auctions.core.plugins.contracting.v3.utils.prolongation import (
     ProlongationManager
 )
-from openprocurement.auctions.core.plugins.\
-        contracting.v3.constants import (
+from openprocurement.auctions.core.plugins.contracting.v3.constants import (
     PROLONGATION_SHORT_PERIOD,
     PROLONGATION_LONG_PERIOD,
     PROLONGATION_DATE_PUBLISHED_LIMIT_PERIOD,
@@ -87,16 +85,10 @@ class TestContractingV3ProlongationManager(BaseWebTest):
         contract, prolongation = self.fixture_created()
 
         prolongation.dateCreated = datetime(2000, 1, 1)
-        prolongation.datePublished =\
-            prolongation.dateCreated -\
-            PROLONGATION_DATE_PUBLISHED_LIMIT_PERIOD +\
-            timedelta(days=1)
+        prolongation.datePublished = prolongation.dateCreated - PROLONGATION_DATE_PUBLISHED_LIMIT_PERIOD + timedelta(days=1)
         prolongation.validate()
 
-        prolongation.datePublished =\
-            prolongation.dateCreated -\
-            PROLONGATION_DATE_PUBLISHED_LIMIT_PERIOD -\
-            timedelta(days=1)
+        prolongation.datePublished = prolongation.dateCreated - PROLONGATION_DATE_PUBLISHED_LIMIT_PERIOD - timedelta(days=1)
         with self.assertRaises(ValidationError) as context:  # noqa: F841
             prolongation.validate()
 

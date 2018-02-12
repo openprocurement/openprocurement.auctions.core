@@ -49,8 +49,7 @@ def switch_active_to_unsuccessful(self):
         auction['awards'][0]['id'],
         auction
     )
-    related_contract['signingPeriod']['endDate'] =\
-            related_contract['signingPeriod']['startDate']
+    related_contract['signingPeriod']['endDate'] = related_contract['signingPeriod']['startDate']
     self.db.save(auction)
 
     self.app.authorization = ('Basic', ('chronograph', ''))
@@ -126,8 +125,7 @@ def switch_suspended_active_to_unsuccessful(self):
         auction['awards'][0]['id'],
         auction
     )
-    related_contract['signingPeriod']['endDate'] =\
-            related_contract['signingPeriod']['startDate']
+    related_contract['signingPeriod']['endDate'] = related_contract['signingPeriod']['startDate']
     related_contract['signingPeriod']['endDate'] = related_contract['signingPeriod']['startDate']
     self.db.save(auction)
 
@@ -208,8 +206,7 @@ def switch_active_to_unsuccessful_2(self):
         auction['awards'][0]['id'],
         auction
     )
-    related_contract['signingPeriod']['endDate'] =\
-            related_contract['signingPeriod']['startDate']
+    related_contract['signingPeriod']['endDate'] = related_contract['signingPeriod']['startDate']
     self.db.save(auction)
 
     self.app.authorization = ('Basic', ('chronograph', ''))
