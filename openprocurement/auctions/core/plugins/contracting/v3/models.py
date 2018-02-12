@@ -29,8 +29,7 @@ from openprocurement.auctions.core.models import (
     dgfDocument as BaseDocument,
     dgfComplaint as Complaint,
 )
-from openprocurement.auctions.core.plugins.\
-        contracting.v3.constants import (
+from openprocurement.auctions.core.plugins.contracting.v3.constants import (
     PROLONGATION_SHORT_PERIOD,
     PROLONGATION_LONG_PERIOD,
     PROLONGATION_DATE_PUBLISHED_LIMIT_PERIOD,
@@ -38,10 +37,7 @@ from openprocurement.auctions.core.plugins.\
 
 
 class Document(BaseDocument):
-    documentType = StringType(
-        choices=['prolongationProtocol'],
-        default='prolongationProtocol'
-    )
+    documentType = StringType(choices=['prolongationProtocol'], default='prolongationProtocol')
 
 
 ProlongationDocument = Document
@@ -58,13 +54,10 @@ class Prolongation(Model):
     id = MD5Type(required=True, default=lambda: uuid4().hex)
     dateCreated = IsoDateTimeType(default=get_now(), required=True)
     decisionID = StringType(required=True)
-    status = StringType(
-        choices=[
-            'draft',
-            'applied',
-        ],
-        default='draft'
-    )
+    status = StringType(choices=['draft', 'applied'], default='draft')
+    description = StringType(required=True, min_length=10)
+    datePublished = IsoDateTimeType(required=True)
+    documents = ListType(ModelType(ProlongationDocument), default=[], required=True)
     reason = StringType(
         choices=[
             'dgfPaymentImpossibility',
@@ -72,16 +65,6 @@ class Prolongation(Model):
             'dgfLegalObstacles',
             'other'
         ],
-        required=True
-    )
-    description = StringType(
-        required=True,
-        min_length=10
-    )
-    datePublished = IsoDateTimeType(required=True)
-    documents = ListType(
-        ModelType(ProlongationDocument),
-        default=[],
         required=True
     )
 

@@ -55,18 +55,12 @@ class BaseAuctionAwardContractDocumentResource(APIResource):
                 ),
                 extra=context_unpack(
                     self.request,
-                    {
-                        'MESSAGE_ID':
-                            'auction_contract_prolongation_document_create'
-                    },
+                    {'MESSAGE_ID': 'auction_contract_prolongation_document_create'},
                     {'document_id': document.id}
                 )
             )
             self.request.response.status = 201
-            document_route = self.request.matched_route.name.replace(
-                "collection_",
-                ""
-            )
+            document_route = self.request.matched_route.name.replace("collection_", "")
             self.request.response.headers['Location'] = self.request.current_route_url(
                         _route_name=document_route,
                         document_id=document.id,
@@ -122,9 +116,7 @@ class BaseAuctionAwardContractDocumentResource(APIResource):
                 ),
                 extra=context_unpack(
                     self.request,
-                    {'MESSAGE_ID':
-                        'auction_contract_prolongation_document_patch'
-                    }
+                    {'MESSAGE_ID': 'auction_contract_prolongation_document_patch'}
                 )
             )
             return {'data': self.request.context.serialize("view")}
