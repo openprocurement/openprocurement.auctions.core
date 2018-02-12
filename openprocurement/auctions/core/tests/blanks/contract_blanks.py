@@ -116,7 +116,7 @@ def create_auction_contract_in_complete_status(self):
     response = self.app.post_json(
         '/auctions/{}/contracts'.format(
         self.auction_id
-    ),
+        ),
         {'data': {
             'title': 'contract title',
             'description': 'contract description',
@@ -312,14 +312,12 @@ def patch_signing_period(self):
         }},
         status=200
     )
-    after_patch_contract_response = self.app.get('/auctions/{0}/contracts/{1}' \
-        .format(self.auction_id, contract['id']))
+    after_patch_contract_response = self.app.get(
+        '/auctions/{0}/contracts/{1}'.format(self.auction_id, contract['id'])
+    )
 
     # responses before & after patch are equal
-    self.assertEqual(
-        pre_patch_contract_response.json,
-        after_patch_contract_response.json
-    )
+    self.assertEqual(pre_patch_contract_response.json, after_patch_contract_response.json)
 
 
 def patch_date_paid(self):
@@ -345,8 +343,9 @@ def patch_date_paid(self):
         status=200
     )
 
-    after_patch_contract_response = self.app.get('/auctions/{0}/contracts/{1}' \
-        .format(self.auction_id, contract['id']))
+    after_patch_contract_response = self.app.get(
+        '/auctions/{0}/contracts/{1}'.format(self.auction_id, contract['id'])
+    )
     # check if datePaid has appeared
     self.assertEqual(
         after_patch_contract_response.json['data'].get('datePaid'),

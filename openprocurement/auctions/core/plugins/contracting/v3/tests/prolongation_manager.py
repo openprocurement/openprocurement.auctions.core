@@ -20,9 +20,7 @@ from openprocurement.auctions.core.plugins.contracting.v3.constants import (
     PROLONGATION_DATE_PUBLISHED_LIMIT_PERIOD,
 )
 
-contract_data = {
-    'awardID': uuid4().hex  # random md5
-}
+contract_data = {'awardID': uuid4().hex}
 
 
 class TestContractingV3ProlongationManager(BaseWebTest):
@@ -56,17 +54,12 @@ class TestContractingV3ProlongationManager(BaseWebTest):
 
         prolongation_doc = self.fixture_document()
         prolongation_doc.__parent__ = prolongation
-        prolongation.documents.append(
-            prolongation_doc
-        )
+        prolongation.documents.append(prolongation_doc)
         return (contract, prolongation)
 
     def test_date_created(self):
         contract, prolongation = self.fixture_created()
-        self.assertNotEqual(
-            prolongation.dateCreated,
-            None
-        )
+        self.assertNotEqual(prolongation.dateCreated, None)
         fields_awailable_for_creation = prolongation.serialize('create')
         self.assertNotIn(
             'dateCreated',
@@ -111,10 +104,7 @@ class TestContractingV3ProlongationManager(BaseWebTest):
         managed_prolongation = ProlongationManager(prolongation)
         managed_prolongation.apply()
 
-        self.assertEqual(
-            prolongation.status,
-            'applied'
-        )
+        self.assertEqual(prolongation.status, 'applied')
 
         # check update of startDate
         self.assertEqual(
@@ -144,15 +134,9 @@ class TestContractingV3ProlongationManager(BaseWebTest):
 
         managed_prolongation = ProlongationManager(prolongation)
         managed_prolongation.apply()
-        self.assertEqual(
-            previous_short_prolongation.status,
-            'applied'
-        )
+        self.assertEqual(previous_short_prolongation.status, 'applied')
 
-        self.assertEqual(
-            prolongation.status,
-            'applied'
-        )
+        self.assertEqual(prolongation.status, 'applied')
 
         # check update of startDate
         self.assertEqual(
@@ -173,10 +157,7 @@ class TestContractingV3ProlongationManager(BaseWebTest):
         managed_prolongation = ProlongationManager(prolongation)
         managed_prolongation.apply()
 
-        self.assertEqual(
-            prolongation.status,
-            'applied'
-        )
+        self.assertEqual(prolongation.status, 'applied')
 
     def test_apply_when_need_to_apply_long(self):
         contract, prolongation = self.fixture_created()
@@ -184,22 +165,13 @@ class TestContractingV3ProlongationManager(BaseWebTest):
         contract.prolongations.append(previous_applied_prolongation)
         previous_applied_prolongation.status = 'applied'
 
-        self.assertEqual(
-            prolongation.status,
-            'draft'
-        )
+        self.assertEqual(prolongation.status, 'draft')
 
         managed_prolongation = ProlongationManager(prolongation)
         managed_prolongation.apply()
 
-        self.assertEqual(
-            prolongation.status,
-            'applied'
-        )
-        self.assertEqual(
-            previous_applied_prolongation.status,
-            'applied'
-        )
+        self.assertEqual(prolongation.status, 'applied')
+        self.assertEqual(previous_applied_prolongation.status, 'applied')
 
     def test_add_document(self):
         contract, prolongation = self.fixture_created()
@@ -209,10 +181,7 @@ class TestContractingV3ProlongationManager(BaseWebTest):
 
         managed_prolongation = ProlongationManager(prolongation)
         managed_prolongation.add_document(document)
-        self.assertEqual(
-            prolongation.documents[0],
-            document
-        )
+        self.assertEqual(prolongation.documents[0], document)
 
     def test_add_document_when_applied(self):
         contract, prolongation = self.fixture_created()

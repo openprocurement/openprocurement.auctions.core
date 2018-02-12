@@ -170,10 +170,7 @@ def check_award_status(request, award, now):
     # seek for contract overdue
     related_contract = get_related_contract_of_award(award['id'], auction)
 
-    contract_overdue = check_contract_overdue(
-        related_contract, 
-        now
-    ) if related_contract else None # award could have not a contract
+    contract_overdue = check_contract_overdue(related_contract, now) if related_contract else None
 
     if protocol_overdue or contract_overdue:
         if award.status == 'active':

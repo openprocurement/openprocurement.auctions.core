@@ -9,9 +9,7 @@ from openprocurement.auctions.core.plugins.contracting.v3.models import (
     Contract,
 )
 
-contract_data = {
-    'awardID': uuid4().hex  # random md5
-}
+contract_data = {'awardID': uuid4().hex}
 
 class TestContractingV3ContractValidation(BaseWebTest):
 
