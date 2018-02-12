@@ -1,4 +1,10 @@
 # -*- coding: utf-8 -*-
+from pkg_resources import get_distribution
+from schematics.exceptions import ModelValidationError
+from time import sleep
+from re import compile
+from pyramid.compat import decode_path_info
+from pyramid.exceptions import URLDecodeError
 from cornice.resource import resource, view
 from cornice.util import json_error
 from couchdb.http import ResourceConflict
@@ -6,27 +12,38 @@ from functools import partial
 from json import dumps
 from jsonpointer import resolve_pointer
 from logging import getLogger
+
 from openprocurement.api.models import get_now, TZ, COMPLAINT_STAND_STILL_TIME
 from openprocurement.api.validation import error_handler
-from openprocurement.api.utils import (generate_id, calculate_business_date, apply_data_patch,
-                                       get_revision_changes, set_modetest_titles, update_logging_context,
-                                       context_unpack)
+from openprocurement.api.utils import (
+    generate_id,
+    calculate_business_date,
+    apply_data_patch,
+    get_revision_changes,
+    set_modetest_titles,
+    update_logging_context,
+    context_unpack
+)
 from openprocurement.auctions.core.traversal import factory
-from pkg_resources import get_distribution
-from schematics.exceptions import ModelValidationError
-from time import sleep
-from re import compile
-from pyramid.compat import decode_path_info
-from pyramid.exceptions import URLDecodeError
 
 
 PKG = get_distribution(__package__)
 LOGGER = getLogger(PKG.project_name)
-VERSION = '{}.{}'.format(int(PKG.parsed_version[0]), int(PKG.parsed_version[1]) if PKG.parsed_version[1].isdigit() else 0)
-ROUTE_PREFIX = '/api/{}'.format(VERSION)
-DOCUMENT_BLACKLISTED_FIELDS = ('title', 'format', '__parent__', 'id', 'url', 'dateModified', )
 ACCELERATOR_RE = compile(r'.accelerator=(?P<accelerator>\d+)')
 json_view = partial(view, renderer='json')
+VERSION = '{}.{}'.format(
+    int(PKG.parsed_version[0]),
+    int(PKG.parsed_version[1]) if PKG.parsed_version[1].isdigit() else 0
+)
+ROUTE_PREFIX = '/api/{}'.format(VERSION)
+DOCUMENT_BLACKLISTED_FIELDS = (
+    'title',
+    'format',
+    '__parent__',
+    'id',
+    'url',
+    'dateModified',
+)
 
 
 def generate_auction_id(ctime, db, server_id=''):
@@ -44,7 +61,13 @@ def generate_auction_id(ctime, db, server_id=''):
             sleep(1)
         else:
             break
-    return 'UA-EA-{:04}-{:02}-{:02}-{:06}{}'.format(ctime.year, ctime.month, ctime.day, index, server_id and '-' + server_id)
+    return 'UA-EA-{:04}-{:02}-{:02}-{:06}{}'.format(
+        ctime.year,
+        ctime.month,
+        ctime.day,
+        index,
+        server_id and '-' + server_id
+    )
 
 
 def auction_serialize(request, auction_data, fields):

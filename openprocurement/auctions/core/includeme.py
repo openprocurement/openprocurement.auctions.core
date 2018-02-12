@@ -50,8 +50,8 @@ def includeme(config):
     )
 
     config.add_request_method(get_content_configurator, 'content_configurator', reify=True)
-    plugins = config.registry.settings.get('plugins') and \
-              config.registry.settings['plugins'].split(',')
+    plugins = (config.registry.settings.get('plugins') and 
+              config.registry.settings['plugins'].split(','))
     for entry_point in iter_entry_points('openprocurement.auctions.core.plugins'):
         if not plugins or entry_point.name in plugins:
             plugin = entry_point.load()

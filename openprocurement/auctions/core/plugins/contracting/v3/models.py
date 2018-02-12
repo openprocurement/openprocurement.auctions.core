@@ -98,8 +98,7 @@ class Prolongation(Model):
             value,
             PROLONGATION_DATE_PUBLISHED_LIMIT_PERIOD
         )
-        if offset_from_date_created <\
-                data['dateCreated']:
+        if offset_from_date_created < data['dateCreated']:
             raise ValidationError(
                 'datePublished must be no less on {limit} days, '
                 'than dateCreated'.format(
@@ -133,8 +132,10 @@ class Contract(BaseContract):
 
     def validate_datePaid(self, data, value):
         target_signingPeriod = data.get('signingPeriod')
-        if target_signingPeriod is None or \
-                value is None:
+        if (
+            target_signingPeriod is None
+            or value is None
+        ):
             return None
         if value > data.get('signingPeriod').get('startDate'):
             raise ValidationError(

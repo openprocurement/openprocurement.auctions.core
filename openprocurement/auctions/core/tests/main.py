@@ -2,8 +2,7 @@
 import unittest
 
 from openprocurement.auctions.core.tests import auctions
-from openprocurement.auctions.core.plugins.\
-        contracting.v3.tests.main import (
+from openprocurement.auctions.core.plugins.contracting.v3.tests.main import (
     contracting_v3_test_suite
 )
 

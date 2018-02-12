@@ -18,12 +18,20 @@ def validate_auction_data(request):
 
     model = request.auction_from_data(data, create=False)
     if not request.check_accreditation(model.create_accreditation):
-        request.errors.add('procurementMethodType', 'accreditation', 'Broker Accreditation level does not permit auction creation')
+        request.errors.add(
+            'procurementMethodType',
+            'accreditation',
+            'Broker Accreditation level does not permit auction creation'
+        )
         request.errors.status = 403
         return
     data = validate_data(request, model, data=data)
     if data and data.get('mode', None) is None and request.check_accreditation('t'):
-        request.errors.add('procurementMethodType', 'mode', 'Broker Accreditation level does not permit auction creation')
+        request.errors.add(
+            'procurementMethodType',
+            'mode',
+            'Broker Accreditation level does not permit auction creation'
+        )
         request.errors.status = 403
         return
 
@@ -352,39 +360,40 @@ def validate_contract_data(request):
 
 
 def validate_prolongation_data(request):
-    if request.validated['auction_status'] not in \
-        ['active.qualification', 'active.awarded']:
+    if (
+        request.validated['auction_status']
+        not in ['active.qualification', 'active.awarded']
+    ):
         request.errors.add(
             'body',
             'data',
-            'Can\'t create prolongation in current ({}) auction status'\
-                .format(request.validated['auction_status']))
+            'Can\'t create prolongation in current ({}) auction status'.format(
+                request.validated['auction_status']
+            )
+        )
         request.errors.status = 403
         return
     update_logging_context(request, {'prolongation_id': '__new__'})
-    model = type(request.auction).contracts.model_class.\
-        prolongations.model_class
+    model = type(request.auction).contracts.model_class.prolongations.model_class
     return validate_data(request, model)
 
 
 def validate_patch_prolongation_data(request):
-    if request.validated['auction_status'] not in \
-        ['active.qualification', 'active.awarded']:
+    if (
+        request.validated['auction_status']
+        not in ['active.qualification', 'active.awarded']
+    ):
         request.errors.add(
             'body',
             'data',
-            'Can\'t update prolongation in current ({}) auction status'\
-                .format(request.validated['auction_status']))
+            'Can\'t update prolongation in current ({}) auction status'.format(
+                request.validated['auction_status']
+            )
+        )
         request.errors.status = 403
         return
     auction = request.validated['auction']
-    if any([
-        i.status != 'active' for i in auction.lots \
-            if i.id in [
-                a.lotID for a in auction.awards if \
-                    a.id == request.context.awardID
-            ]
-    ]):
+    if any([i.status != 'active' for i in auction.lots if i.id in [ a.lotID for a in auction.awards if a.id == request.context.awardID]]):
         request.errors.add(
             'body',
             'data',
@@ -392,8 +401,7 @@ def validate_patch_prolongation_data(request):
         )
         request.errors.status = 403
         return
-    model = type(request.auction).contracts.model_class.\
-        prolongations.model_class
+    model = type(request.auction).contracts.model_class.prolongations.model_class
     return validate_data(request, model, True)
 
 
@@ -416,5 +424,3 @@ def validate_patch_lot_data(request):
 def validate_disallow_dgfPlatformLegalDetails(docs, *args):
     if any([i.documentType == 'x_dgfPlatformLegalDetails' for i in docs]):
         raise ValidationError(u"Disallow documents with x_dgfPlatformLegalDetails documentType")
-
-
