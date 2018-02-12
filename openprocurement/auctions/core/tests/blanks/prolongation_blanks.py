@@ -1,18 +1,11 @@
-<<<<<<< HEAD
 from openprocurement.api.models import get_now
 
-=======
->>>>>>> f3ed869... Add Prolongation views
 from openprocurement.auctions.core.plugins.contracting.v3.models import (
     Prolongation,
     Contract,
     ProlongationDocument,
 )
-<<<<<<< HEAD
 from openprocurement.auctions.core.plugins.contracting.v3.constants import (
-=======
-from openprocurement.auctions.core.constants import (
->>>>>>> f3ed869... Add Prolongation views
     PROLONGATION_SHORT_PERIOD,
     PROLONGATION_LONG_PERIOD,
 )
@@ -226,15 +219,12 @@ def apply_prolongation_triple_times(test_case):
         test_case.contract_id,
         test_case.prolongation2_id,
     )
-<<<<<<< HEAD
     add_document_to_prolongation(
         test_case,
         test_case.auction_id,
         test_case.contract_id,
         test_case.prolongation3_id,
     )
-=======
->>>>>>> f3ed869... Add Prolongation views
 
     patch_data = {
         'data': {
@@ -251,10 +241,7 @@ def apply_prolongation_triple_times(test_case):
         patch_data
     )
 
-<<<<<<< HEAD
     # apply long prolongation
-=======
->>>>>>> f3ed869... Add Prolongation views
     valid_patch_prolongation_response = test_case.app.patch_json(
         PATHS['prolongation'].format(
             auction_id=test_case.auction_id,
@@ -268,8 +255,6 @@ def apply_prolongation_triple_times(test_case):
         PATHS['prolongation'].format(
             auction_id=test_case.auction_id,
             contract_id=test_case.contract_id,
-<<<<<<< HEAD
-            prolongation_id=test_case.prolongation3_id
         ),
         patch_data,
         status=403
@@ -288,13 +273,6 @@ def apply_prolongation_triple_times(test_case):
     )
 
     # check if contract signing was prolongated for the third time
-=======
-            prolongation_id=test_case.prolongation2_id
-        ),
-        patch_data
-    )
-
->>>>>>> f3ed869... Add Prolongation views
     post_prolongation_contract = get_related_contract(test_case)
     test_case.assertEqual(
         post_prolongation_contract.signingPeriod.endDate,
@@ -305,7 +283,6 @@ def apply_prolongation_triple_times(test_case):
     )
 
 
-<<<<<<< HEAD
 def apply_applied_prolongation(test_case):
     add_document_to_prolongation(
         test_case,
@@ -366,8 +343,6 @@ def create_applied_prolongation(test_case):
     )
 
 
-=======
->>>>>>> f3ed869... Add Prolongation views
 def upload_document(test_case):
     prolongation_response = test_case.app.get(
         PATHS['prolongation'].format(
@@ -385,11 +360,7 @@ def upload_document(test_case):
     )
 
     add_document_response = test_case.app.post(
-<<<<<<< HEAD
         PATHS['prolongation_documents'].format(
-=======
-        PATHS['documents'].format(
->>>>>>> f3ed869... Add Prolongation views
             auction_id=test_case.auction_id,
             contract_id=test_case.contract_id,
             prolongation_id=test_case.prolongation_id
@@ -430,11 +401,7 @@ def get_document(test_case):
         test_case.contract_id,
         test_case.prolongation_id,
     )
-<<<<<<< HEAD
     url = PATHS['prolongation_document'].format(
-=======
-    url = PATHS['document'].format(
->>>>>>> f3ed869... Add Prolongation views
         auction_id=test_case.auction_id,
         contract_id=test_case.contract_id,
         prolongation_id=test_case.prolongation_id,
@@ -471,11 +438,7 @@ def get_list_of_documents(test_case):
         test_case.prolongation_id,
     )
     list_of_docs_response = test_case.app.get(
-<<<<<<< HEAD
         PATHS['prolongation_documents'].format(
-=======
-        PATHS['documents'].format(
->>>>>>> f3ed869... Add Prolongation views
         auction_id=test_case.auction_id,
         contract_id=test_case.contract_id,
         prolongation_id=test_case.prolongation_id
@@ -504,21 +467,14 @@ def patch_document(test_case):
         prolongation_id=test_case.prolongation_id
         )
     )
-<<<<<<< HEAD
     pre_patch_doc_title = pre_patch_prolongation_response.json['data']['documents'][0]['title']
     patch_document_response = test_case.app.patch_json(
         PATHS['prolongation_document'].format(
-=======
-    pre_patch_doc_title = pre_patch_prolongation_response.\
-        json['data']['documents'][0]['title']
-    patch_document_response = test_case.app.patch_json(
-        PATHS['document'].format(
->>>>>>> f3ed869... Add Prolongation views
-        auction_id=test_case.auction_id,
-        contract_id=test_case.contract_id,
-        prolongation_id=test_case.prolongation_id,
-        document_id=document_id,
-        key=document_key
+            auction_id=test_case.auction_id,
+            contract_id=test_case.contract_id,
+            prolongation_id=test_case.prolongation_id,
+            document_id=document_id,
+            key=document_key
         ),
         {'data':
             {'title': 'updated.doc'}
