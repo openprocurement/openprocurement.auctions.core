@@ -36,7 +36,7 @@ class Award(BaseAward):
     """
     class Options:
         roles = {
-            'create': blacklist('id', 'status', 'date', 'documents', 'complaints', 'complaintPeriod', 'verificationPeriod', 'signingPeriod'),
+            'create': blacklist('id', 'status', 'date', 'documents', 'complaints', 'complaintPeriod', 'verificationPeriod', 'signingPeriod', 'paymentPeriod'),
             'Administrator': whitelist('verificationPeriod', 'signingPeriod'),
         }
 
@@ -56,13 +56,14 @@ class Award(BaseAward):
                 bid_owner_token = bid.owner_token
         return [(Allow, '{}_{}'.format(bid_owner, bid_owner_token), 'edit_auction_award')]
 
-    status = StringType(required=True, choices=['pending.waiting', 'unsuccessful', 'active', 'cancelled', 'pending'], default='pending')
+    status = StringType(required=True, choices=['pending.waiting', 'unsuccessful', 'active', 'cancelled', 'pending', 'pending.payment', 'pending.verification'], default='pending') # pending.payment and pending.verification is deprecated
     suppliers = ListType(ModelType(Organization), min_size=1, max_size=1)
     complaints = ListType(ModelType(Complaint), default=list())
     documents = ListType(ModelType(Document), default=list(), validators=[validate_disallow_dgfPlatformLegalDetails])
     items = ListType(ModelType(Item))
     verificationPeriod = ModelType(Period)
     signingPeriod = ModelType(Period)
+    paymentPeriod = ModelType(Period)
 
     @serializable(serialized_name="verificationPeriod", serialize_when_none=False)
     def award_verificationPeriod(self):
