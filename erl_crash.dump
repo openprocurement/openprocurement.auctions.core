@@ -1,0 +1,52 @@
+=erl_crash_dump:0.3
+Fri Feb 16 17:30:11 2018
+Slogan: erl_child_setup closed
+System version: Erlang/OTP 19 [erts-8.3.5.4] [source] [64-bit] [smp:4:4] [async-threads:4] [hipe] [kernel-poll:true]
+Compiled: Tue Dec 19 10:28:50 2017
+Taints: jiffy,sd_notify,snappy,crypto,erl_tracer
+Atoms: 10645
+Calling Thread: scheduler:2
+=scheduler:1
+Scheduler Sleep Info Flags: SLEEPING | TSE_SLEEPING | WAITING
+Scheduler Sleep Info Aux Work: 
+Current Port: 
+Run Queue Max Length: 0
+Run Queue High Length: 0
+Run Queue Normal Length: 0
+Run Queue Low Length: 0
+Run Queue Port Length: 0
+Run Queue Flags: OUT_OF_WORK | HALFTIME_OUT_OF_WORK
+Current Process: 
+=scheduler:2
+Scheduler Sleep Info Flags: 
+Scheduler Sleep Info Aux Work: 
+Current Port: #Port<0.0>
+Run Queue Max Length: 0
+Run Queue High Length: 0
+Run Queue Normal Length: 1
+Run Queue Low Length: 0
+Run Queue Port Length: 0
+Run Queue Flags: NONEMPTY_NORMAL | OUT_OF_WORK | HALFTIME_OUT_OF_WORK | NONEMPTY | UNKNOWN(134217728)
+Current Process: 
+=scheduler:3
+Scheduler Sleep Info Flags: SLEEPING | TSE_SLEEPING | WAITING
+Scheduler Sleep Info Aux Work: 
+Current Port: 
+Run Queue Max Length: 0
+Run Queue High Length: 0
+Run Queue Normal Length: 0
+Run Queue Low Length: 0
+Run Queue Port Length: 0
+Run Queue Flags: OUT_OF_WORK | HALFTIME_OUT_OF_WORK
+Current Process: 
+=scheduler:4
+Scheduler Sleep Info Flags: SLEEPING | TSE_SLEEPING | WAITING
+Scheduler Sleep Info Aux Work: 
+Current Port: 
+Run Queue Max Length: 0
+Run Queue High Length: 0
+Run Queue Normal Length: 0
+Run Queue Low Length: 0
+Run Queue Port Length: 0
+Run Queue Flags: OUT_OF_WORK | HALFTIME_OUT_OF_WORK | INACTIVE
+Current Process: 
