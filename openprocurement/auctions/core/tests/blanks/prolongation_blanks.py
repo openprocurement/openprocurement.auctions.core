@@ -239,6 +239,7 @@ def apply_prolongation_triple_times(test_case):
         patch_data
     )
 
+    # apply long prolongation
     valid_patch_prolongation_response = test_case.app.patch_json(
         PATHS['prolongation'].format(
             auction_id=test_case.auction_id,
@@ -279,6 +280,49 @@ def apply_prolongation_triple_times(test_case):
             PROLONGATION_LONG_PERIOD
         )
     )
+
+
+def apply_applied_prolongation(test_case):
+    add_document_to_prolongation(
+        test_case,
+        test_case.auction_id,
+        test_case.contract_id,
+        test_case.prolongation_id,
+    )
+    patch_data = {
+        'data': {
+            'status': 'applied',
+        }
+    }
+
+    # apply prolongation for the first time
+    prolongation_patch_response = test_case.app.patch_json(
+        PATHS['prolongation'].format(
+            auction_id=test_case.auction_id,
+            contract_id=test_case.contract_id,
+            prolongation_id=test_case.prolongation_id
+        ),
+        patch_data
+    )
+    test_case.assertEqual(
+        prolongation_patch_response.status,
+        '200 OK'
+    )
+    # try to apply already applied prolongation
+    prolongation_patch_response = test_case.app.patch_json(
+        PATHS['prolongation'].format(
+            auction_id=test_case.auction_id,
+            contract_id=test_case.contract_id,
+            prolongation_id=test_case.prolongation_id
+        ),
+        patch_data,
+        status=403
+    )
+    test_case.assertEqual(
+        prolongation_patch_response.status,
+        '403 Forbidden'
+    )
+    pass
 
 
 def upload_document(test_case):

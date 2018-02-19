@@ -376,10 +376,7 @@ def validate_prolongation_data(request):
 
 
 def validate_patch_prolongation_data(request):
-    if (
-        request.validated['auction_status']
-        not in ['active.qualification', 'active.awarded']
-    ):
+    if (request.validated['auction_status'] not in ['active.qualification', 'active.awarded']):
         request.errors.add(
             'body',
             'data',
@@ -389,6 +386,17 @@ def validate_patch_prolongation_data(request):
         )
         request.errors.status = 403
         return
+    # Don't allow to patch active Prolongation
+    current_prolongation_status = request.validated['prolongation']['status']
+    if current_prolongation_status == 'applied':
+        request.errors.add(
+            'body',
+            'data',
+            'Can\'t patch Prolongation in {0} status'.format(current_prolongation_status)
+        )
+        request.errors.status = 403
+        return
+
     auction = request.validated['auction']
     if any([i.status != 'active' for i in auction.lots if i.id in [ a.lotID for a in auction.awards if a.id == request.context.awardID]]):
         request.errors.add(
