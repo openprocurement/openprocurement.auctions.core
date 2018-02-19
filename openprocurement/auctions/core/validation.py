@@ -360,10 +360,7 @@ def validate_contract_data(request):
 
 
 def validate_prolongation_data(request):
-    if (
-        request.validated['auction_status']
-        not in ['active.qualification', 'active.awarded']
-    ):
+    if (request.validated['auction_status'] not in ['active.qualification', 'active.awarded']):
         request.errors.add(
             'body',
             'data',
