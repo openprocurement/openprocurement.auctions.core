@@ -49,9 +49,9 @@ class AuctionMultipleLotAuctionResourceTestMixin(object):
 
 
 def suite():
-    suite = unittest.TestSuite()
-    suite.addTest(unittest.makeSuite(AuctionResourceTest))
-    return suite
+    tests = unittest.TestSuite()
+    tests.addTest(unittest.makeSuite(AuctionResourceTest))
+    return tests
 
 
 if __name__ == '__main__':
