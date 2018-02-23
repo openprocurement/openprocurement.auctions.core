@@ -10,6 +10,11 @@ LOGGER = getLogger(PKG.project_name)
 
 
 def check_auction_status(request):
+    """Update auction status taking as basis it's awards and contracts
+
+        If auction has not successful awards - mark it as `unsuccessful`,
+        else if it has active contract - mark it as complete.
+    """
     auction = request.validated['auction']
     if auction.awards:
         awards_statuses = set([award.status for award in auction.awards])
