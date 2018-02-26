@@ -10,7 +10,7 @@ def add_document_to_prolongation(
     prolongation_id,
 ):
     add_document_response = test_case.app.post(
-        PATHS['documents'].format(
+        PATHS['prolongation_documents'].format(
             auction_id=auction_id,
             contract_id=contract_id,
             prolongation_id=prolongation_id

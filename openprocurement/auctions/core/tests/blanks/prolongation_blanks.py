@@ -342,7 +342,7 @@ def upload_document(test_case):
     )
 
     add_document_response = test_case.app.post(
-        PATHS['documents'].format(
+        PATHS['prolongation_documents'].format(
             auction_id=test_case.auction_id,
             contract_id=test_case.contract_id,
             prolongation_id=test_case.prolongation_id
@@ -383,7 +383,7 @@ def get_document(test_case):
         test_case.contract_id,
         test_case.prolongation_id,
     )
-    url = PATHS['document'].format(
+    url = PATHS['prolongation_document'].format(
         auction_id=test_case.auction_id,
         contract_id=test_case.contract_id,
         prolongation_id=test_case.prolongation_id,
@@ -420,7 +420,7 @@ def get_list_of_documents(test_case):
         test_case.prolongation_id,
     )
     list_of_docs_response = test_case.app.get(
-        PATHS['documents'].format(
+        PATHS['prolongation_documents'].format(
         auction_id=test_case.auction_id,
         contract_id=test_case.contract_id,
         prolongation_id=test_case.prolongation_id
@@ -451,7 +451,7 @@ def patch_document(test_case):
     )
     pre_patch_doc_title = pre_patch_prolongation_response.json['data']['documents'][0]['title']
     patch_document_response = test_case.app.patch_json(
-        PATHS['document'].format(
+        PATHS['prolongation_document'].format(
         auction_id=test_case.auction_id,
         contract_id=test_case.contract_id,
         prolongation_id=test_case.prolongation_id,
