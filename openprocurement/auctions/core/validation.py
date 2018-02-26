@@ -392,7 +392,7 @@ def validate_patch_prolongation_data(request):
         request.errors.add(
             'body',
             'data',
-            'Can\'t patch Prolongation in {0} status'.format(current_prolongation_status)
+            'Can\'t patch prolongation in current {0} status'.format(current_prolongation_status)
         )
         request.errors.status = 403
         return
