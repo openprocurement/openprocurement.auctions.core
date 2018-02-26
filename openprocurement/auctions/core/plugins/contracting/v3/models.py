@@ -68,7 +68,7 @@ class Prolongation(Model):
         required=True
     )
 
-    def validate_datePublished(self, data, value):
+    def validate_datePublished(self, data, datePublished):
         """Check if datePublished attribute is valid
 
             datePublished must be non less than `dateCreated` on some
@@ -78,7 +78,7 @@ class Prolongation(Model):
             return
 
         offset_from_date_created = calculate_business_date(
-            value,
+            datePublished,
             PROLONGATION_DATE_PUBLISHED_LIMIT_PERIOD
         )
         if offset_from_date_created < data['dateCreated']:
