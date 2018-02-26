@@ -360,13 +360,19 @@ def validate_contract_data(request):
 
 
 def validate_prolongation_data(request):
+    if request.json_body['data'].get('status') == 'applied':
+        request.errors.add(
+            'body',
+            'data',
+            'Can\'t create prolongation in {0} status'.format(request.validated['auction_status'])
+        )
+        request.errors.status = 403
+        return
     if (request.validated['auction_status'] not in ['active.qualification', 'active.awarded']):
         request.errors.add(
             'body',
             'data',
-            'Can\'t create prolongation in current ({}) auction status'.format(
-                request.validated['auction_status']
-            )
+            'Can\'t create prolongation in current ({}) auction status'.format(request.validated['auction_status'])
         )
         request.errors.status = 403
         return

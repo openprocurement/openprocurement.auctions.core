@@ -28,16 +28,13 @@ class ProlongationManager(object):
 
         self.prolongation.status = 'applied'
         contract = self.prolongation.__parent__
-        if applied_prolongations_count == 0:
-            contract.signingPeriod.endDate = calculate_business_date(
-                contract.signingPeriod.startDate,
-                PROLONGATION_SHORT_PERIOD
-            )
-        elif applied_prolongations_count == 1:
-            contract.signingPeriod.endDate = calculate_business_date(
-                contract.signingPeriod.startDate,
-                PROLONGATION_LONG_PERIOD
-            )
+        prolongation_period = (
+            PROLONGATION_LONG_PERIOD if applied_prolongations_count else PROLONGATION_SHORT_PERIOD
+        )
+        contract.signingPeriod.endDate = calculate_business_date(
+            contract.signingPeriod.startDate,
+            prolongation_period
+        )
 
     def add_document(self, document):
         if self.prolongation.status == 'draft':

@@ -1,3 +1,5 @@
+from openprocurement.api.models import get_now
+
 from openprocurement.auctions.core.plugins.contracting.v3.models import (
     Prolongation,
     Contract,
@@ -322,7 +324,24 @@ def apply_applied_prolongation(test_case):
         prolongation_patch_response.status,
         '403 Forbidden'
     )
-    pass
+
+def create_applied_prolongation(test_case):
+    prolongation_create_data = {
+        'decisionID': 'very_importante_documente',
+        'description': 'Prolongate your contract for free!',
+        'reason': 'other',
+        'documents': [],
+        'datePublished': get_now().isoformat(),
+        'status': 'applied',
+    }
+    prolongation_post_response = test_case.app.post_json(
+        '/auctions/{0}/contracts/{1}/prolongations'.format(
+            test_case.auction_id,
+            test_case.contract_id
+        ),
+        {'data':prolongation_create_data},
+        status=403
+    )
 
 
 def upload_document(test_case):

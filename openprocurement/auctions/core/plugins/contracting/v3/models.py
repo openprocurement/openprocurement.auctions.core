@@ -47,7 +47,7 @@ class Prolongation(Model):
 
     class Options:
         roles = {
-            'create': blacklist('id', 'dateCreated',),
+            'create': blacklist('id', 'dateCreated', 'status',),
             'edit': blacklist('id', 'dateCreated',),
         }
 
