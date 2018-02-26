@@ -398,14 +398,6 @@ def validate_patch_prolongation_data(request):
         return
 
     auction = request.validated['auction']
-    if any([i.status != 'active' for i in auction.lots if i.id in [ a.lotID for a in auction.awards if a.id == request.context.awardID]]):
-        request.errors.add(
-            'body',
-            'data',
-            'Can update prolongation only in active lot status'
-        )
-        request.errors.status = 403
-        return
     model = type(request.auction).contracts.model_class.prolongations.model_class
     return validate_data(request, model, True)
 
