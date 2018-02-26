@@ -87,16 +87,11 @@ class AuctionAwardContractProlongationResource(APIResource):
             Fields, except on `status`, can be updated only when
             Prolongation has status `draft`.
         """
-        old_prolongation = self.request.context
         new_status = self.request.validated['data'].get('status')
 
-        is_status_change = (new_status != old_prolongation.status)
-
-        if not is_status_change and old_prolongation.status == 'draft':
-            apply_patch(self.request) # apply patch only in `draft`
         if new_status == 'applied':
             # this method checks intention of long apply
-            managed_prolongation = ProlongationManager(old_prolongation)
+            managed_prolongation = ProlongationManager(self.request.context)
             try:
                 managed_prolongation.apply()
             except Exception as e:
@@ -104,6 +99,7 @@ class AuctionAwardContractProlongationResource(APIResource):
                 self.request.errors.status = 403
                 return
             save_auction(self.request)
+        apply_patch(self.request)
 
         self.LOGGER.info(
             'Updated prolongation {}'.format(
