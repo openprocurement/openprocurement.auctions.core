@@ -173,26 +173,6 @@ class TestContractingV3ProlongationManager(BaseWebTest):
         self.assertEqual(prolongation.status, 'applied')
         self.assertEqual(previous_applied_prolongation.status, 'applied')
 
-    def test_add_document(self):
-        contract, prolongation = self.fixture_created()
-
-        prolongation.documents = []
-        document = ProlongationDocument()
-
-        managed_prolongation = ProlongationManager(prolongation)
-        managed_prolongation.add_document(document)
-        self.assertEqual(prolongation.documents[0], document)
-
-    def test_add_document_when_applied(self):
-        contract, prolongation = self.fixture_created()
-
-        prolongation.status = 'applied'
-
-        managed_prolongation = ProlongationManager(prolongation)
-        document = ProlongationDocument()
-        with self.assertRaises(ValidationError) as context:
-            managed_prolongation.add_document(document)
-
     def test_apply_without_documents(self):
         contract, prolongation = self.fixture_created()
 

@@ -36,14 +36,6 @@ class ProlongationManager(object):
             prolongation_period
         )
 
-    def add_document(self, document):
-        if self.prolongation.status == 'draft':
-            self.prolongation.documents.append(document)
-        else:
-            raise ValidationError(
-                'Document can be added only in `draft` status.'
-            )
-
     def _check_documents_are_present(self):
         if len(self.prolongation.documents) == 0:
             raise ValidationError(
