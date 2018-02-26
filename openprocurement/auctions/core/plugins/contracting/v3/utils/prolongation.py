@@ -18,8 +18,9 @@ class ProlongationManager(object):
     def apply(self):
         """Choose order of prolongation and apply right"""
         self._check_documents_are_present()
+        contract = self.prolongation.__parent__
         applied_prolongations_count = len([
-            p for p in self.prolongation.__parent__.prolongations
+            p for p in contract.prolongations
             if p.status == 'applied'
         ])
 
@@ -27,7 +28,6 @@ class ProlongationManager(object):
             raise Exception("Contract can be prolongated for 2 times only.")
 
         self.prolongation.status = 'applied'
-        contract = self.prolongation.__parent__
         prolongation_period = (
             PROLONGATION_LONG_PERIOD if applied_prolongations_count else PROLONGATION_SHORT_PERIOD
         )
