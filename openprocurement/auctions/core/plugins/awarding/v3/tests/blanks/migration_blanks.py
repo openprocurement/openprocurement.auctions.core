@@ -102,7 +102,8 @@ def migrate_contract_pending(self):
         'date': now.isoformat(),
         'items': auction['items'],
         'contractID': '{}-11'.format(auction['auctionID']),
-        'status': 'pending'
+        'status': 'pending',
+        'signingPeriod': active_award['signingPeriod'],
     }]
 
     auction.update(auction)

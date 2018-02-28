@@ -40,7 +40,8 @@ def award_fixture(auction, status, bid_index):
             "startDate": now.isoformat()
         },
         "signingPeriod": {
-            "startDate": now.isoformat()
+            "startDate": now.isoformat(),
+            "endDate": now.isoformat(),
         },
         "verificationPeriod": {
             "startDate": now.isoformat()
