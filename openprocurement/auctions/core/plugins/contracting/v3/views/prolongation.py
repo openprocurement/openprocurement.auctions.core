@@ -98,17 +98,15 @@ class AuctionAwardContractProlongationResource(APIResource):
                 self.request.errors.add('body', 'data', e.message)
                 self.request.errors.status = 403
                 return
-            save_auction(self.request)
-        apply_patch(self.request)
-
-        self.LOGGER.info(
-            'Updated prolongation {}'.format(
-                self.request.context.id
-            ),
-            extra=context_unpack(
-                self.request,
-                {'MESSAGE_ID': 'contract_prolongation_patch'}
+        if apply_patch(self.request):
+            self.LOGGER.info(
+                'Updated prolongation {}'.format(
+                    self.request.context.id
+                ),
+                extra=context_unpack(
+                    self.request,
+                    {'MESSAGE_ID': 'contract_prolongation_patch'}
+                    )
                 )
-            )
-        return {'data': self.request.context.serialize()}
+            return {'data': self.request.context.serialize()}
 
