@@ -2,6 +2,7 @@
 from datetime import timedelta
 
 from openprocurement.api.models import get_now
+from openprocurement.api.utils import check_status
 
 
 # AuctionSwitchAuctionResourceTest
@@ -181,3 +182,53 @@ def switch_suspended_auction_to_auction(self):
     self.assertEqual(response.status, '200 OK')
     self.assertEqual(response.content_type, 'application/json')
     self.assertEqual(response.json['data']["status"], "active.auction")
+
+def contract_signing_period_switch_to_qualification(self):
+    auction = self.db.get(self.auction_id)
+    contract = auction['contracts'][0]
+    start_date = get_now() - timedelta(days=7)
+    start_date = start_date.isoformat()
+    end_date = get_now() - timedelta(days=5)
+    end_date = end_date.isoformat()
+
+    # set signingPeriod to past
+    contract['signingPeriod']['startDate'] = start_date
+    contract['signingPeriod']['endDate'] = end_date
+
+    self.assertEqual(auction['status'], 'active.awarded')
+
+    self.db.save(auction)
+
+    self.app.authorization = ('Basic', ('chronograph', ''))
+    response = self.app.patch_json(
+        '/auctions/{}'.format(self.auction_id),
+        {'data': {'id': self.auction_id}}
+    )
+    status = response.json['data']['status']
+    self.assertEqual(status, 'active.qualification')
+
+def contract_signing_period_switch_to_complete(self):
+    auction = self.db.get(self.auction_id)
+    contract = auction['contracts'][0]
+    start_date = get_now() - timedelta(days=3)
+    start_date = start_date.isoformat()
+    end_date = get_now() + timedelta(days=3)
+    end_date = end_date.isoformat()
+
+    # set signingPeriod to present
+    contract['signingPeriod']['startDate'] = start_date
+    contract['signingPeriod']['endDate'] = end_date
+
+    contract['status'] = 'active'
+
+    self.assertEqual(auction['status'], 'active.awarded')
+
+    self.db.save(auction)
+
+    self.app.authorization = ('Basic', ('chronograph', ''))
+    response = self.app.patch_json(
+        '/auctions/{}'.format(self.auction_id),
+        {'data': {'id': self.auction_id}}
+    )
+    status = response.json['data']['status']
+    self.assertEqual(status, 'complete')

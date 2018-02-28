@@ -7,6 +7,7 @@ from openprocurement.api.utils import (
     get_awarding_type_by_procurement_method_type
 )
 
+from openprocurement.auctions.core.utils import get_related_contract_of_award
 from openprocurement.auctions.core.plugins.awarding.v2.constants import (
     NUMBER_OF_BIDS_TO_BE_QUALIFIED
 )
@@ -27,9 +28,7 @@ def create_awards(request):
     )
     valid_bids = [bid for bid in auction.bids if bid['value'] is not None]
     bids = chef(valid_bids, auction.features or [], [], True)
-    bids_to_qualify = NUMBER_OF_BIDS_TO_BE_QUALIFIED \
-        if (len(bids) > NUMBER_OF_BIDS_TO_BE_QUALIFIED) \
-        else len(bids)
+    bids_to_qualify = NUMBER_OF_BIDS_TO_BE_QUALIFIED if (len(bids) > NUMBER_OF_BIDS_TO_BE_QUALIFIED) else len(bids)
 
     for bid, status in izip_longest(bids[:bids_to_qualify],
                                     ['pending'],
@@ -106,7 +105,7 @@ def next_check_awarding(auction):
             if a.complaintPeriod.endDate
         ]
         for contract in auction.contracts:
-            if contract.status == 'active':
+            if contract.status == 'pending':
                 checks.append(contract.signingPeriod.endDate.astimezone(TZ))
 
         last_award_status = auction.awards[-1].status if auction.awards else ''
@@ -134,7 +133,12 @@ def next_check_awarding(auction):
                 if a.complaintPeriod.endDate
             ]
             last_award_status = lot_awards[-1].status if lot_awards else ''
-            if not pending_complaints and not pending_awards_complaints and standStillEnds and last_award_status == 'unsuccessful':
+            if (
+                not pending_complaints
+                and not pending_awards_complaints
+                and standStillEnds
+                and last_award_status == 'unsuccessful'
+            ):
                 checks.append(max(standStillEnds))
     return min(checks) if checks else None
 
@@ -145,14 +149,29 @@ def invalidate_bids_under_threshold(auction):
         if bid['value']['amount'] < value_threshold:
             bid['status'] = 'invalid'
 
+def check_contract_overdue(contract, now):
+    return (
+        contract.status == 'pending' and
+        contract['signingPeriod']['endDate'] < now
+    )
+
+def check_protocol_overdue(award, now):
+    return (
+        award.status == 'pending' and
+        award['verificationPeriod']['endDate'] < now
+    )
 
 def check_award_status(request, award, now):
     """Checking protocol and contract loading by the owner in time."""
     auction = request.validated['auction']
-    protocol_overdue = (award.status == 'pending' and
-                        award['verificationPeriod']['endDate'] < now)
-    contract_overdue = (award.status == 'active' and
-                        award['signingPeriod']['endDate'] < now)
+
+    protocol_overdue = check_protocol_overdue(award, now)
+
+    # seek for contract overdue
+    related_contract = get_related_contract_of_award(award['id'], auction)
+
+    contract_overdue = check_contract_overdue(related_contract, now) if related_contract else None
+
     if protocol_overdue or contract_overdue:
         if award.status == 'active':
             auction.awardPeriod.endDate = None

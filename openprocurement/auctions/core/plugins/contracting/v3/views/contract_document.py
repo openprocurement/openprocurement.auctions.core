@@ -17,6 +17,9 @@ from openprocurement.auctions.core.utils import (
     apply_patch,
     opresource,
 )
+from openprocurement.auctions.core.plugins.contracting.v3.validators import (
+    validate_contract_document
+)
 
 
 @opresource(
@@ -27,25 +30,6 @@ from openprocurement.auctions.core.utils import (
     description="Financial auction contract documents"
 )
 class BaseAuctionAwardContractDocumentResource(APIResource):
-
-    def validate_contract_document(self, operation):
-        if self.request.validated['auction_status'] not in ['active.qualification', 'active.awarded']:
-            self.request.errors.add('body', 'data', 'Can\'t {} document in current ({}) auction status'.format(operation,
-                                                                                                              self.request.validated[
-                                                                                                                  'auction_status']))
-            self.request.errors.status = 403
-            return
-        if any([i.status != 'active' for i in self.request.validated['auction'].lots if
-                i.id in [a.lotID for a in self.request.validated['auction'].awards if
-                         a.id == self.request.validated['contract'].awardID]]):
-            self.request.errors.add('body', 'data', 'Can {} document only in active lot status'.format(operation))
-            self.request.errors.status = 403
-            return
-        if self.request.validated['contract'].status not in ['pending', 'active']:
-            self.request.errors.add('body', 'data', 'Can\'t {} document in current contract status'.format(operation))
-            self.request.errors.status = 403
-            return
-        return True
 
     @json_view(permission='view_auction')
     def collection_get(self):
@@ -63,7 +47,7 @@ class BaseAuctionAwardContractDocumentResource(APIResource):
     def collection_post(self):
         """Auction Contract Document Upload
         """
-        if not self.validate_contract_document('add'):
+        if not validate_contract_document(self.request, 'add'):
             return
         document = upload_file(self.request)
         self.context.documents.append(document)
@@ -92,7 +76,7 @@ class BaseAuctionAwardContractDocumentResource(APIResource):
     @json_view(validators=(validate_file_update,), permission='edit_auction')
     def put(self):
         """Auction Contract Document Update"""
-        if not self.validate_contract_document('update'):
+        if not validate_contract_document(self.request, 'update'):
             return
         document = upload_file(self.request)
         self.request.validated['contract'].documents.append(document)
@@ -104,7 +88,7 @@ class BaseAuctionAwardContractDocumentResource(APIResource):
     @json_view(content_type="application/json", validators=(validate_patch_document_data,), permission='edit_auction')
     def patch(self):
         """Auction Contract Document Update"""
-        if not self.validate_contract_document('update'):
+        if not validate_contract_document(self.request, 'update'):
             return
         if apply_patch(self.request, src=self.request.context.serialize()):
             update_file_content_type(self.request)

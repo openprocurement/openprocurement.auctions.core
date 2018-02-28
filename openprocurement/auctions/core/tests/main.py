@@ -2,13 +2,15 @@
 import unittest
 
 from openprocurement.auctions.core.tests import auctions
-from openprocurement.auctions.core.plugins.contracting.v3.tests import validators
+from openprocurement.auctions.core.plugins.contracting.v3.tests.main import (
+    contracting_v3_test_suite
+)
 
 def suite():
-    tests = unittest.TestSuite()
-    tests.addTest(auctions.suite())
-    tests.addTest(validators.suite())
-    return tests
+    suite = unittest.TestSuite()
+    suite.addTest(auctions.suite())
+    suite.addTest(contracting_v3_test_suite())
+    return suite
 
 
 if __name__ == '__main__':

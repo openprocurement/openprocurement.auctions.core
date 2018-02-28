@@ -78,19 +78,12 @@ def create_auction_contract_invalid(self):
 
 
 def create_auction_contract(self):
-    response = self.app.post_json('/auctions/{}/contracts'.format(
-        self.auction_id), {
-        'data': {'title': 'contract title', 'description': 'contract description', 'awardID': self.award_id,
-                 'value': self.award_value, 'suppliers': self.award_suppliers}})
-    self.assertEqual(response.status, '201 Created')
-    self.assertEqual(response.content_type, 'application/json')
-    contract = response.json['data']
+    auction = self.db.get(self.auction_id)
+    contract = auction['contracts'][0]
     self.assertIn('id', contract)
     self.assertIn('value', contract)
     self.assertIn('suppliers', contract)
-    self.assertIn(contract['id'], response.headers['Location'])
 
-    auction = self.db.get(self.auction_id)
     auction['contracts'][-1]["status"] = "terminated"
     self.db.save(auction)
 
@@ -114,32 +107,36 @@ def create_auction_contract(self):
 
 
 def create_auction_contract_in_complete_status(self):
-    response = self.app.post_json('/auctions/{}/contracts'.format(
-        self.auction_id),
-        {'data': {'title': 'contract title', 'description': 'contract description', 'awardID': self.award_id}})
-    self.assertEqual(response.status, '201 Created')
-    self.assertEqual(response.content_type, 'application/json')
-    contract = response.json['data']
-    self.assertIn('id', contract)
-    self.assertIn(contract['id'], response.headers['Location'])
-
     auction = self.db.get(self.auction_id)
     auction['contracts'][-1]["status"] = "terminated"
     self.db.save(auction)
 
     self.set_status('complete')
 
-    response = self.app.post_json('/auctions/{}/contracts'.format(
-        self.auction_id),
-        {'data': {'title': 'contract title', 'description': 'contract description', 'awardID': self.award_id}},
-        status=403)
+    response = self.app.post_json(
+        '/auctions/{}/contracts'.format(
+        self.auction_id
+        ),
+        {'data': {
+            'title': 'contract title',
+            'description': 'contract description',
+            'awardID': self.award_id
+        }},
+        status=403
+    )
     self.assertEqual(response.status, '403 Forbidden')
     self.assertEqual(response.content_type, 'application/json')
     self.assertEqual(response.json['errors'][0]["description"],
                      "Can't add contract in current (complete) auction status")
 
-    response = self.app.patch_json('/auctions/{}/contracts/{}'.format(self.auction_id, contract['id']),
-                                   {"data": {"status": "active"}}, status=403)
+    response = self.app.patch_json(
+        '/auctions/{}/contracts/{}'.format(
+            self.auction_id, 
+            self.award_contract_id
+        ),
+       {"data": {"status": "active"}},
+       status=403
+    )
     self.assertEqual(response.status, '403 Forbidden')
     self.assertEqual(response.content_type, 'application/json')
     self.assertEqual(response.json['errors'][0]["description"],
@@ -150,27 +147,27 @@ def patch_auction_contract(self):
     response = self.app.get('/auctions/{}/contracts'.format(self.auction_id))
     contract = response.json['data'][0]
 
-    # response = self.app.patch_json('/auctions/{}/contracts/{}'.format(self.auction_id, contract['id']), {"data": {"status": "active"}}, status=403)
-    # self.assertEqual(response.status, '403 Forbidden')
-    # self.assertEqual(response.content_type, 'application/json')
-    # self.assertIn("Can't sign contract before stand-still period end (", response.json['errors'][0]["description"])
+    response = self.app.patch_json('/auctions/{}/contracts/{}'.format(self.auction_id, contract['id']), {"data": {"status": "active"}}, status=403)
+    self.assertEqual(response.status, '403 Forbidden')
+    self.assertEqual(response.content_type, 'application/json')
+    self.assertIn("Can't sign contract before stand-still period end (", response.json['errors'][0]["description"])
 
-    # self.set_status('complete', {'status': 'active.awarded'})
+    self.set_status('complete', {'status': 'active.awarded'})
 
-    # response = self.app.post_json('/auctions/{}/awards/{}/complaints'.format(self.auction_id, self.award_id), {'data': {
-    #     'title': 'complaint title',
-    #     'description': 'complaint description',
-    #     'author': self.initial_organization,
-    #     'status': 'claim'
-    # }})
-    # self.assertEqual(response.status, '201 Created')
-    # complaint = response.json['data']
-    # owner_token = response.json['access']['token']
+    response = self.app.post_json('/auctions/{}/awards/{}/complaints'.format(self.auction_id, self.award_id), {'data': {
+        'title': 'complaint title',
+        'description': 'complaint description',
+        'author': self.initial_organization,
+        'status': 'claim'
+    }})
+    self.assertEqual(response.status, '201 Created')
+    complaint = response.json['data']
+    owner_token = response.json['access']['token']
 
-    # auction = self.db.get(self.auction_id)
-    # for i in auction.get('awards', []):
-    #     i['complaintPeriod']['endDate'] = i['complaintPeriod']['startDate']
-    # self.db.save(auction)
+    auction = self.db.get(self.auction_id)
+    for i in auction.get('awards', []):
+        i['complaintPeriod']['endDate'] = i['complaintPeriod']['startDate']
+    self.db.save(auction)
 
     response = self.app.patch_json('/auctions/{}/contracts/{}'.format(self.auction_id, contract['id']),
                                    {"data": {"status": "active"}}, status=403)
@@ -209,10 +206,6 @@ def patch_auction_contract(self):
     self.assertEqual(response.status, '200 OK')
     self.assertEqual(response.json['data']['value']['amount'], 500)
 
-    # response = self.app.patch_json('/auctions/{}/contracts/{}'.format(self.auction_id, contract['id']), {"data": {"dateSigned": i['complaintPeriod']['endDate']}}, status=422)
-    # self.assertEqual(response.status, '422 Unprocessable Entity')
-    # self.assertEqual(response.json['errors'], [{u'description': [u'Contract signature date should be after award complaint period end date ({})'.format(i['complaintPeriod']['endDate'])], u'location': u'body', u'name': u'dateSigned'}])
-
     one_hour_in_furure = (get_now() + timedelta(hours=1)).isoformat()
     response = self.app.patch_json('/auctions/{}/contracts/{}'.format(self.auction_id, contract['id']),
                                    {"data": {"dateSigned": one_hour_in_furure}}, status=422)
@@ -225,30 +218,6 @@ def patch_auction_contract(self):
     response = self.app.patch_json('/auctions/{}/contracts/{}'.format(self.auction_id, contract['id']),
                                    {"data": {"dateSigned": custom_signature_date}})
     self.assertEqual(response.status, '200 OK')
-
-    # response = self.app.patch_json('/auctions/{}/contracts/{}'.format(self.auction_id, contract['id']), {"data": {"status": "active"}}, status=403)
-    # self.assertEqual(response.status, '403 Forbidden')
-    # self.assertEqual(response.content_type, 'application/json')
-    # self.assertEqual(response.json['errors'][0]["description"], "Can't sign contract before reviewing all complaints")
-
-    # response = self.app.patch_json('/auctions/{}/awards/{}/complaints/{}?acc_token={}'.format(self.auction_id, self.award_id, complaint['id'], self.auction_token), {"data": {
-    #     "status": "answered",
-    #     "resolutionType": "resolved",
-    #     "resolution": "resolution text " * 2
-    # }})
-    # self.assertEqual(response.status, '200 OK')
-    # self.assertEqual(response.content_type, 'application/json')
-    # self.assertEqual(response.json['data']["status"], "answered")
-    # self.assertEqual(response.json['data']["resolutionType"], "resolved")
-    # self.assertEqual(response.json['data']["resolution"], "resolution text " * 2)
-
-    # response = self.app.patch_json('/auctions/{}/awards/{}/complaints/{}?acc_token={}'.format(self.auction_id, self.award_id, complaint['id'], owner_token), {"data": {
-    #     "satisfied": True,
-    #     "status": "resolved"
-    # }})
-    # self.assertEqual(response.status, '200 OK')
-    # self.assertEqual(response.content_type, 'application/json')
-    # self.assertEqual(response.json['data']["status"], "resolved")
 
     response = self.app.patch_json('/auctions/{}/contracts/{}'.format(self.auction_id, contract['id']),
                                    {"data": {"status": "active"}})
@@ -343,14 +312,12 @@ def patch_signing_period(self):
         }},
         status=200
     )
-    after_patch_contract_response = self.app.get('/auctions/{0}/contracts/{1}' \
-        .format(self.auction_id, contract['id']))
+    after_patch_contract_response = self.app.get(
+        '/auctions/{0}/contracts/{1}'.format(self.auction_id, contract['id'])
+    )
 
     # responses before & after patch are equal
-    self.assertEqual(
-        pre_patch_contract_response.json,
-        after_patch_contract_response.json
-    )
+    self.assertEqual(pre_patch_contract_response.json, after_patch_contract_response.json)
 
 
 def patch_date_paid(self):
@@ -376,8 +343,9 @@ def patch_date_paid(self):
         status=200
     )
 
-    after_patch_contract_response = self.app.get('/auctions/{0}/contracts/{1}' \
-        .format(self.auction_id, contract['id']))
+    after_patch_contract_response = self.app.get(
+        '/auctions/{0}/contracts/{1}'.format(self.auction_id, contract['id'])
+    )
     # check if datePaid has appeared
     self.assertEqual(
         after_patch_contract_response.json['data'].get('datePaid'),
@@ -386,17 +354,14 @@ def patch_date_paid(self):
 
 
 def get_auction_contract(self):
-    response = self.app.post_json('/auctions/{}/contracts'.format(
-        self.auction_id),
-        {'data': {'title': 'contract title', 'description': 'contract description', 'awardID': self.award_id}})
-    self.assertEqual(response.status, '201 Created')
-    self.assertEqual(response.content_type, 'application/json')
-    contract = response.json['data']
-
-    response = self.app.get('/auctions/{}/contracts/{}'.format(self.auction_id, contract['id']))
+    response = self.app.get(
+        '/auctions/{}/contracts/{}'.format(
+            self.auction_id,
+            self.award_contract_id
+        )
+    )
     self.assertEqual(response.status, '200 OK')
     self.assertEqual(response.content_type, 'application/json')
-    self.assertEqual(response.json['data'], contract)
 
     response = self.app.get('/auctions/{}/contracts/some_id'.format(self.auction_id), status=404)
     self.assertEqual(response.status, '404 Not Found')
@@ -418,17 +383,10 @@ def get_auction_contract(self):
 
 
 def get_auction_contracts(self):
-    response = self.app.post_json('/auctions/{}/contracts'.format(
-        self.auction_id),
-        {'data': {'title': 'contract title', 'description': 'contract description', 'awardID': self.award_id}})
-    self.assertEqual(response.status, '201 Created')
-    self.assertEqual(response.content_type, 'application/json')
-    contract = response.json['data']
-
     response = self.app.get('/auctions/{}/contracts'.format(self.auction_id))
     self.assertEqual(response.status, '200 OK')
     self.assertEqual(response.content_type, 'application/json')
-    self.assertEqual(response.json['data'][-1], contract)
+    self.assertIn('id', response.json['data'][0])
 
     response = self.app.get('/auctions/some_id/contracts', status=404)
     self.assertEqual(response.status, '404 Not Found')
@@ -443,12 +401,6 @@ def get_auction_contracts(self):
 
 
 def patch_auction_contract_2_lots(self):
-    response = self.app.post_json('/auctions/{}/contracts'.format(
-        self.auction_id), {'data': {'title': 'contract title', 'description': 'contract description', 'awardID': self.award_id}})
-    self.assertEqual(response.status, '201 Created')
-    self.assertEqual(response.content_type, 'application/json')
-    contract = response.json['data']
-
     response = self.app.patch_json('/auctions/{}/contracts/{}'.format(self.auction_id, contract['id']), {"data": {"status": "active"}}, status=403)
     self.assertEqual(response.status, '403 Forbidden')
     self.assertEqual(response.content_type, 'application/json')
@@ -463,10 +415,20 @@ def patch_auction_contract_2_lots(self):
         "relatedLot": self.initial_lots[0]['id']
     }})
 
-    response = self.app.patch_json('/auctions/{}/contracts/{}'.format(self.auction_id, contract['id']), {"data": {"status": "active"}}, status=403)
+    response = self.app.patch_json(
+        '/auctions/{}/contracts/{}'.format(
+            self.auction_id,
+            self.award_contract_id
+        ),
+        {"data": {"status": "active"}},
+        status=403
+    )
     self.assertEqual(response.status, '403 Forbidden')
     self.assertEqual(response.content_type, 'application/json')
-    self.assertEqual(response.json['errors'][0]["description"], "Can update contract only in active lot status")
+    self.assertEqual(
+        response.json['errors'][0]["description"],
+        "Can update contract only in active lot status"
+    )
 
 # AuctionContractDocumentResourceTest
 
