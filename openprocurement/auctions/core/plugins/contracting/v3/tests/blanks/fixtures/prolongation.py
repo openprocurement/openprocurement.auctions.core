@@ -1,5 +1,4 @@
-from openprocurement.auctions.core.\
-        plugins.contracting.v3.tests.constants import (
+from openprocurement.auctions.core.plugins.contracting.v3.tests.constants import (
     PATHS
 )
 

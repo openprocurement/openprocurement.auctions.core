@@ -2,8 +2,7 @@
 from openprocurement.api.models import get_now, Period
 
 from openprocurement.auctions.core.utils import get_related_contract_of_award
-from openprocurement.auctions.core.plugins.\
-        awarding.v3.constants import (
+from openprocurement.auctions.core.plugins.awarding.v3.constants import (
     VERIFY_AUCTION_PROTOCOL_TIME
 )
 # CreateAuctionAwardTest
@@ -244,12 +243,8 @@ def award_activation_creates_contract(self):
             self.auction_id
         )
     )
-    pre_award_activation_auction = pre_award_activation_auction_response\
-        .json['data']
-    self.assertEqual(
-        pre_award_activation_auction.get('contracts'),
-        None
-    )
+    pre_award_activation_auction = pre_award_activation_auction_response.json['data']
+    self.assertEqual(pre_award_activation_auction.get('contracts'), None)
 
     response = self.app.post(
         '/auctions/{}/awards/{}/documents?acc_token={}'.format(
@@ -295,8 +290,7 @@ def award_activation_creates_contract(self):
             self.auction_id
         )
     )
-    post_award_activation_auction = post_award_activation_auction_response\
-        .json['data']
+    post_award_activation_auction = post_award_activation_auction_response.json['data']
     contract = post_award_activation_auction.get('contracts')[0]
     self.assertEqual(
         contract['signingPeriod'],
