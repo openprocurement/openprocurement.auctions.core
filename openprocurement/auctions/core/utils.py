@@ -1,37 +1,49 @@
 # -*- coding: utf-8 -*-
-from barbecue import chef
-from base64 import b64encode
+from pkg_resources import get_distribution
+from schematics.exceptions import ModelValidationError
+from time import sleep
+from re import compile
+from pyramid.compat import decode_path_info
+from pyramid.exceptions import URLDecodeError
 from cornice.resource import resource, view
 from cornice.util import json_error
 from couchdb.http import ResourceConflict
-from email.header import decode_header
 from functools import partial
 from json import dumps
 from jsonpointer import resolve_pointer
 from logging import getLogger
+
 from openprocurement.api.models import get_now, TZ, COMPLAINT_STAND_STILL_TIME
-from openprocurement.api.utils import (generate_id, calculate_business_date, apply_data_patch,
-                                       get_revision_changes, set_modetest_titles, update_logging_context,
-                                       context_unpack)
+from openprocurement.api.validation import error_handler
+from openprocurement.api.utils import (
+    generate_id,
+    calculate_business_date,
+    apply_data_patch,
+    get_revision_changes,
+    set_modetest_titles,
+    update_logging_context,
+    context_unpack
+)
 from openprocurement.auctions.core.traversal import factory
-from pkg_resources import get_distribution
-from rfc6266 import build_header
-from schematics.exceptions import ModelValidationError
-from time import sleep
-from urllib import quote
-from urlparse import urlparse, parse_qs
-from re import compile
-from pyramid.compat import decode_path_info
-from pyramid.exceptions import URLDecodeError
 
 
 PKG = get_distribution(__package__)
 LOGGER = getLogger(PKG.project_name)
-VERSION = '{}.{}'.format(int(PKG.parsed_version[0]), int(PKG.parsed_version[1]) if PKG.parsed_version[1].isdigit() else 0)
-ROUTE_PREFIX = '/api/{}'.format(VERSION)
-DOCUMENT_BLACKLISTED_FIELDS = ('title', 'format', '__parent__', 'id', 'url', 'dateModified', )
 ACCELERATOR_RE = compile(r'.accelerator=(?P<accelerator>\d+)')
 json_view = partial(view, renderer='json')
+VERSION = '{}.{}'.format(
+    int(PKG.parsed_version[0]),
+    int(PKG.parsed_version[1]) if PKG.parsed_version[1].isdigit() else 0
+)
+ROUTE_PREFIX = '/api/{}'.format(VERSION)
+DOCUMENT_BLACKLISTED_FIELDS = (
+    'title',
+    'format',
+    '__parent__',
+    'id',
+    'url',
+    'dateModified',
+)
 
 
 def generate_auction_id(ctime, db, server_id=''):
@@ -49,7 +61,13 @@ def generate_auction_id(ctime, db, server_id=''):
             sleep(1)
         else:
             break
-    return 'UA-EA-{:04}-{:02}-{:02}-{:06}{}'.format(ctime.year, ctime.month, ctime.day, index, server_id and '-' + server_id)
+    return 'UA-EA-{:04}-{:02}-{:02}-{:06}{}'.format(
+        ctime.year,
+        ctime.month,
+        ctime.day,
+        index,
+        server_id and '-' + server_id
+    )
 
 
 def auction_serialize(request, auction_data, fields):
@@ -148,7 +166,7 @@ def check_bids(request):
         if not set([i.status for i in auction.lots]).difference(set(['unsuccessful', 'cancelled'])):
             auction.status = 'unsuccessful'
         elif max([i.numberOfBids for i in auction.lots if i.status == 'active']) < 2:
-            add_next_award(request)
+            request.content_configurator.start_awarding()
 
     else:
         if auction.numberOfBids < 2 and auction.auctionPeriod and auction.auctionPeriod.startDate:
@@ -157,7 +175,7 @@ def check_bids(request):
             auction.status = 'unsuccessful'
         if auction.numberOfBids == 1:
             # auction.status = 'active.qualification'
-            add_next_award(request)
+            request.content_configurator.start_awarding()
 
 
 def check_complaint_status(request, complaint, now=None):
@@ -321,116 +339,6 @@ def check_auction_status(request):
             auction.status = 'complete'
 
 
-def add_next_award(request):
-    auction = request.validated['auction']
-    now = get_now()
-    if not auction.awardPeriod:
-        auction.awardPeriod = type(auction).awardPeriod({})
-    if not auction.awardPeriod.startDate:
-        auction.awardPeriod.startDate = now
-    if auction.lots:
-        statuses = set()
-        for lot in auction.lots:
-            if lot.status != 'active':
-                continue
-            lot_awards = [i for i in auction.awards if i.lotID == lot.id]
-            if lot_awards and lot_awards[-1].status in ['pending', 'active']:
-                statuses.add(lot_awards[-1].status if lot_awards else 'unsuccessful')
-                continue
-            lot_items = [i.id for i in auction.items if i.relatedLot == lot.id]
-            features = [
-                i
-                for i in (auction.features or [])
-                if i.featureOf == 'tenderer' or i.featureOf == 'lot' and i.relatedItem == lot.id or i.featureOf == 'item' and i.relatedItem in lot_items
-            ]
-            codes = [i.code for i in features]
-            bids = [
-                {
-                    'id': bid.id,
-                    'value': [i for i in bid.lotValues if lot.id == i.relatedLot][0].value,
-                    'tenderers': bid.tenderers,
-                    'parameters': [i for i in bid.parameters if i.code in codes],
-                    'date': [i for i in bid.lotValues if lot.id == i.relatedLot][0].date
-                }
-                for bid in auction.bids
-                if lot.id in [i.relatedLot for i in bid.lotValues]
-            ]
-            if not bids:
-                lot.status = 'unsuccessful'
-                statuses.add('unsuccessful')
-                continue
-            unsuccessful_awards = [i.bid_id for i in lot_awards if i.status == 'unsuccessful']
-            bids = chef(bids, features, unsuccessful_awards, True)
-            if bids:
-                bid = bids[0]
-                award = type(auction).awards.model_class({
-                    'bid_id': bid['id'],
-                    'lotID': lot.id,
-                    'status': 'pending',
-                    'value': bid['value'],
-                    'date': get_now(),
-                    'suppliers': bid['tenderers'],
-                    'complaintPeriod': {
-                        'startDate': now.isoformat()
-                    }
-                })
-                auction.awards.append(award)
-                request.response.headers['Location'] = request.route_url('{}:Auction Awards'.format(auction.procurementMethodType), auction_id=auction.id, award_id=award['id'])
-                statuses.add('pending')
-            else:
-                statuses.add('unsuccessful')
-        if statuses.difference(set(['unsuccessful', 'active'])):
-            auction.awardPeriod.endDate = None
-            auction.status = 'active.qualification'
-        else:
-            auction.awardPeriod.endDate = now
-            auction.status = 'active.awarded'
-    else:
-        if not auction.awards or auction.awards[-1].status not in ['pending', 'active']:
-            unsuccessful_awards = [i.bid_id for i in auction.awards if i.status == 'unsuccessful']
-            bids = chef(auction.bids, auction.features or [], unsuccessful_awards, True)
-            if bids:
-                bid = bids[0].serialize()
-                award = type(auction).awards.model_class({
-                    'bid_id': bid['id'],
-                    'status': 'pending',
-                    'date': get_now(),
-                    'value': bid['value'],
-                    'suppliers': bid['tenderers'],
-                    'complaintPeriod': {
-                        'startDate': get_now().isoformat()
-                    }
-                })
-                auction.awards.append(award)
-                request.response.headers['Location'] = request.route_url('{}:Auction Awards'.format(auction.procurementMethodType), auction_id=auction.id, award_id=award['id'])
-        if auction.awards[-1].status == 'pending':
-            auction.awardPeriod.endDate = None
-            auction.status = 'active.qualification'
-        else:
-            auction.awardPeriod.endDate = now
-            auction.status = 'active.awarded'
-
-
-def error_handler(errors, request_params=True):
-    params = {
-        'ERROR_STATUS': errors.status
-    }
-    if request_params:
-        params['ROLE'] = str(errors.request.authenticated_role)
-        if errors.request.params:
-            params['PARAMS'] = str(dict(errors.request.params))
-    if errors.request.matchdict:
-        for x, j in errors.request.matchdict.items():
-            params[x.upper()] = j
-    if 'auction' in errors.request.validated:
-        params['AUCTION_REV'] = errors.request.validated['auction'].rev
-        params['AUCTIONID'] = errors.request.validated['auction'].auctionID
-        params['AUCTION_STATUS'] = errors.request.validated['auction'].status
-    LOGGER.info('Error on processing request "{}"'.format(dumps(errors, indent=4)),
-                extra=context_unpack(errors.request, {'MESSAGE_ID': 'error_handler'}, params))
-    return json_error(errors)
-
-
 opresource = partial(resource, error_handler=error_handler, factory=factory)
 
 
@@ -516,3 +424,19 @@ def register_auction_procurementMethodType(config, model):
         The auction model class
     """
     config.registry.auction_procurementMethodTypes[model.procurementMethodType.default] = model
+
+
+def read_json(name):
+    import os.path
+    from json import loads
+    curr_dir = os.path.dirname(os.path.realpath(__file__))
+    file_path = os.path.join(curr_dir, name)
+    with open(file_path) as lang_file:
+        data = lang_file.read()
+    return loads(data)
+
+
+def get_related_contract_of_award(award_id, auction):
+    for contract in auction['contracts']:
+        if contract['awardID'] == award_id:
+            return contract

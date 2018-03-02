@@ -71,6 +71,7 @@ def factory(request):
         request.validated['auction_src'] = auction.serialize('plain')
         if auction._initial.get('next_check'):
             request.validated['auction_src']['next_check'] = auction._initial.get('next_check')
+    #  Award branch
     if request.matchdict.get('award_id'):
         award = get_item(auction, 'award', request)
         if request.matchdict.get('complaint_id'):
@@ -83,34 +84,48 @@ def factory(request):
             return get_item(award, 'document', request)
         else:
             return award
+    #  Contract branch
     elif request.matchdict.get('contract_id'):
         contract = get_item(auction, 'contract', request)
-        if request.matchdict.get('document_id'):
+        if request.matchdict.get('document_id') and not \
+                request.matchdict.get('prolongation_id'):
             return get_item(contract, 'document', request)
+        if request.matchdict.get('prolongation_id'):
+            prolongation = get_item(contract, 'prolongation', request)
+            if request.matchdict.get('document_id'):
+                return get_item(prolongation, 'document', request)
+            else:
+                return prolongation
         else:
             return contract
+    #  Bid branch
     elif request.matchdict.get('bid_id'):
         bid = get_item(auction, 'bid', request)
         if request.matchdict.get('document_id'):
             return get_item(bid, 'document', request)
         else:
             return bid
+    #  Complaint branch
     elif request.matchdict.get('complaint_id'):
         complaint = get_item(auction, 'complaint', request)
         if request.matchdict.get('document_id'):
             return get_item(complaint, 'document', request)
         else:
             return complaint
+    #  Cancellation branch
     elif request.matchdict.get('cancellation_id'):
         cancellation = get_item(auction, 'cancellation', request)
         if request.matchdict.get('document_id'):
             return get_item(cancellation, 'document', request)
         else:
             return cancellation
+    #  Document branch
     elif request.matchdict.get('document_id'):
         return get_item(auction, 'document', request)
+    #  question branch
     elif request.matchdict.get('question_id'):
         return get_item(auction, 'question', request)
+    #  Lot branch
     elif request.matchdict.get('lot_id'):
         return get_item(auction, 'lot', request)
     request.validated['id'] = request.matchdict['auction_id']

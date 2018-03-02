@@ -22,6 +22,7 @@ sdist/
 var/
 *.egg-info/
 .installed.cfg
+.mr.developer.cfg
 *.egg
 
 # PyInstaller
@@ -44,6 +45,7 @@ nosetests.xml
 coverage.xml
 *,cover
 .hypothesis/
+erl_crash.dump
 
 # Translations
 *.mo
@@ -90,7 +92,7 @@ ENV/
 
 # Buildout
 bin/
-
+src/
 cover/
 output.html
 

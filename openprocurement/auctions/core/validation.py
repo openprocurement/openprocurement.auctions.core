@@ -1,8 +1,14 @@
 # -*- coding: utf-8 -*-
+from schematics.exceptions import ValidationError
+
 from openprocurement.api.models import get_now, SANDBOX_MODE
-from openprocurement.api.utils import update_logging_context
-from openprocurement.api.validation import validate_json_data, validate_data
 from openprocurement.auctions.core.constants import ENGLISH_AUCTION_PROCUREMENT_METHOD_TYPES
+from openprocurement.api.utils import (
+    update_logging_context, error_handler
+)
+from openprocurement.api.views.complaint_document import STATUS4ROLE
+
+from openprocurement.api.validation import validate_json_data, validate_data
 
 
 def validate_auction_data(request):
@@ -14,12 +20,20 @@ def validate_auction_data(request):
 
     model = request.auction_from_data(data, create=False)
     if not request.check_accreditation(model.create_accreditation):
-        request.errors.add('procurementMethodType', 'accreditation', 'Broker Accreditation level does not permit auction creation')
+        request.errors.add(
+            'procurementMethodType',
+            'accreditation',
+            'Broker Accreditation level does not permit auction creation'
+        )
         request.errors.status = 403
         return
     data = validate_data(request, model, data=data)
     if data and data.get('mode', None) is None and request.check_accreditation('t'):
-        request.errors.add('procurementMethodType', 'mode', 'Broker Accreditation level does not permit auction creation')
+        request.errors.add(
+            'procurementMethodType',
+            'mode',
+            'Broker Accreditation level does not permit auction creation'
+        )
         request.errors.status = 403
         return
 
@@ -148,6 +162,161 @@ def validate_patch_award_data(request):
     return validate_data(request, model, True)
 
 
+def validate_award_data_post_common(request):
+    auction = request.validated['auction']
+    award = request.validated['award']
+    if auction.status != 'active.qualification':
+        request.errors.add('body', 'data',
+                           'Can\'t create award in current ({})'
+                           ' auction status'.format(auction.status))
+    elif any([i.status != 'active' for i in auction.lots if i.id == award.lotID]):
+        request.errors.add('body', 'data',
+                           'Can create award only in active lot status')
+    else:
+        return
+    request.errors.status = 403
+    raise error_handler(request.errors)
+
+
+def validate_patch_award_data_patch_common(request):
+    auction = request.validated['auction']
+    if auction.status not in ['active.qualification', 'active.awarded']:
+        request.errors.add('body', 'data',
+                           'Can\'t update award in current ({}) auction status'.format(auction.status))
+        request.errors.status = 403
+        raise error_handler(request.errors)
+
+
+def validate_complaint_data_post_common(request):
+    auction = request.validated['auction']
+    context = request.context
+    condition_start_date = context.complaintPeriod.startDate and context.complaintPeriod.startDate > get_now()
+    condition_end_date = context.complaintPeriod.endDate and context.complaintPeriod.endDate < get_now()
+    condition_date = condition_start_date or condition_end_date
+    if auction.status not in ['active.qualification', 'active.awarded']:
+        request.errors.add('body', 'data',
+                           'Can\'t add complaint in current ({}) auction status'.format(auction.status))
+    elif any([i.status != 'active' for i in auction.lots if
+            i.id == context.lotID]):
+        request.errors.add('body', 'data', 'Can add complaint only in active lot status')
+    elif context.complaintPeriod and condition_date:
+        request.errors.add('body', 'data','Can add complaint only in complaintPeriod')
+    else:
+        return
+    request.errors.status = 403
+    raise error_handler(request.errors)
+
+
+def validate_file_upload_post_common(request):
+    if request.validated['auction_status'] not in ['active.qualification',
+                                                   'active.awarded']:
+        request.errors.add('body', 'data',
+                           'Can\'t add document in current ({})'
+                           ' auction status'.format(request.validated['auction_status']))
+    elif any([i.status != 'active' for i in request.validated['auction'].lots
+              if i.id == request.validated['award'].lotID]):
+        request.errors.add('body', 'data',
+                           'Can add document only in active lot status')
+    elif request.context.status not in STATUS4ROLE.get(request.authenticated_role, []):
+        request.errors.add('body', 'data',
+                           'Can\'t add document in current ({})'
+                           ' complaint status'.format(request.context.status))
+    else:
+        return
+    request.errors.status = 403
+    raise error_handler(request.errors)
+
+
+def validate_file_update_put_common(request):
+    if request.authenticated_role != request.context.author:
+        request.errors.add('url', 'role', 'Can update document only author')
+    elif request.validated['auction_status'] not in ['active.qualification',
+                                                   'active.awarded']:
+        request.errors.add('body', 'data',
+                           'Can\'t update document in current ({})'
+                           ' auction status'.format(request.validated['auction_status']))
+    elif any([i.status != 'active' for i in request.validated['auction'].lots
+            if i.id == request.validated['award'].lotID]):
+        request.errors.add('body', 'data',
+                           'Can update document only in active lot status')
+    elif request.validated['complaint'].status not in STATUS4ROLE.get(request.authenticated_role, []):
+        request.errors.add('body', 'data',
+                           'Can\'t update document in current ({})'
+                           ' complaint status'.format(request.validated['complaint'].status))
+    else:
+        return
+    request.errors.status = 403
+    raise error_handler(request.errors)
+
+
+def validate_patch_document_data_patch_common(request):
+    if request.authenticated_role != request.context.author:
+        request.errors.add('url', 'role', 'Can update document only author')
+    elif request.validated['auction_status'] not in ['active.qualification',
+                                                   'active.awarded']:
+        request.errors.add('body', 'data',
+                           'Can\'t update document in current ({})'
+                           ' auction status'.format(request.validated['auction_status']))
+    elif any([i.status != 'active' for i in request.validated['auction'].lots
+            if i.id == request.validated['award'].lotID]):
+        request.errors.add('body', 'data',
+                           'Can update document only in active lot status')
+    elif request.validated['complaint'].status not in STATUS4ROLE.get(
+            request.authenticated_role, []):
+        request.errors.add('body', 'data',
+                           'Can\'t update document in current ({})'
+                           ' complaint status'.format(request.validated['complaint'].status))
+    else:
+        return
+    request.errors.status = 403
+    raise error_handler(request.errors)
+
+
+def validate_award_document(request, operation):
+    if request.validated['auction_status'] != 'active.qualification':
+        request.errors.add('body', 'data',
+                           'Can\'t {} document in current ({})'
+                           ' auction status'.format(operation, request.validated['auction_status']))
+    elif any([i.status != 'active' for i in request.validated['auction'].lots if
+              i.id == request.validated['award'].lotID]):
+        request.errors.add('body', 'data',
+                           'Can {} document only in active lot status'.format(operation))
+    else:
+        return True
+    request.errors.status = 403
+    raise error_handler(request.errors)
+
+
+def validate_file_upload_award_post_common(request):
+    validate_award_document(request, 'add')
+
+
+def validate_file_update_award_put_common(request):
+    validate_award_document(request, 'update')
+
+
+def validate_patch_document_data_award_patch_common(request):
+    validate_award_document(request, 'update')
+
+
+def validate_patch_complaint_data_patch_common(request):
+    auction = request.validated['auction']
+    if auction.status not in ['active.qualification', 'active.awarded']:
+        request.errors.add('body', 'data', 'Can\'t update complaint in current'
+                                           ' ({}) auction status'.format(auction.status))
+    elif any([i.status != 'active' for i in auction.lots if
+            i.id == request.validated['award'].lotID]):
+        request.errors.add('body', 'data','Can update complaint only'
+                                          ' in active lot status')
+    elif request.context.status not in ['draft', 'claim', 'answered', 'pending']:
+        request.errors.add('body', 'data', 'Can\'t update complaint in current'
+                                           ' ({}) status'.format(request.context.status))
+    else:
+        return
+    request.errors.status = 403
+    raise error_handler(request.errors)
+
+
 def validate_question_data(request):
     if not request.check_accreditation(request.auction.edit_accreditation):
         request.errors.add('procurementMethodType', 'accreditation', 'Broker Accreditation level does not permit question creation')
@@ -203,6 +372,55 @@ def validate_contract_data(request):
     return validate_data(request, model)
 
 
+def validate_prolongation_data(request):
+    if request.json_body['data'].get('status') == 'applied':
+        request.errors.add(
+            'body',
+            'data',
+            'Can\'t create prolongation in {0} status'.format(request.validated['auction_status'])
+        )
+        request.errors.status = 403
+        return
+    if (request.validated['auction_status'] not in ['active.qualification', 'active.awarded']):
+        request.errors.add(
+            'body',
+            'data',
+            'Can\'t create prolongation in current ({}) auction status'.format(request.validated['auction_status'])
+        )
+        request.errors.status = 403
+        return
+    update_logging_context(request, {'prolongation_id': '__new__'})
+    model = type(request.auction).contracts.model_class.prolongations.model_class
+    return validate_data(request, model)
+
+
+def validate_patch_prolongation_data(request):
+    if (request.validated['auction_status'] not in ['active.qualification', 'active.awarded']):
+        request.errors.add(
+            'body',
+            'data',
+            'Can\'t update prolongation in current ({}) auction status'.format(
+                request.validated['auction_status']
+            )
+        )
+        request.errors.status = 403
+        return
+    # Don't allow to patch active Prolongation
+    current_prolongation_status = request.validated['prolongation']['status']
+    if current_prolongation_status == 'applied':
+        request.errors.add(
+            'body',
+            'data',
+            'Can\'t patch prolongation in current {0} status'.format(current_prolongation_status)
+        )
+        request.errors.status = 403
+        return
+
+    auction = request.validated['auction']
+    model = type(request.auction).contracts.model_class.prolongations.model_class
+    return validate_data(request, model, True)
+
+
 def validate_patch_contract_data(request):
     model = type(request.auction).contracts.model_class
     return validate_data(request, model, True)
@@ -217,3 +435,8 @@ def validate_lot_data(request):
 def validate_patch_lot_data(request):
     model = type(request.auction).lots.model_class
     return validate_data(request, model, True)
+
+
+def validate_disallow_dgfPlatformLegalDetails(docs, *args):
+    if any([i.documentType == 'x_dgfPlatformLegalDetails' for i in docs]):
+        raise ValidationError(u"Disallow documents with x_dgfPlatformLegalDetails documentType")

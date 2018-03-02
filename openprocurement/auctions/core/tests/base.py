@@ -41,15 +41,16 @@ class BaseWebTest(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        for _ in range(10):
-            try:
-                cls.app = webtest.TestApp("config:tests.ini", relative_to=cls.relative_to)
-            except:
-                pass
+        if not getattr(cls, 'app', None):
+            for _ in range(10):
+                try:
+                    cls.app = webtest.TestApp("config:tests.ini", relative_to=cls.relative_to)
+                except:
+                    pass
+                else:
+                    break
             else:
-                break
-        else:
-            cls.app = webtest.TestApp("config:tests.ini", relative_to=cls.relative_to)
+                cls.app = webtest.TestApp("config:tests.ini", relative_to=cls.relative_to)
         cls.app.RequestClass = PrefixedRequestClass
         cls.couchdb_server = cls.app.app.registry.couchdb_server
         cls.db = cls.app.app.registry.db
