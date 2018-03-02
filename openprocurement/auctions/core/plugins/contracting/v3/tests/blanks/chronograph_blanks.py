@@ -6,10 +6,8 @@ from openprocurement.api.models import get_now
 def contract_signing_period_switch_to_qualification(self):
     auction = self.db.get(self.auction_id)
     contract = auction['contracts'][0]
-    start_date = get_now() - timedelta(days=7)
-    start_date = start_date.isoformat()
-    end_date = get_now() - timedelta(days=5)
-    end_date = end_date.isoformat()
+    start_date = (get_now() - timedelta(days=7)).isoformat()
+    end_date = (get_now() - timedelta(days=5)).isoformat()
 
     # set signingPeriod to past
     contract['signingPeriod']['startDate'] = start_date
