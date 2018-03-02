@@ -228,6 +228,7 @@ def create_auction_award(self):
     self.assertEqual(response.json['data']['status'], u'active.awarded')
 
 def award_activation_creates_contract(self):
+    # Create Award
     request_path = '/auctions/{0}/awards'.format(self.auction_id)
     now = get_now()
     response = self.app.post_json(
@@ -239,6 +240,7 @@ def award_activation_creates_contract(self):
     )
     award = response.json['data']
 
+    # Check that Auction hasn't any contracts for now
     pre_award_activation_auction_response = self.app.get(
         '/auctions/{0}'.format(
             self.auction_id
@@ -247,6 +249,7 @@ def award_activation_creates_contract(self):
     pre_award_activation_auction = pre_award_activation_auction_response.json['data']
     self.assertEqual(pre_award_activation_auction.get('contracts'), None)
 
+    # Load auction protocol into Award to make it's activation possible
     response = self.app.post(
         '/auctions/{}/awards/{}/documents?acc_token={}'.format(
             self.auction_id,
@@ -275,6 +278,7 @@ def award_activation_creates_contract(self):
         }}
     )
 
+    # Actuallly activate Award
     response = self.app.patch_json(
         '/auctions/{}/awards/{}'.format(
             self.auction_id,
@@ -286,6 +290,7 @@ def award_activation_creates_contract(self):
     )
     self.assertEqual(response.json['data']['status'], u'active')
 
+    # Check that contracts have been created
     post_award_activation_auction_response = self.app.get(
         '/auctions/{0}'.format(
             self.auction_id
