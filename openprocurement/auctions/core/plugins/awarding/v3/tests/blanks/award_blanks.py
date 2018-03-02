@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from openprocurement.api.models import get_now, Period
+from openprocurement.api.utils import calculate_business_date
 
 from openprocurement.auctions.core.utils import get_related_contract_of_award
 from openprocurement.auctions.core.plugins.awarding.v3.constants import (
@@ -976,7 +977,7 @@ def get_auction_awards(self):
     ])
 
 
-def created_awards_have_periods_set(self):
+def created_award_have_periods_set(self):
     awards = [self.first_award,]
     periods = ['signingPeriod', 'verificationPeriod']
     dates = ['startDate', 'endDate']
@@ -1008,8 +1009,10 @@ def created_awards_statuses(self):
 
 def verification_period_length(self):
     period = Period(self.first_award['verificationPeriod'])
-    period_length = period.endDate - period.startDate
+    actual_period_length = period.endDate - period.startDate
+    target_end_date = calculate_business_date(period['startDate'], VERIFY_AUCTION_PROTOCOL_TIME, working_days=True)
+    target_period_length = target_end_date - period.startDate
     self.assertLessEqual(
-        period_length.days,
-        VERIFY_AUCTION_PROTOCOL_TIME.days + 2,  # 2 stands for holidays
+        actual_period_length.days,
+        target_period_length.days
     )
