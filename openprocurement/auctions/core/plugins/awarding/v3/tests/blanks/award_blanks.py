@@ -228,7 +228,7 @@ def create_auction_award(self):
     self.assertEqual(response.json['data']['status'], u'active.awarded')
 
 def award_activation_creates_contract(self):
-    request_path = '/auctions/{}/awards'.format(self.auction_id)
+    request_path = '/auctions/{0}/awards'.format(self.auction_id)
     now = get_now()
     response = self.app.post_json(
         request_path,
