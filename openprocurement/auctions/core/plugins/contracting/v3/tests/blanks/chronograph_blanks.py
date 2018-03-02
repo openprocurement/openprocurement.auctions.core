@@ -1,6 +1,5 @@
 from datetime import timedelta
 
-
 from openprocurement.api.models import get_now
 
 
@@ -41,8 +40,9 @@ def contract_signing_period_switch_to_qualification(self):
     self.assertEqual(
         response.json['data']['awards'][1]['status'],
         'pending',
-        'awars status is wrong'
+        'Award status is wrong'
     )
+
 
 def contract_signing_period_switch_to_complete(self):
     auction = self.db.get(self.auction_id)
