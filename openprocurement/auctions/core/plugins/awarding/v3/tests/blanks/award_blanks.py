@@ -2,7 +2,6 @@
 from openprocurement.api.models import get_now, Period
 from openprocurement.api.utils import calculate_business_date
 
-from openprocurement.auctions.core.utils import get_related_contract_of_award
 from openprocurement.auctions.core.plugins.awarding.v3.constants import (
     VERIFY_AUCTION_PROTOCOL_TIME
 )
