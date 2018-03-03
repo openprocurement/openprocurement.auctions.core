@@ -230,7 +230,6 @@ def create_auction_award(self):
 def award_activation_creates_contract(self):
     # Create Award
     request_path = '/auctions/{0}/awards'.format(self.auction_id)
-    now = get_now()
     response = self.app.post_json(
         request_path,
         {'data': {
@@ -1013,10 +1012,15 @@ def created_awards_statuses(self):
     )
 
 def verification_period_length(self):
+    auction = self.db.get(self.auction_id)
     period = Period(self.first_award['verificationPeriod'])
     actual_period_length = period.endDate - period.startDate
-    target_end_date = calculate_business_date(period['startDate'], VERIFY_AUCTION_PROTOCOL_TIME, working_days=True)
+
+    target_end_date = calculate_business_date(period.startDate, VERIFY_AUCTION_PROTOCOL_TIME, auction, True)
+    round_to_18_hour_delta = period.endDate.replace(hour=18, minute=0, second=0) - period.endDate
+    target_end_date = calculate_business_date(period.endDate, round_to_18_hour_delta, auction, False)
     target_period_length = target_end_date - period.startDate
+
     self.assertLessEqual(
         actual_period_length.days,
         target_period_length.days
