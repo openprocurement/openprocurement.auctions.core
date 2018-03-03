@@ -4,7 +4,6 @@ from openprocurement.api.utils import calculate_business_date
 from openprocurement.auctions.core.plugins.contracting.v3.models import (
     Prolongation,
     Contract,
-    ProlongationDocument,
 )
 from openprocurement.auctions.core.plugins.contracting.v3.constants import (
     PROLONGATION_SHORT_PERIOD,
@@ -167,7 +166,7 @@ def apply_prolongation_long(test_case):
         }
     }
     # apply some short prolongation to be able apply long one
-    short_prolongation_patch_response = test_case.app.patch_json(
+    test_case.app.patch_json(
         PATHS['prolongation'].format(
             auction_id=test_case.auction_id,
             contract_id=test_case.contract_id,
@@ -244,7 +243,7 @@ def apply_prolongation_triple_times(test_case):
     )
 
     # apply long prolongation
-    valid_patch_prolongation_response = test_case.app.patch_json(
+    test_case.app.patch_json(
         PATHS['prolongation'].format(
             auction_id=test_case.auction_id,
             contract_id=test_case.contract_id,
@@ -336,7 +335,7 @@ def create_applied_prolongation(test_case):
         'datePublished': get_now().isoformat(),
         'status': 'applied',
     }
-    prolongation_post_response = test_case.app.post_json(
+    test_case.app.post_json(
         '/auctions/{0}/contracts/{1}/prolongations'.format(
             test_case.auction_id,
             test_case.contract_id
