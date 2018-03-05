@@ -410,7 +410,17 @@ def get_auction_contracts(self):
 
 
 def patch_auction_contract_2_lots(self):
-    response = self.app.patch_json('/auctions/{}/contracts/{}'.format(self.auction_id, contract['id']), {"data": {"status": "active"}}, status=403)
+    from openprocurement.auctions.core.plugins.contracting.v1.tests.fixtures import create_contract
+
+    contract = create_contract(self, self.auction_id, self.award_id)
+    response = self.app.patch_json(
+        '/auctions/{}/contracts/{}'.format(
+            self.auction_id,
+            contract.id
+        ),
+        {"data": {"status": "active"}},
+        status=403
+    )
     self.assertEqual(response.status, '403 Forbidden')
     self.assertEqual(response.content_type, 'application/json')
     self.assertIn("Can't sign contract before stand-still period end (", response.json['errors'][0]["description"])
@@ -427,7 +437,7 @@ def patch_auction_contract_2_lots(self):
     response = self.app.patch_json(
         '/auctions/{}/contracts/{}'.format(
             self.auction_id,
-            self.award_contract_id
+            contract.id,
         ),
         {"data": {"status": "active"}},
         status=403
