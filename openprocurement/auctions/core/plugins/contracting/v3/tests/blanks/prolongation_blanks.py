@@ -9,12 +9,10 @@ from openprocurement.auctions.core.plugins.contracting.v3.constants import (
     PROLONGATION_SHORT_PERIOD,
     PROLONGATION_LONG_PERIOD,
 )
-from openprocurement.auctions.core.plugins.\
-        contracting.v3.tests.constants import (
+from openprocurement.auctions.core.plugins.contracting.v3.tests.constants import (
     PATHS
 )
-from openprocurement.auctions.core.plugins.\
-        contracting.v3.tests.blanks.fixtures.prolongation import (
+from openprocurement.auctions.core.plugins.contracting.v3.tests.blanks.fixtures.prolongation import (
     add_document_to_prolongation
 )
 
