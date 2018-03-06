@@ -312,16 +312,14 @@ class AuctionAwardResource(APIResource):
         apply_patch(self.request, save=False, src=self.request.context.serialize())
         new_award_status = award.status
 
-        if current_award_status == 'pending.waiting' and \
-            new_award_status == 'cancelled':
+        if current_award_status == 'pending.waiting' and new_award_status == 'cancelled':
             if self.request.authenticated_role == 'bid_owner':
                 award.complaintPeriod.endDate = now
             else:
                 self.request.errors.add(
                     'body',
                     'data',
-                    'Only bid owner may cancel award in current ({}) status' \
-                        .format(current_award_status)
+                    'Only bid owner may cancel award in current ({}) status'.format(current_award_status)
                 )
                 self.request.errors.status = 403
                 return
@@ -355,8 +353,7 @@ class AuctionAwardResource(APIResource):
             }))
             auction.status = 'active.awarded'
             auction.awardPeriod.endDate = now
-        elif current_award_status != 'pending.waiting' and \
-            new_award_status == 'unsuccessful':
+        elif current_award_status != 'pending.waiting' and new_award_status == 'unsuccessful':
             if current_award_status == 'pending':
                 award.verificationPeriod.endDate = now
             elif current_award_status == 'active':

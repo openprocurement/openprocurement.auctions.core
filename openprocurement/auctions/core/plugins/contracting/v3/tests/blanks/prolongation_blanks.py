@@ -1,19 +1,20 @@
 from openprocurement.api.models import get_now
+from openprocurement.api.utils import calculate_business_date
 
 from openprocurement.auctions.core.plugins.contracting.v3.models import (
     Prolongation,
     Contract,
-    ProlongationDocument,
 )
 from openprocurement.auctions.core.plugins.contracting.v3.constants import (
     PROLONGATION_SHORT_PERIOD,
     PROLONGATION_LONG_PERIOD,
 )
-from openprocurement.api.utils import calculate_business_date
-from openprocurement.auctions.core.tests.blanks.constants import (
+from openprocurement.auctions.core.plugins.\
+        contracting.v3.tests.constants import (
     PATHS
 )
-from openprocurement.auctions.core.tests.blanks.fixtures.prolongation import (
+from openprocurement.auctions.core.plugins.\
+        contracting.v3.tests.blanks.fixtures.prolongation import (
     add_document_to_prolongation
 )
 
@@ -165,7 +166,7 @@ def apply_prolongation_long(test_case):
         }
     }
     # apply some short prolongation to be able apply long one
-    short_prolongation_patch_response = test_case.app.patch_json(
+    test_case.app.patch_json(
         PATHS['prolongation'].format(
             auction_id=test_case.auction_id,
             contract_id=test_case.contract_id,
@@ -242,7 +243,7 @@ def apply_prolongation_triple_times(test_case):
     )
 
     # apply long prolongation
-    valid_patch_prolongation_response = test_case.app.patch_json(
+    test_case.app.patch_json(
         PATHS['prolongation'].format(
             auction_id=test_case.auction_id,
             contract_id=test_case.contract_id,
@@ -334,7 +335,7 @@ def create_applied_prolongation(test_case):
         'datePublished': get_now().isoformat(),
         'status': 'applied',
     }
-    prolongation_post_response = test_case.app.post_json(
+    test_case.app.post_json(
         '/auctions/{0}/contracts/{1}/prolongations'.format(
             test_case.auction_id,
             test_case.contract_id
@@ -471,11 +472,11 @@ def patch_document(test_case):
     pre_patch_doc_title = pre_patch_prolongation_response.json['data']['documents'][0]['title']
     patch_document_response = test_case.app.patch_json(
         PATHS['prolongation_document'].format(
-        auction_id=test_case.auction_id,
-        contract_id=test_case.contract_id,
-        prolongation_id=test_case.prolongation_id,
-        document_id=document_id,
-        key=document_key
+            auction_id=test_case.auction_id,
+            contract_id=test_case.contract_id,
+            prolongation_id=test_case.prolongation_id,
+            document_id=document_id,
+            key=document_key
         ),
         {'data':
             {'title': 'updated.doc'}

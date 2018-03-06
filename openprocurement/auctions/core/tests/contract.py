@@ -3,9 +3,6 @@ from openprocurement.auctions.core.tests.base import snitch
 from openprocurement.auctions.core.tests.blanks.contract_blanks import (
     # AuctionContractResourceTest
     create_auction_contract_invalid,
-    create_auction_contract,
-    create_auction_contract_in_complete_status,
-    get_auction_contract,
     get_auction_contracts,
     # AuctionContractDocumentResourceTest
     not_found,
@@ -16,17 +13,12 @@ from openprocurement.auctions.core.tests.blanks.contract_blanks import (
     create_auction_2_lot_contract_document,
     put_auction_2_lot_contract_document,
     patch_auction_2_lot_contract_document,
-    patch_date_paid,
 )
 
 
 class AuctionContractResourceTestMixin(object):
     test_create_auction_contract_invalid = snitch(create_auction_contract_invalid)
-    test_create_auction_contract = snitch(create_auction_contract)
-    test_create_auction_contract_in_complete_status = snitch(create_auction_contract_in_complete_status)
-    test_get_auction_contract = snitch(get_auction_contract)
     test_get_auction_contracts = snitch(get_auction_contracts)
-    test_patch_date_paid = snitch (patch_date_paid)
 
 
 class AuctionContractDocumentResourceTestMixin(object):

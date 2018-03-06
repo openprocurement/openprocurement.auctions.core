@@ -1,5 +1,10 @@
 # -*- coding: utf-8 -*-
-from openprocurement.api.models import get_now
+from openprocurement.api.models import get_now, Period
+from openprocurement.api.utils import calculate_business_date
+
+from openprocurement.auctions.core.plugins.awarding.v3.constants import (
+    VERIFY_AUCTION_PROTOCOL_TIME
+)
 # CreateAuctionAwardTest
 
 
@@ -220,6 +225,85 @@ def create_auction_award(self):
     self.assertEqual(response.status, '200 OK')
     self.assertEqual(response.content_type, 'application/json')
     self.assertEqual(response.json['data']['status'], u'active.awarded')
+
+def award_activation_creates_contract(self):
+    # Create Award
+    request_path = '/auctions/{0}/awards'.format(self.auction_id)
+    response = self.app.post_json(
+        request_path,
+        {'data': {
+            'suppliers': [self.initial_organization],
+            'bid_id': self.initial_bids[0]['id']
+        }}
+    )
+    award = response.json['data']
+
+    # Check that Auction hasn't any contracts for now
+    pre_award_activation_auction_response = self.app.get(
+        '/auctions/{0}'.format(
+            self.auction_id
+        )
+    )
+    pre_award_activation_auction = pre_award_activation_auction_response.json['data']
+    self.assertEqual(pre_award_activation_auction.get('contracts'), None)
+
+    # Load auction protocol into Award to make it's activation possible
+    response = self.app.post(
+        '/auctions/{}/awards/{}/documents?acc_token={}'.format(
+            self.auction_id,
+            award['id'],
+            self.auction_token
+        ),
+        upload_files=[(
+            'file',
+            'auction_protocol.pdf',
+            'content'
+        )]
+    )
+    doc_id = response.json["data"]['id']
+    key = response.json["data"]["url"].split('?')[-1]
+
+    response = self.app.patch_json(
+        '/auctions/{}/awards/{}/documents/{}?acc_token={}'.format(
+            self.auction_id,
+            award['id'],
+            doc_id,
+            self.auction_token
+        ),
+        {"data": {
+            "description": "auction protocol",
+            "documentType": 'auctionProtocol'
+        }}
+    )
+
+    # Actuallly activate Award
+    response = self.app.patch_json(
+        '/auctions/{}/awards/{}'.format(
+            self.auction_id,
+            award['id']
+        ),
+        {"data": {
+            "status": "active"
+        }}
+    )
+    self.assertEqual(response.json['data']['status'], u'active')
+
+    # Check that contracts have been created
+    post_award_activation_auction_response = self.app.get(
+        '/auctions/{0}'.format(
+            self.auction_id
+        )
+    )
+    post_award_activation_auction = post_award_activation_auction_response.json['data']
+    contract = post_award_activation_auction.get('contracts')[0]
+    self.assertEqual(
+        contract['signingPeriod'],
+        award['signingPeriod']
+    )
+    self.assertEqual(
+        contract['status'],
+        'pending'
+    )
 
 # AuctionAwardProcessTest
 
@@ -894,3 +978,49 @@ def get_auction_awards(self):
         {u'description': u'Not Found', u'location':
             u'url', u'name': u'auction_id'}
     ])
+
+
+def created_award_have_periods_set(self):
+    awards = [self.first_award,]
+    periods = ['signingPeriod', 'verificationPeriod']
+    dates = ['startDate', 'endDate']
+
+    for count, award in enumerate(awards):
+        for period in periods:
+            for date in dates:
+                self.assertNotEqual(
+                    award.get(period, {}).get(date),
+                    None,
+                    'Date not set in {0} award '
+                    '{1}.{2}'.format(
+                        count,
+                        period,
+                        date
+                    )
+                )
+
+
+def created_awards_statuses(self):
+    self.assertEqual(
+        self.first_award['status'],
+        'pending'
+    )
+    self.assertEqual(
+        self.second_award['status'],
+        'pending.waiting'
+    )
+
+def verification_period_length(self):
+    auction = self.db.get(self.auction_id)
+    period = Period(self.first_award['verificationPeriod'])
+    actual_period_length = period.endDate - period.startDate
+
+    target_end_date = calculate_business_date(period.startDate, VERIFY_AUCTION_PROTOCOL_TIME, auction, True)
+    round_to_18_hour_delta = period.endDate.replace(hour=18, minute=0, second=0) - period.endDate
+    target_end_date = calculate_business_date(period.endDate, round_to_18_hour_delta, auction, False)
+    target_period_length = target_end_date - period.startDate
+
+    self.assertLessEqual(
+        actual_period_length.days,
+        target_period_length.days
+    )
