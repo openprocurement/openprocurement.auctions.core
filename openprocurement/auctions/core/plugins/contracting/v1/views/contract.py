@@ -5,6 +5,7 @@ from openprocurement.api.utils import (
     context_unpack,
     APIResource,
 )
+from openprocurement.auctions.core.endpoints import ENDPOINTS
 from openprocurement.auctions.core.utils import (
     apply_patch,
     save_auction,
@@ -18,8 +19,8 @@ from openprocurement.auctions.core.validation import (
 
 
 @opresource(name='awarding_1_0:Auction Contracts',
-            collection_path='/auctions/{auction_id}/contracts',
-            path='/auctions/{auction_id}/contracts/{contract_id}',
+            collection_path=ENDPOINTS['contracts'],
+            path=ENDPOINTS['contract'],
             awardingType='awarding_1_0',
             description="Auction contracts")
 class BaseAuctionAwardContractResource(APIResource):

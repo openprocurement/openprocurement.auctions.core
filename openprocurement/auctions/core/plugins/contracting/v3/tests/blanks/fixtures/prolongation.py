@@ -1,4 +1,4 @@
-from openprocurement.auctions.core.tests.blanks.constants import (
+from openprocurement.auctions.core.plugins.contracting.v3.tests.constants import (
     PATHS
 )
 
