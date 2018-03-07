@@ -34,6 +34,8 @@ setup(name='openprocurement.auctions.core',
       install_requires=[
           'setuptools',
           'openprocurement.api',
+          'openprocurement.schemas.dgf',
+          'schematics-flexible'
       ],
       entry_points=entry_points,
       )
