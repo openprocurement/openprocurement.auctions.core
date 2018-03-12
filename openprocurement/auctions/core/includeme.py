@@ -19,6 +19,7 @@ from openprocurement.api.interfaces import (
     IAwardingNextCheck
 )
 from openprocurement.auctions.core.models import IAuction
+from openprocurement.auctions.core.constants import VIEW_LOCATIONS
 from openprocurement.api.utils import get_content_configurator
 
 
@@ -35,7 +36,9 @@ def includeme(config):
         'add_auction_procurementMethodType',
          register_auction_procurementMethodType
     )
-    config.scan("openprocurement.auctions.core.views")
+
+    for view_location in VIEW_LOCATIONS:
+        config.scan(view_location)
     
     # register Adapters
     config.registry.registerAdapter(

@@ -23,3 +23,14 @@ PROLONGATION_LONG_PERIOD = timedelta(days=132)
 # Period, that limits time period between `datePublished` of
 # Prolongation and it's actual creation time `dateCreated`
 PROLONGATION_DATE_PUBLISHED_LIMIT_PERIOD = timedelta(days=20)
+
+VIEW_LOCATIONS = [
+    "openprocurement.auctions.core.views",
+    "openprocurement.auctions.core.plugins.awarding.v1.views",
+    "openprocurement.auctions.core.plugins.awarding.v2.views",
+    "openprocurement.auctions.core.plugins.awarding.v3.views",
+    "openprocurement.auctions.core.plugins.contracting.v1.views",
+    "openprocurement.auctions.core.plugins.contracting.v2.views",
+    "openprocurement.auctions.core.plugins.contracting.v3.views",
+
+]
