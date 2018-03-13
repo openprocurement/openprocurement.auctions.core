@@ -13,7 +13,8 @@ def add_document_to_prolongation(
         PATHS['prolongation_documents'].format(
             auction_id=auction_id,
             contract_id=contract_id,
-            prolongation_id=prolongation_id
+            prolongation_id=prolongation_id,
+            token=test_case.auction_token
         ),
         upload_files=[(
             'file',
