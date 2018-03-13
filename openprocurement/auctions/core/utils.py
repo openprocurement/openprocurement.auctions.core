@@ -25,6 +25,8 @@ from openprocurement.api.utils import (
     context_unpack
 )
 from openprocurement.auctions.core.traversal import factory
+from openprocurement.auctions.core.plugins.awarding import includeme as awarding
+from openprocurement.auctions.core.plugins.contracting import includeme as contracting
 
 
 PKG = get_distribution(__package__)
@@ -446,3 +448,8 @@ def get_related_award_of_contract(contract, auction):
     for award in auction['awards']:
         if contract['awardID'] == award['id']:
             return award
+
+
+def init_plugins(config):
+    awarding.includeme(config)
+    contracting.includeme(config)
