@@ -47,7 +47,7 @@ def create_awards(request):
             award.status = 'unsuccessful'
             award.complaintPeriod.endDate = now
         if award.status == 'pending':
-            award.signingPeriod = award.paymentPeriod = award.verificationPeriod = {'startDate': now}
+            award.signingPeriod = award.verificationPeriod = {'startDate': now}
             request.response.headers['Location'] = request.route_url(
                 '{}:Auction Awards'.format(awarding_type),
                 auction_id=auction.id, award_id=award['id']
@@ -65,7 +65,7 @@ def switch_to_next_award(request):
     if waiting_awards:
         award = waiting_awards[0]
         award.status = 'pending'
-        award.signingPeriod = award.paymentPeriod = award.verificationPeriod = {'startDate': now}
+        award.signingPeriod = award.verificationPeriod = {'startDate': now}
         award = award.serialize()
         request.response.headers['Location'] = request.route_url(
             '{}:Auction Awards'.format(awarding_type),
