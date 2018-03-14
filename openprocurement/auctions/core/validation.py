@@ -7,6 +7,32 @@ from openprocurement.api.utils import (
 )
 from openprocurement.api.validation import validate_json_data, validate_data
 from openprocurement.api.views.complaint_document import STATUS4ROLE
+from openprocurement.api.validation import (
+    validate_json_data,
+    validate_data,
+    validate_file_update,
+    validate_file_upload,
+    validate_patch_document_data,
+)
+
+
+def raise_wrapper(func):
+    def wrapper(*args, **kw):
+        res = func(*args, **kw)
+        request = args[0]
+        if request.errors:
+            raise error_handler(args[0].errors)
+        else:
+            return res
+
+    return wrapper
+
+
+validate_data = raise_wrapper(validate_data)
+validate_json_data = raise_wrapper(validate_json_data)
+validate_file_update = raise_wrapper(validate_file_update)
+validate_file_upload = raise_wrapper(validate_file_upload)
+validate_patch_document_data = raise_wrapper(validate_patch_document_data)
 
 
 def validate_auction_data(request):
