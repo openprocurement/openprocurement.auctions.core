@@ -21,7 +21,8 @@ def get_prolongations_for_contract(test_case):
     get_prolongations_response = test_case.app.get(
         PATHS['prolongations'].format(
             auction_id=test_case.auction_id,
-            contract_id=test_case.contract_id
+            contract_id=test_case.contract_id,
+            token=test_case.auction_token
         )
     )
     test_case.assertEqual(
@@ -39,7 +40,8 @@ def get_prolongation_by_id(test_case):
         PATHS['prolongation'].format(
             auction_id=test_case.auction_id,
             contract_id=test_case.contract_id,
-            prolongation_id=test_case.prolongation_id
+            prolongation_id=test_case.prolongation_id,
+            token=test_case.auction_token
         )
     )
     test_case.assertEqual(
@@ -68,7 +70,8 @@ def patch_prolongation_fields(test_case):
         PATHS['prolongation'].format(
             auction_id=test_case.auction_id,
             contract_id=test_case.contract_id,
-            prolongation_id=test_case.prolongation_id
+            prolongation_id=test_case.prolongation_id,
+            token=test_case.auction_token
         ),
         patch_data
     )
@@ -93,6 +96,7 @@ def get_related_contract(test_case):
         PATHS['contract'].format(
             auction_id=test_case.auction_id,
             contract_id=test_case.contract_id,
+            token=test_case.auction_token
         )
     )
     return Contract(contract_response.json['data'])
@@ -116,7 +120,8 @@ def apply_prolongation_short(test_case):
         PATHS['prolongation'].format(
             auction_id=test_case.auction_id,
             contract_id=test_case.contract_id,
-            prolongation_id=test_case.prolongation_id
+            prolongation_id=test_case.prolongation_id,
+            token=test_case.auction_token
         ),
         patch_data
     )
@@ -168,7 +173,8 @@ def apply_prolongation_long(test_case):
         PATHS['prolongation'].format(
             auction_id=test_case.auction_id,
             contract_id=test_case.contract_id,
-            prolongation_id=test_case.prolongation_id
+            prolongation_id=test_case.prolongation_id,
+            token=test_case.auction_token
         ),
         patch_data
     )
@@ -177,7 +183,8 @@ def apply_prolongation_long(test_case):
         PATHS['prolongation'].format(
             auction_id=test_case.auction_id,
             contract_id=test_case.contract_id,
-            prolongation_id=test_case.prolongation2_id
+            prolongation_id=test_case.prolongation2_id,
+            token=test_case.auction_token
         ),
         patch_data
     )
@@ -235,7 +242,8 @@ def apply_prolongation_triple_times(test_case):
         PATHS['prolongation'].format(
             auction_id=test_case.auction_id,
             contract_id=test_case.contract_id,
-            prolongation_id=test_case.prolongation_id
+            prolongation_id=test_case.prolongation_id,
+            token=test_case.auction_token
         ),
         patch_data
     )
@@ -245,7 +253,8 @@ def apply_prolongation_triple_times(test_case):
         PATHS['prolongation'].format(
             auction_id=test_case.auction_id,
             contract_id=test_case.contract_id,
-            prolongation_id=test_case.prolongation2_id
+            prolongation_id=test_case.prolongation2_id,
+            token=test_case.auction_token
         ),
         patch_data
     )
@@ -254,7 +263,8 @@ def apply_prolongation_triple_times(test_case):
         PATHS['prolongation'].format(
             auction_id=test_case.auction_id,
             contract_id=test_case.contract_id,
-            prolongation_id=test_case.prolongation3_id
+            prolongation_id=test_case.prolongation3_id,
+            token=test_case.auction_token
         ),
         patch_data,
         status=403
@@ -301,7 +311,8 @@ def apply_applied_prolongation(test_case):
         PATHS['prolongation'].format(
             auction_id=test_case.auction_id,
             contract_id=test_case.contract_id,
-            prolongation_id=test_case.prolongation_id
+            prolongation_id=test_case.prolongation_id,
+            token=test_case.auction_token
         ),
         patch_data
     )
@@ -314,7 +325,8 @@ def apply_applied_prolongation(test_case):
         PATHS['prolongation'].format(
             auction_id=test_case.auction_id,
             contract_id=test_case.contract_id,
-            prolongation_id=test_case.prolongation_id
+            prolongation_id=test_case.prolongation_id,
+            token=test_case.auction_token
         ),
         patch_data,
         status=403
@@ -348,7 +360,8 @@ def upload_document(test_case):
         PATHS['prolongation'].format(
             auction_id=test_case.auction_id,
             contract_id=test_case.contract_id,
-            prolongation_id=test_case.prolongation_id
+            prolongation_id=test_case.prolongation_id,
+            token=test_case.auction_token
         )
     )
     prolongation_before_document_post = Prolongation(
@@ -363,7 +376,8 @@ def upload_document(test_case):
         PATHS['prolongation_documents'].format(
             auction_id=test_case.auction_id,
             contract_id=test_case.contract_id,
-            prolongation_id=test_case.prolongation_id
+            prolongation_id=test_case.prolongation_id,
+            token=test_case.auction_token
         ),
         upload_files=[(
             'file',
@@ -379,7 +393,8 @@ def upload_document(test_case):
         PATHS['prolongation'].format(
             auction_id=test_case.auction_id,
             contract_id=test_case.contract_id,
-            prolongation_id=test_case.prolongation_id
+            prolongation_id=test_case.prolongation_id,
+            token=test_case.auction_token
         )
     )
     prolongation_after_document_post = Prolongation(
@@ -439,9 +454,10 @@ def get_list_of_documents(test_case):
     )
     list_of_docs_response = test_case.app.get(
         PATHS['prolongation_documents'].format(
-        auction_id=test_case.auction_id,
-        contract_id=test_case.contract_id,
-        prolongation_id=test_case.prolongation_id
+            auction_id=test_case.auction_id,
+            contract_id=test_case.contract_id,
+            prolongation_id=test_case.prolongation_id,
+            token=test_case.auction_token
         )
     )
     test_case.assertIsInstance(
@@ -462,9 +478,10 @@ def patch_document(test_case):
     )
     pre_patch_prolongation_response = test_case.app.get(
         PATHS['prolongation'].format(
-        auction_id=test_case.auction_id,
-        contract_id=test_case.contract_id,
-        prolongation_id=test_case.prolongation_id
+            auction_id=test_case.auction_id,
+            contract_id=test_case.contract_id,
+            prolongation_id=test_case.prolongation_id,
+            token=test_case.auction_token
         )
     )
     pre_patch_doc_title = pre_patch_prolongation_response.json['data']['documents'][0]['title']

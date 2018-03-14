@@ -8,7 +8,8 @@ from openprocurement.auctions.core.utils import (
     extract_auction,
     register_auction_procurementMethodType,
     isAuction,
-    auction_from_data
+    auction_from_data,
+    init_plugins
 )
 from openprocurement.auctions.core.adapters import (
     AuctionConfigurator,
@@ -36,7 +37,8 @@ def includeme(config):
          register_auction_procurementMethodType
     )
     config.scan("openprocurement.auctions.core.views")
-    
+    init_plugins(config)
+
     # register Adapters
     config.registry.registerAdapter(
         AuctionConfigurator,

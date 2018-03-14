@@ -33,7 +33,7 @@ class AuctionAwardContractProlongationResource(APIResource):
 
     @json_view(
         content_type="application/json",
-        permission='create_contract',
+        permission='edit_auction',
         validators=(validate_prolongation_data,)
     )
     def collection_post(self):
@@ -73,7 +73,7 @@ class AuctionAwardContractProlongationResource(APIResource):
 
     @json_view(permission='view_auction')
     def get(self):
-        """Retrieving the contract for award"""
+        """Retrieving the prolongation for a contract"""
         return {'data': self.request.validated['prolongation'].serialize()}
 
     @json_view(
@@ -109,4 +109,3 @@ class AuctionAwardContractProlongationResource(APIResource):
                     )
                 )
             return {'data': self.request.context.serialize()}
-
