@@ -453,3 +453,8 @@ def get_related_award_of_contract(contract, auction):
 def init_plugins(config):
     awarding.includeme(config)
     contracting.includeme(config)
+
+
+def get_auction_creation_date(data):
+    auction_creation_date = (data.get('revisions')[0].date if data.get('revisions') else get_now())
+    return auction_creation_date
