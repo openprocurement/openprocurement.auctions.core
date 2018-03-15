@@ -4,7 +4,8 @@ from itertools import izip_longest
 from openprocurement.api.models import TZ
 from openprocurement.api.utils import (
     get_now,
-    calculate_business_date
+    calculate_business_date,
+    get_awarding_type_by_procurement_method_type
 )
 
 from openprocurement.auctions.core.plugins.awarding.v2_1.constants import (
@@ -22,6 +23,9 @@ def create_awards(request):
     auction.status = 'active.qualification'
     now = get_now()
     auction.awardPeriod = type(auction).awardPeriod({'startDate': now})
+    awarding_type = get_awarding_type_by_procurement_method_type(
+        auction.procurementMethodType
+    )
     bids = chef(auction.bids, auction.features or [], [], True)
     # minNumberOfQualifiedBids == 1
     bids_to_qualify = NUMBER_OF_BIDS_TO_BE_QUALIFIED \
@@ -46,7 +50,7 @@ def create_awards(request):
         if award.status == 'pending.verification':
             award.verificationPeriod = award.paymentPeriod = award.signingPeriod = {'startDate': now}
             request.response.headers['Location'] = request.route_url('{}:Auction Awards'.format(
-                auction.procurementMethodType),
+                awarding_type),
                 auction_id=auction.id,
                 award_id=award['id'])
         auction.awards.append(award)
@@ -56,11 +60,14 @@ def switch_to_next_award(request):
     auction = request.validated['auction']
     now = get_now()
     waiting_awards = [i for i in auction.awards if i['status'] == 'pending.waiting']
+    awarding_type = get_awarding_type_by_procurement_method_type(
+        auction.procurementMethodType
+    )
     if waiting_awards:
         award = waiting_awards[0]
         award.status = 'pending.verification'
         award.verificationPeriod = award.paymentPeriod = award.signingPeriod = {'startDate': now}
-        request.response.headers['Location'] = request.route_url('{}:Auction Awards'.format(auction.procurementMethodType), auction_id=auction.id, award_id=award['id'])
+        request.response.headers['Location'] = request.route_url('{}:Auction Awards'.format(awarding_type), auction_id=auction.id, award_id=award['id'])
 
     elif all([award.status in ['cancelled', 'unsuccessful'] for award in auction.awards]):
         auction.awardPeriod.endDate = now

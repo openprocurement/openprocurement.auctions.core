@@ -25,7 +25,7 @@ from openprocurement.auctions.core.utils import (
 
 
 @opresource(
-    name='awarding_2_1:Auction Award Complaints',
+    name='awarding_2_1:Auction Award Documents',
     collection_path='/auctions/{auction_id}/awards/{award_id}/documents',
     path='/auctions/{auction_id}/awards/{award_id}/documents/{document_id}',
     awardingType='awarding_2_1',
