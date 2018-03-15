@@ -15,9 +15,9 @@ from openprocurement.api.models import (
 from openprocurement.api.utils import calculate_business_date
 from openprocurement.auctions.core.models import (
     get_auction,
-    dgfDocument as Document,
-    dgfComplaint as Complaint,
-    dgfItem as Item,
+    dgfCDB2Document as Document,
+    dgfCDB2Complaint as Complaint,
+    dgfCDB2Item as Item,
     dgfOrganization as Organization
 )
 from openprocurement.auctions.core.validation import (
