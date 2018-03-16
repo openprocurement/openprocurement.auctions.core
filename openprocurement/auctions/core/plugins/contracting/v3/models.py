@@ -101,7 +101,7 @@ class Contract(BaseContract):
     datePaid = IsoDateTimeType()
     prolongations = ListType(ModelType(Prolongation), default=list())
     documents = ListType(
-        ModelType(Document),
+        ModelType(BaseDocument),
         default=list(),
         validators=[validate_disallow_dgfPlatformLegalDetails]
     )
