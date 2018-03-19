@@ -20,7 +20,6 @@ from openprocurement.api.interfaces import (
     IAwardingNextCheck
 )
 from openprocurement.auctions.core.models import IAuction
-from openprocurement.auctions.core.constants import VIEW_LOCATIONS
 from openprocurement.api.utils import get_content_configurator
 
 

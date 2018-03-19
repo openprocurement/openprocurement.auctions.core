@@ -1,3 +1,8 @@
+from datetime import (
+    datetime,
+    timedelta,
+    time
+)
 from urlparse import (
     urlparse,
     parse_qs
@@ -32,7 +37,9 @@ from openprocurement.api.models import (
     validate_dkpp,
     Organization,
     Address,
-    Location
+    Location,
+    schematics_embedded_role,
+    schematics_default_role,
 )
 from openprocurement.auctions.core.validation import (
     validate_disallow_dgfPlatformLegalDetails
@@ -296,3 +303,80 @@ class Complaint(Complaint):
 
 
 dgfComplaint = Complaint
+
+
+plain_role = (blacklist('_attachments', 'revisions', 'dateModified') + schematics_embedded_role)
+create_role = (blacklist('owner_token', 'owner', '_attachments', 'revisions', 'date', 'dateModified', 'doc_id', 'auctionID', 'bids', 'documents', 'awards', 'questions', 'complaints', 'auctionUrl', 'status', 'auctionPeriod', 'awardPeriod', 'procurementMethod', 'awardCriteria', 'submissionMethod', 'cancellations', 'numberOfBidders', 'contracts') + schematics_embedded_role)
+draft_role = whitelist('status')
+edit_role = (blacklist('status', 'procurementMethodType', 'lots', 'owner_token', 'owner', '_attachments', 'revisions', 'date', 'dateModified', 'doc_id', 'auctionID', 'bids', 'documents', 'awards', 'questions', 'complaints', 'auctionUrl', 'auctionPeriod', 'awardPeriod', 'procurementMethod', 'awardCriteria', 'submissionMethod', 'mode', 'cancellations', 'numberOfBidders', 'contracts') + schematics_embedded_role)
+view_role = (blacklist('owner_token', '_attachments', 'revisions') + schematics_embedded_role)
+listing_role = whitelist('dateModified', 'doc_id')
+auction_view_role = whitelist('auctionID', 'dateModified', 'bids', 'auctionPeriod', 'minimalStep', 'auctionUrl', 'features', 'lots', 'items', 'procurementMethodType')
+auction_post_role = whitelist('bids')
+auction_patch_role = whitelist('auctionUrl', 'bids', 'lots')
+enquiries_role = (blacklist('owner_token', '_attachments', 'revisions', 'bids', 'numberOfBids') + schematics_embedded_role)
+auction_role = (blacklist('owner_token', '_attachments', 'revisions', 'bids', 'numberOfBids') + schematics_embedded_role)
+#chronograph_role = whitelist('status', 'enquiryPeriod', 'tenderPeriod', 'auctionPeriod', 'awardPeriod', 'lots')
+chronograph_role = whitelist('auctionPeriod', 'lots', 'next_check')
+chronograph_view_role = whitelist('status', 'enquiryPeriod', 'tenderPeriod', 'auctionPeriod', 'awardPeriod', 'awards', 'lots', 'doc_id', 'submissionMethodDetails', 'mode', 'numberOfBids', 'complaints', 'procurementMethodType')
+Administrator_role = whitelist('status', 'mode', 'procuringEntity','auctionPeriod', 'lots')
+
+flash_auction_roles = {
+        'plain': plain_role,
+        'create': create_role,
+        'edit': edit_role,
+        'edit_draft': draft_role,
+        'edit_active.enquiries': edit_role,
+        'edit_active.tendering': whitelist(),
+        'edit_active.auction': whitelist(),
+        'edit_active.qualification': whitelist(),
+        'edit_active.awarded': whitelist(),
+        'edit_complete': whitelist(),
+        'edit_unsuccessful': whitelist(),
+        'edit_cancelled': whitelist(),
+        'view': view_role,
+        'listing': listing_role,
+        'auction_view': auction_view_role,
+        'auction_post': auction_post_role,
+        'auction_patch': auction_patch_role,
+        'draft': enquiries_role,
+        'active.enquiries': enquiries_role,
+        'active.tendering': enquiries_role,
+        'active.auction': auction_role,
+        'active.qualification': view_role,
+        'active.awarded': view_role,
+        'complete': view_role,
+        'unsuccessful': view_role,
+        'cancelled': view_role,
+        'chronograph': chronograph_role,
+        'chronograph_view': chronograph_view_role,
+        'Administrator': Administrator_role,
+        'default': schematics_default_role,
+        'contracting': whitelist('doc_id', 'owner'),
+    }
+
+
+view_bid_role = (blacklist('owner_token') + schematics_default_role)
+Administrator_bid_role = whitelist('tenderers')
+
+flash_bid_roles = {
+    'embedded': view_bid_role,
+    'view': view_bid_role,
+    'auction_view': whitelist('value', 'lotValues', 'id', 'date', 'parameters', 'participationUrl', 'owner'),
+    'active.qualification': view_bid_role,
+    'active.awarded': view_bid_role,
+    'complete': view_bid_role,
+    'unsuccessful': view_bid_role,
+    'cancelled': view_bid_role,
+}
+
+
+STAND_STILL_TIME = timedelta(days=2)
+COMPLAINT_STAND_STILL_TIME = timedelta(days=3)
+BIDDER_TIME = timedelta(minutes=3 * 3)
+SERVICE_TIME = timedelta(minutes=5 + 3 + 3)
+AUCTION_STAND_STILL_TIME = timedelta(minutes=15)
+
+
+def calc_auction_end_time(bids, start):
+    return start + bids * BIDDER_TIME + SERVICE_TIME + AUCTION_STAND_STILL_TIME
