@@ -12,7 +12,7 @@ from openprocurement.api.models import (
     Period,
     Award as BaseAward
 )
-from openprocurement.api.utils import calculate_business_date
+
 from openprocurement.auctions.core.models import (
     get_auction,
     dgfCDB2Document as Document,
@@ -20,15 +20,12 @@ from openprocurement.auctions.core.models import (
     dgfCDB2Item as Item,
     dgfOrganization as Organization
 )
-from openprocurement.auctions.core.validation import (
-    validate_disallow_dgfPlatformLegalDetails
-)
-from .utils import calculate_enddate
 from openprocurement.auctions.core.plugins.awarding.v2_1.constants import (
     AWARD_PAYMENT_TIME,
     CONTRACT_SIGNING_TIME,
     VERIFY_AUCTION_PROTOCOL_TIME
 )
+from .utils import calculate_enddate
 
 
 class Award(BaseAward):

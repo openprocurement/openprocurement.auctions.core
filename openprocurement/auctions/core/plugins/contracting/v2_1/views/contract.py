@@ -15,6 +15,10 @@ from openprocurement.auctions.core.validation import (
     validate_contract_data,
     validate_patch_contract_data,
 )
+from openprocurement.auctions.core.plugins.contracting.v2_1.validators import (
+    validate_contract_create,
+    validate_contract_update
+)
 
 
 @opresource(
@@ -26,15 +30,11 @@ from openprocurement.auctions.core.validation import (
 )
 class AuctionAwardContractResource(APIResource):
 
-    @json_view(content_type="application/json", permission='create_contract', validators=(validate_contract_data,))
+    @json_view(content_type="application/json", permission='create_contract', validators=(validate_contract_data, validate_contract_create))
     def collection_post(self):
         """Post a contract for award
         """
         auction = self.request.validated['auction']
-        if auction.status not in ['active.qualification', 'active.awarded']:
-            self.request.errors.add('body', 'data', 'Can\'t add contract in current ({}) auction status'.format(auction.status))
-            self.request.errors.status = 403
-            return
         contract = self.request.validated['contract']
         auction.contracts.append(contract)
         if save_auction(self.request):
@@ -57,19 +57,11 @@ class AuctionAwardContractResource(APIResource):
         """
         return {'data': self.request.validated['contract'].serialize()}
 
-    @json_view(content_type="application/json", permission='edit_auction', validators=(validate_patch_contract_data,))
+    @json_view(content_type="application/json", permission='edit_auction', validators=(validate_patch_contract_data, validate_contract_update))
     def patch(self):
         """Update of contract
         """
-        if self.request.validated['auction_status'] not in ['active.qualification', 'active.awarded']:
-            self.request.errors.add('body', 'data', 'Can\'t update contract in current ({}) auction status'.format(self.request.validated['auction_status']))
-            self.request.errors.status = 403
-            return
         auction = self.request.validated['auction']
-        if any([i.status != 'active' for i in auction.lots if i.id in [a.lotID for a in auction.awards if a.id == self.request.context.awardID]]):
-            self.request.errors.add('body', 'data', 'Can update contract only in active lot status')
-            self.request.errors.status = 403
-            return
         data = self.request.validated['data']
 
         if data['value']:
@@ -107,9 +99,9 @@ class AuctionAwardContractResource(APIResource):
                 self.request.errors.add('body', 'data', 'Can\'t sign contract before reviewing all complaints')
                 self.request.errors.status = 403
                 return
-        contract_status = self.request.context.status
+        current_contract_status = self.request.context.status
         apply_patch(self.request, save=False, src=self.request.context.serialize())
-        if contract_status != self.request.context.status and (contract_status != 'pending' or self.request.context.status != 'active'):
+        if current_contract_status != self.request.context.status and (current_contract_status != 'pending' or self.request.context.status != 'active'):
             self.request.errors.add('body', 'data', 'Can\'t update contract status')
             self.request.errors.status = 403
             return

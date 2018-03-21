@@ -114,6 +114,9 @@ dgfItem = Item
 
 
 class dgfCDB2CPVCAVClassification(Classification):
+    """
+    Classification for CDB2 which use CPV and CAV-PS scheme and validate code according to them.
+    """
     scheme = StringType(required=True, default=u'CPV', choices=[u'CPV', u'CAV-PS'])
     id = StringType(required=True)
 
