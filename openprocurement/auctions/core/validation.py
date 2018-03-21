@@ -5,7 +5,6 @@ from openprocurement.api.models import get_now
 from openprocurement.api.utils import (
     update_logging_context, error_handler
 )
-from openprocurement.api.validation import validate_json_data, validate_data
 from openprocurement.api.validation import (
     validate_json_data,
     validate_data,
@@ -33,7 +32,6 @@ validate_json_data = raise_wrapper(validate_json_data)
 validate_file_update = raise_wrapper(validate_file_update)
 validate_file_upload = raise_wrapper(validate_file_upload)
 validate_patch_document_data = raise_wrapper(validate_patch_document_data)
-
 
 
 def validate_auction_data(request):
