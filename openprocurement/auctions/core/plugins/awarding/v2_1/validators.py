@@ -1,4 +1,4 @@
-from openprocurement.auctions.core.plugins.awarding.v2_1.constants import STATUS4ROLE
+from openprocurement.api.constants import STATUS4ROLE
 
 
 def validate_complaint_document_create(request):

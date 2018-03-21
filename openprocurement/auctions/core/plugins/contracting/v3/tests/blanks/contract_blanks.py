@@ -1,3 +1,4 @@
+from openprocurement.api.models import get_now
 from openprocurement.auctions.core.utils import get_related_award_of_contract
 
 
@@ -121,7 +122,7 @@ def patch_date_paid(self):
     self.assertEqual(response.content_type, 'application/json')
 
     # check that datepaid can be patched
-    date_paid_iso_str = '2018-01-01T12:04:15+02:00'
+    date_paid_iso_str = get_now().isoformat()
     pre_patch_contract_response = self.app.get('/auctions/{0}/contracts/{1}' \
         .format(self.auction_id, contract['id']))
     self.assertIsNone(pre_patch_contract_response.json['data'].get('datePaid'))

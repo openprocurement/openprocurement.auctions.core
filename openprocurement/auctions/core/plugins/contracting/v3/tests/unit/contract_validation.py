@@ -16,7 +16,7 @@ class TestContractingV3ContractValidation(BaseWebTest):
     def test_datePaid_good_date(self):
         start_of_signing_period = datetime(2000, 1, 1)
         end_of_signing_period = datetime(2000, 1, 10)
-        good_datepaid1 = datetime(1999, 12, 31)
+        good_datepaid1 = datetime(2000, 1, 5)
         good_datepaid2 = datetime(2000, 1, 1)
         period = Period()
 
@@ -41,7 +41,7 @@ class TestContractingV3ContractValidation(BaseWebTest):
         contract.signingPeriod = period
         self.db.commit()
         with self.assertRaises(ValidationError) as context:  # noqa: F841
-            contract.datePaid = datetime(2000, 1, 5)
+            contract.datePaid = datetime(1999, 12, 30)
             contract.validate()
 
     def test_datePaid_when_signingPeriod_None(self):
