@@ -307,7 +307,7 @@ class AuctionAwardResource(APIResource):
             if self.request.authenticated_role == 'bid_owner':
                 award.complaintPeriod.endDate = now
             else:
-                self.request.errors.add('body', 'data', 'Only bid owner may cancel award in current ({}) status'.format(award_status))
+                self.request.errors.add('body', 'data', 'Only bid owner may cancel award in current ({}) status'.format(current_award_status))
                 self.request.errors.status = 403
                 return
         elif current_award_status == 'pending.verification' and award.status == 'pending.payment':
@@ -343,7 +343,7 @@ class AuctionAwardResource(APIResource):
             award.complaintPeriod.endDate = now
             self.request.content_configurator.back_to_awarding()
         elif current_award_status != award.status:
-            self.request.errors.add('body', 'data', 'Can\'t switch award ({}) status to ({}) status'.format(award_status, award.status))
+            self.request.errors.add('body', 'data', 'Can\'t switch award ({}) status to ({}) status'.format(current_award_status, award.status))
             self.request.errors.status = 403
             return
         if save_auction(self.request):
