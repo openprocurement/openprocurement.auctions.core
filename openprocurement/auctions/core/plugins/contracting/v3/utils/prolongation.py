@@ -2,6 +2,7 @@ from schematics.exceptions import ValidationError
 
 from openprocurement.api.utils import calculate_business_date
 
+from openprocurement.auctions.core.models import get_auction
 from openprocurement.auctions.core.plugins.contracting.v3.constants import (
     PROLONGATION_SHORT_PERIOD,
     PROLONGATION_LONG_PERIOD,
@@ -33,7 +34,8 @@ class ProlongationManager(object):
         )
         contract.signingPeriod.endDate = calculate_business_date(
             contract.signingPeriod.startDate,
-            prolongation_period
+            prolongation_period,
+            context=get_auction(self.prolongation)
         )
 
     def _check_documents_are_present(self):
