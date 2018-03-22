@@ -3,7 +3,6 @@ from barbecue import chef
 from openprocurement.api.models import TZ
 from openprocurement.api.utils import (
     get_now,
-    get_awarding_type_by_procurement_method_type
 )
 
 from openprocurement.auctions.core.plugins.awarding.v2.constants import (
@@ -21,9 +20,7 @@ def create_awards(request):
     auction.status = 'active.qualification'
     now = get_now()
     auction.awardPeriod = type(auction).awardPeriod({'startDate': now})
-    awarding_type = get_awarding_type_by_procurement_method_type(
-        auction.procurementMethodType
-    )
+    awarding_type = request.content_configurator.awarding_type
     valid_bids = [bid for bid in auction.bids if bid['value'] is not None]
     bids = chef(valid_bids, auction.features or [], [], True)
     bids_to_qualify = NUMBER_OF_BIDS_TO_BE_QUALIFIED \
@@ -58,9 +55,7 @@ def create_awards(request):
 def switch_to_next_award(request):
     auction = request.validated['auction']
     now = get_now()
-    awarding_type = get_awarding_type_by_procurement_method_type(
-        auction.procurementMethodType
-    )
+    awarding_type = request.content_configurator.awarding_type
     waiting_awards = [i for i in auction.awards if i['status'] == 'pending.waiting']
     if waiting_awards:
         award = waiting_awards[0]
