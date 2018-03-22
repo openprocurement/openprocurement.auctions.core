@@ -41,7 +41,7 @@ class BaseWebTest(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        if not getattr(cls, 'app', None):
+        if not getattr(cls, 'app', None) or getattr(cls, 'docservice', True):
             for _ in range(10):
                 try:
                     cls.app = webtest.TestApp("config:tests.ini", relative_to=cls.relative_to)
