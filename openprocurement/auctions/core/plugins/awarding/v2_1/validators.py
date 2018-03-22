@@ -3,7 +3,7 @@ from openprocurement.api.utils import get_now
 
 
 def validate_award_patch(request):
-    if request.validated['auction'] not in ['active.qualification', 'active.awarded']:
+    if request.validated['auction'].status not in ['active.qualification', 'active.awarded']:
         request.errors.add('body', 'data',
                                 'Can\'t update award in current ({}) auction status'.format(request.validated['auction'].status))
         request.errors.status = 403
