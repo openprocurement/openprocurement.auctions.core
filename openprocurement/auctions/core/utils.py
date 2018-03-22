@@ -456,6 +456,11 @@ def init_plugins(config):
     contracting.includeme(config)
 
 
+def get_auction_creation_date(data):
+    auction_creation_date = (data.get('revisions')[0].date if data.get('revisions') else get_now())
+    return auction_creation_date
+
+
 def rounding_shouldStartAfter_after_midnigth(start_after, auction, use_from=datetime(2016, 6, 1, tzinfo=TZ)):
     if (auction.enquiryPeriod and auction.enquiryPeriod.startDate or get_now()) > use_from and not (SANDBOX_MODE and auction.submissionMethodDetails and u'quick' in auction.submissionMethodDetails):
         midnigth = datetime.combine(start_after.date(), time(0, tzinfo=start_after.tzinfo))

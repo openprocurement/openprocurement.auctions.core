@@ -12,7 +12,8 @@ from zope.interface import Interface
 from schematics.types import (
     StringType,
     IntType,
-    URLType
+    URLType,
+    BaseType
 )
 from schematics.transforms import (
     blacklist,
@@ -34,6 +35,9 @@ from openprocurement.api.models import (
     validate_dkpp,
     Organization,
     Address,
+    Period,
+    Location,
+    CPV_CODES,
     Location,
     schematics_embedded_role,
     schematics_default_role,
@@ -41,12 +45,19 @@ from openprocurement.api.models import (
 from openprocurement.auctions.core.validation import (
     validate_disallow_dgfPlatformLegalDetails
 )
+from openprocurement.auctions.core.utils import get_auction_creation_date
 from openprocurement.auctions.core.constants import (
     DOCUMENT_TYPE_OFFLINE,
     DOCUMENT_TYPE_URL_ONLY,
     CAV_CODES_DGF,
     CAV_CODES_FLASH,
-    ORA_CODES
+    ORA_CODES,
+    CPVS_CODES_DGF_CDB2,
+    CAVPS_CODES_DGF_CDB2,
+    CPV_NON_SPECIFIC_LOCATION_UNITS_DGF_CDB2,
+    CAV_NON_SPECIFIC_LOCATION_UNITS_DGF_CDB2,
+    DGF_CDB2_ADDRESS_REQUIRED_FROM,
+    DGF_CDB2_CLASSIFICATION_PRECISELY_FROM
 )
 
 
@@ -100,6 +111,59 @@ class Item(Item):
 
 
 dgfItem = Item
+
+
+class dgfCDB2CPVCAVClassification(Classification):
+    """
+    Classification for CDB2 which use CPV and CAV-PS scheme and validate code according to them.
+    """
+    scheme = StringType(required=True, default=u'CPV', choices=[u'CPV', u'CAV-PS'])
+    id = StringType(required=True)
+
+    def validate_id(self, data, code):
+        auction = get_auction(data['__parent__'])
+        if data.get('scheme') == u'CPV' and code not in CPV_CODES:
+            raise ValidationError(BaseType.MESSAGES['choices'].format(unicode(CPV_CODES)))
+        elif data.get('scheme') == u'CAV-PS' and code not in CAVPS_CODES_DGF_CDB2:
+            raise ValidationError(BaseType.MESSAGES['choices'].format(unicode(CAVPS_CODES_DGF_CDB2)))
+        if code.find("00000-") > 0 and get_auction_creation_date(data) > DGF_CDB2_CLASSIFICATION_PRECISELY_FROM:
+            raise ValidationError('At least {} classification class (XXXX0000-Y) should be specified more precisely'.format(data.get('scheme')))
+
+
+class dgfCDB2AdditionalClassification(Classification):
+    def validate_id(self, data, code):
+        if data.get('scheme') == u'CPVS' and code not in CPVS_CODES_DGF_CDB2:
+            raise ValidationError(BaseType.MESSAGES['choices'].format(unicode(CPVS_CODES_DGF_CDB2)))
+
+
+class Item(flashItem):
+    """A good, service, or work to be contracted."""
+    class Options:
+        roles = {
+            'create': blacklist('deliveryLocation', 'deliveryAddress'),
+            'edit_active.tendering': blacklist('deliveryLocation', 'deliveryAddress'),
+        }
+    classification = ModelType(dgfCDB2CPVCAVClassification, required=True)
+    additionalClassifications = ListType(ModelType(dgfCDB2AdditionalClassification), default=list())
+    address = ModelType(Address)
+    location = ModelType(Location)
+    contractPeriod = ModelType(Period)
+
+    def __init__(self, *args, **kwargs):
+        super(Item, self).__init__(*args, **kwargs)
+        if hasattr(self, 'deliveryDate'):
+            del self.deliveryDate
+
+    def validate_address(self, data, address):
+        if not address:
+            if get_auction_creation_date(data) > DGF_CDB2_ADDRESS_REQUIRED_FROM:
+                non_specific_location_cav = data['classification']['scheme'] == u'CAV-PS' and not data['classification']['id'].startswith(CAV_NON_SPECIFIC_LOCATION_UNITS_DGF_CDB2)
+                non_specific_location_cpv = data['classification']['scheme'] == u'CPV' and not data['classification']['id'].startswith(CPV_NON_SPECIFIC_LOCATION_UNITS_DGF_CDB2)
+                if non_specific_location_cav or non_specific_location_cpv:
+                    raise ValidationError(u'This field is required.')
+
+
+dgfCDB2Item = Item
 
 
 class Document(BaseDocument):
@@ -211,6 +275,25 @@ class Document(Document):
 dgfDocument = Document
 
 
+class Document(dgfDocument):
+    documentType = StringType(choices=[
+        'auctionNotice', 'awardNotice', 'contractNotice',
+        'notice', 'biddingDocuments', 'technicalSpecifications',
+        'evaluationCriteria', 'clarifications', 'shortlistedFirms',
+        'riskProvisions', 'billOfQuantity', 'bidders', 'conflictOfInterest',
+        'debarments', 'evaluationReports', 'winningBid', 'complaints',
+        'contractSigned', 'contractArrangements', 'contractSchedule',
+        'contractAnnexe', 'contractGuarantees', 'subContract',
+        'eligibilityCriteria', 'contractProforma', 'commercialProposal',
+        'qualificationDocuments', 'eligibilityDocuments', 'tenderNotice',
+        'illustration', 'auctionProtocol', 'x_dgfAssetFamiliarization',
+        'x_presentation', 'x_nda'
+    ])
+
+
+dgfCDB2Document = Document
+
+
 class Complaint(BaseComplaint):
     class Options:
         roles = {
@@ -233,7 +316,7 @@ class Complaint(BaseComplaint):
             'cancelled': view_complaint_role,
         }
     # system
-    documents = ListType(ModelType(Document), default=list())
+    documents = ListType(ModelType(dgfDocument), default=list())
 
     def serialize(self, role=None, context=None):
         if role == 'view' and self.type == 'claim' and get_auction(self).status in ['active.enquiries', 'active.tendering']:
@@ -288,6 +371,14 @@ class Complaint(Complaint):
 
 
 dgfComplaint = Complaint
+
+
+class Complaint(flashComplaint):
+    author = ModelType(Organization, required=True)
+    documents = ListType(ModelType(dgfCDB2Document), default=list())
+
+
+dgfCDB2Complaint = Complaint
 
 
 plain_role = (blacklist('_attachments', 'revisions', 'dateModified') + schematics_embedded_role)
