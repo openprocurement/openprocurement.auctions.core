@@ -17,6 +17,7 @@ class AwardingV2_1ConfiguratorMixin(object):
         back_to_awarding - call when participant was disqualified
     """
     award_model = Award
+    awarding_type = 'awarding_2_1'
 
     def start_awarding(self):
         """
