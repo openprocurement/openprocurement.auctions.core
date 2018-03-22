@@ -1,6 +1,7 @@
 from openprocurement.api.models import get_now
 from openprocurement.api.utils import calculate_business_date
 
+from openprocurement.auctions.core.tests.blanks.fixtures.auction import get_auction
 from openprocurement.auctions.core.plugins.contracting.v3.models import (
     Prolongation,
     Contract,
@@ -143,7 +144,8 @@ def apply_prolongation_short(test_case):
         post_prolongation_contract.signingPeriod.endDate,
         calculate_business_date(
             pre_prolongation_contract.signingPeriod.startDate,
-            PROLONGATION_SHORT_PERIOD
+            PROLONGATION_SHORT_PERIOD,
+            context=get_auction(test_case),
         )
     )
 
@@ -206,7 +208,8 @@ def apply_prolongation_long(test_case):
         post_prolongation_contract.signingPeriod.endDate,
         calculate_business_date(
             pre_prolongation_contract.signingPeriod.startDate,
-            PROLONGATION_LONG_PERIOD
+            PROLONGATION_LONG_PERIOD,
+            context=get_auction(test_case)
         )
     )
 
@@ -288,7 +291,8 @@ def apply_prolongation_triple_times(test_case):
         post_prolongation_contract.signingPeriod.endDate,
         calculate_business_date(
             pre_prolongation_contract.signingPeriod.startDate,
-            PROLONGATION_LONG_PERIOD
+            PROLONGATION_LONG_PERIOD,
+            context=get_auction(test_case)
         )
     )
 
