@@ -16,6 +16,7 @@ class AwardingV1ConfiguratorMixin(object):
         back_to_awarding - call when participant was disqualified
     """
     award_model = Award
+    awarding_type = 'awarding_1_0'
 
     def start_awarding(self):
         """Using add_next_award method from belowThreshold procedure.
