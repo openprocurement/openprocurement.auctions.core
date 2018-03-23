@@ -19,6 +19,7 @@ class ProlongationManager(object):
     def apply(self):
         """Choose order of prolongation and apply right"""
         self._check_documents_are_present()
+        auction = get_auction(self.prolongation)
         contract = self.prolongation.__parent__
         applied_prolongations_count = len([
             p for p in contract.prolongations
@@ -35,7 +36,7 @@ class ProlongationManager(object):
         contract.signingPeriod.endDate = calculate_business_date(
             contract.signingPeriod.startDate,
             prolongation_period,
-            context=get_auction(self.prolongation)
+            context=auction
         )
 
     def _check_documents_are_present(self):
