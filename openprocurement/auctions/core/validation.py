@@ -7,11 +7,7 @@ from openprocurement.api.utils import (
 )
 from openprocurement.api.validation import validate_json_data, validate_data
 
-STATUS4ROLE = {
-    'complaint_owner': ['draft', 'answered'],
-    'reviewers': ['pending'],
-    'tender_owner': ['claim'],
-}
+from openprocurement.auctions.core.constants import STATUS4ROLE
 
 
 def validate_document_data(request, **kwargs):

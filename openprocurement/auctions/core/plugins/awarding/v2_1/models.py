@@ -10,7 +10,6 @@ from openprocurement.api.models import (
     ModelType,
     ListType,
     Period,
-    Award as BaseAward
 )
 
 from openprocurement.auctions.core.models import (
@@ -18,7 +17,8 @@ from openprocurement.auctions.core.models import (
     dgfCDB2Document as Document,
     dgfCDB2Complaint as Complaint,
     dgfCDB2Item as Item,
-    dgfOrganization as Organization
+    dgfOrganization as Organization,
+    Award as BaseAward
 )
 from openprocurement.auctions.core.plugins.awarding.v2_1.constants import (
     AWARD_PAYMENT_TIME,

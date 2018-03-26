@@ -7,15 +7,18 @@ from openprocurement.api.utils import (
     context_unpack,
     APIResource,
 )
-from openprocurement.auctions.core.validation import (
-    validate_file_update,
-    validate_file_upload,
+from openprocurement.api.validation import (
     validate_patch_document_data,
 )
+
 from openprocurement.auctions.core.utils import (
     save_auction,
     apply_patch,
     opresource,
+)
+from openprocurement.auctions.core.validation import (
+    validate_file_update,
+    validate_file_upload,
 )
 
 

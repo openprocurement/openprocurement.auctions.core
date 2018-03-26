@@ -58,3 +58,10 @@ AWARDING_OF_PROCUREMENT_METHOD_TYPE = {
 }
 
 ADDITIONAL_CLASSIFICATIONS_SCHEMES = [u'ДКПП', u'NONE', u'ДК003', u'ДК015', u'ДК018']
+
+# Declares what roles can interact with document in different statuses
+STATUS4ROLE = {
+    'complaint_owner': ['draft', 'answered'],
+    'reviewers': ['pending'],
+    'tender_owner': ['claim'],
+}
