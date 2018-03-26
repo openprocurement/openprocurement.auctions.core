@@ -1,13 +1,17 @@
 def check_auction_protocol(award):
     if award.documents:
         for document in award.documents:
-            if document['documentType'] == 'auctionProtocol' and document['author'] == 'auction_owner':
+            if (
+                document['documentType'] == 'auctionProtocol'
+                and document['author'] == 'auction_owner'
+            ):
                 return True
     return False
 
 
 def invalidate_bids_under_threshold(auction):
-    value_threshold = round(auction['value']['amount'] + auction['minimalStep']['amount'], 2)
+    amount = auction['value']['amount'] + auction['minimalStep']['amount']
+    value_threshold = round(amount, 2)
     for bid in auction['bids']:
         if bid['value']['amount'] < value_threshold:
             bid['status'] = 'invalid'
@@ -37,7 +41,7 @@ def check_pending_awards_complaints(auction):
 def check_pending_awards_complaints(auction):
     for award in lot_awards:
         for item in award.complaints:
-            if item.status in auction.block_complaint_status
+            if item.status in auction.block_complaint_status:
                 return True
 
 def set_stand_still_ends(lot_awards):
@@ -79,7 +83,8 @@ def set_unsuccessful_award(request, auction, award):
     request.content_configurator.back_to_awarding()
 
 def add_award_route_url(request, auction, award, awarding_type):
-    route = '{}:Auction Awards'.format(awarding_type), auction_id=auction.id, award_id=award['id']
-    request.response.headers['Location'] = request.route_url(route)
+    route = '{}:Auction Awards'.format(awarding_type)
+    route_url = request.route_url(route, auction_id=auction.id, award_id=award['id'])
+    request.response.headers['Location'] = route_url
     return True
 
