@@ -8,20 +8,22 @@ from openprocurement.api.utils import (
     update_file_content_type
 )
 from openprocurement.api.validation import (
-    validate_file_update,
-    validate_file_upload,
-    validate_patch_document_data,
+    validate_patch_document_data
 )
-from openprocurement.auctions.core.validation import (
-    validate_file_upload_post_common,
-    validate_file_update_put_common,
-    validate_patch_document_data_patch_common
-)
+
 from openprocurement.auctions.core.utils import (
     apply_patch,
     save_auction,
     opresource,
 )
+from openprocurement.auctions.core.validation import (
+    validate_file_update,
+    validate_file_upload,
+    validate_file_upload_post_common,
+    validate_file_update_put_common,
+    validate_patch_document_data_patch_common
+)
+
 
 @opresource(
     name='awarding_3_0:Auction Award Complaint Documents',

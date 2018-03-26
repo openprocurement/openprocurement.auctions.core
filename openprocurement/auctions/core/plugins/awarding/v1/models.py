@@ -4,14 +4,15 @@ from schematics.types import (
 from schematics.types.compound import ModelType
 
 from openprocurement.api.models import (
-    Award as BaseAward,
     Organization,
     Document,
     ListType
 )
+
 from openprocurement.auctions.core.models import (
     flashComplaint as Complaint,
-    flashItem as Item
+    flashItem as Item,
+    Award as BaseAward
 )
 
 

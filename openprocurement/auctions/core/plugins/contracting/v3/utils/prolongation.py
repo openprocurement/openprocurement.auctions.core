@@ -4,8 +4,7 @@ from openprocurement.api.utils import calculate_business_date
 
 from openprocurement.auctions.core.plugins.contracting.v3.constants import (
     PROLONGATION_SHORT_PERIOD,
-    PROLONGATION_LONG_PERIOD,
-    PROLONGATION_DATE_PUBLISHED_LIMIT_PERIOD,
+    PROLONGATION_LONG_PERIOD
 )
 
 

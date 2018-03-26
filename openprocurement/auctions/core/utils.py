@@ -1,23 +1,25 @@
 # -*- coding: utf-8 -*-
 from datetime import datetime, time, timedelta
-from pkg_resources import get_distribution
-from schematics.exceptions import ModelValidationError
-from time import sleep
+from functools import partial
+from logging import getLogger
 from re import compile
+from time import sleep
+
+from couchdb.http import ResourceConflict
+from jsonpointer import resolve_pointer
+from cornice.resource import resource, view
+from pkg_resources import get_distribution
 from pyramid.compat import decode_path_info
 from pyramid.exceptions import URLDecodeError
-from cornice.resource import resource, view
-from cornice.util import json_error
-from couchdb.http import ResourceConflict
-from functools import partial
-from json import dumps
-from jsonpointer import resolve_pointer
-from logging import getLogger
+from schematics.exceptions import ModelValidationError
 
-from openprocurement.api.models import get_now, TZ, COMPLAINT_STAND_STILL_TIME, SANDBOX_MODE
+from openprocurement.api.constants import (
+    TZ, SANDBOX_MODE, AWARDING_OF_PROCUREMENT_METHOD_TYPE,
+    AUCTIONS_COMPLAINT_STAND_STILL_TIME
+)
 from openprocurement.api.validation import error_handler
+from openprocurement.api.models import get_now
 from openprocurement.api.utils import (
-    generate_id,
     calculate_business_date,
     apply_data_patch,
     get_revision_changes,
@@ -25,9 +27,10 @@ from openprocurement.api.utils import (
     update_logging_context,
     context_unpack
 )
-from openprocurement.auctions.core.traversal import factory
+
 from openprocurement.auctions.core.plugins.awarding import includeme as awarding
 from openprocurement.auctions.core.plugins.contracting import includeme as contracting
+from openprocurement.auctions.core.traversal import factory
 
 
 PKG = get_distribution(__package__)
@@ -47,6 +50,34 @@ DOCUMENT_BLACKLISTED_FIELDS = (
     'url',
     'dateModified',
 )
+
+
+class awardingTypePredicate(object):
+    def __init__(self, val, config):
+        self.val = val
+
+    def text(self):
+        return 'awardingType = {value}'.format(value=self.val)
+
+    phash = text
+
+    def __call__(self, context, request):
+        if request.auction is not None:
+            procurement_method_type = getattr(
+                request.auction,
+                'procurementMethodType',
+                None
+            )
+            if not procurement_method_type:
+                return False
+
+            desirable_awarding_version = \
+                AWARDING_OF_PROCUREMENT_METHOD_TYPE.get(
+                    procurement_method_type
+                )
+            return desirable_awarding_version == self.val
+
+        return False
 
 
 def generate_auction_id(ctime, db, server_id=''):
@@ -184,11 +215,11 @@ def check_bids(request):
 def check_complaint_status(request, complaint, now=None):
     if not now:
         now = get_now()
-    if complaint.status == 'claim' and calculate_business_date(complaint.dateSubmitted, COMPLAINT_STAND_STILL_TIME, request.auction) < now:
+    if complaint.status == 'claim' and calculate_business_date(complaint.dateSubmitted, AUCTIONS_COMPLAINT_STAND_STILL_TIME, request.auction) < now:
         complaint.status = 'pending'
         complaint.type = 'complaint'
         complaint.dateEscalated = now
-    elif complaint.status == 'answered' and calculate_business_date(complaint.dateAnswered, COMPLAINT_STAND_STILL_TIME, request.auction) < now:
+    elif complaint.status == 'answered' and calculate_business_date(complaint.dateAnswered, AUCTIONS_COMPLAINT_STAND_STILL_TIME, request.auction) < now:
         complaint.status = complaint.resolutionType
 
 
@@ -365,9 +396,9 @@ def auction_from_data(request, data, raise_error=True, create=True):
     procurementMethodType = data.get('procurementMethodType', 'belowThreshold')
     model = request.registry.auction_procurementMethodTypes.get(procurementMethodType)
     if model is None and raise_error:
-       request.errors.add('data', 'procurementMethodType', 'Not implemented')
+       request.errors.add('body', 'data', 'procurementMethodType is not implemented')
        request.errors.status = 415
-       raise error_handler(request.errors)
+       raise error_handler(request)
     update_logging_context(request, {'auction_type': procurementMethodType})
     if model is not None and create:
        model = model(data)
@@ -380,7 +411,7 @@ def extract_auction_adapter(request, auction_id):
     if doc is None or doc.get('doc_type') != 'Auction':
         request.errors.add('url', 'auction_id', 'Not Found')
         request.errors.status = 404
-        raise error_handler(request.errors)
+        raise error_handler(request)
 
     return request.auction_from_data(doc)
 
