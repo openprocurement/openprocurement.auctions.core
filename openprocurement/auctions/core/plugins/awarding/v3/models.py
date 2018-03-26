@@ -24,9 +24,11 @@ from openprocurement.auctions.core.validation import (
     validate_disallow_dgfPlatformLegalDetails
 )
 from openprocurement.auctions.core.plugins.awarding.v3.constants import (
-    AWARD_PAYMENT_TIME,
-    CONTRACT_SIGNING_TIME,
     VERIFY_AUCTION_PROTOCOL_TIME
+)
+from openprocurement.auctions.core.plugins.awarding.base.constants import (
+    CONTRACT_SIGNING_TIME,
+    AWARD_PAYMENT_TIME
 )
 
 

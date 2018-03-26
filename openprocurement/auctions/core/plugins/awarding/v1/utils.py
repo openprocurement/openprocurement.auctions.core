@@ -2,42 +2,10 @@
 from barbecue import chef
 
 from openprocurement.api.models import TZ, get_now
-
-
-def next_check_awarding(auction):
-    '''
-        Awarding part of generating next_check field
-    '''
-    checks = []
-    auction_complaints_status = any([i.status in auction.block_complaint_status for i in auction.complaints])
-    auction_award_complaints_status = any([i.status in auction.block_complaint_status for a in auction.awards for i in a.complaints])
-    auction_complaint_and_relatedLot = any([i.status in auction.block_complaint_status and i.relatedLot is None for i in auction.complaints])
-    if not auction.lots and auction.status == 'active.awarded' and not auction_complaints_status and not auction_award_complaints_status:
-        standStillEnds = [
-            a.complaintPeriod.endDate.astimezone(TZ)
-            for a in auction.awards
-            if a.complaintPeriod.endDate
-        ]
-        last_award_status = auction.awards[-1].status if auction.awards else ''
-        if standStillEnds and last_award_status == 'unsuccessful':
-            checks.append(max(standStillEnds))
-    elif auction.lots and auction.status in ['active.qualification', 'active.awarded'] and not auction_complaint_and_relatedLot:
-        for lot in auction.lots:
-            if lot['status'] != 'active':
-                continue
-            lot_awards = [i for i in auction.awards if i.lotID == lot.id]
-            pending_complaints = any([i['status'] in auction.block_complaint_status and i.relatedLot == lot.id for i in auction.complaints])
-            pending_awards_complaints = any([i.status in auction.block_complaint_status for a in lot_awards for i in a.complaints])
-            standStillEnds = [
-                a.complaintPeriod.endDate.astimezone(TZ)
-                for a in lot_awards
-                if a.complaintPeriod.endDate
-            ]
-            last_award_status = lot_awards[-1].status if lot_awards else ''
-            if not pending_complaints and not pending_awards_complaints and standStillEnds and last_award_status == 'unsuccessful':
-                checks.append(max(standStillEnds))
-    return min(checks) if checks else None
-
+from openprocurement.auctions.core.plugins.awarding.base.utils import (
+    make_award,
+    add_award_route_url
+)
 
 def add_next_award(request):
     auction = request.validated['auction']
@@ -82,23 +50,9 @@ def add_next_award(request):
             bids = chef(bids, features, unsuccessful_awards, True)
             if bids:
                 bid = bids[0]
-                award = type(auction).awards.model_class({
-                    'bid_id': bid['id'],
-                    'lotID': lot.id,
-                    'status': 'pending',
-                    'value': bid['value'],
-                    'date': get_now(),
-                    'suppliers': bid['tenderers'],
-                    'complaintPeriod': {
-                        'startDate': now.isoformat()
-                    }
-                })
+                award = make_award(request, auction, status, bid, now)
                 auction.awards.append(award)
-                request.response.headers['Location'] = request.route_url(
-                    '{}:Auction Awards'.format(awarding_type),
-                    auction_id=auction.id,
-                    award_id=award['id']
-                )
+                add_award_route_url(request, auction, award, awarding_type)
                 statuses.add('pending')
             else:
                 statuses.add('unsuccessful')
@@ -114,25 +68,47 @@ def add_next_award(request):
             bids = chef(auction.bids, auction.features or [], unsuccessful_awards, True)
             if bids:
                 bid = bids[0].serialize()
-                award = type(auction).awards.model_class({
-                    'bid_id': bid['id'],
-                    'status': 'pending',
-                    'date': get_now(),
-                    'value': bid['value'],
-                    'suppliers': bid['tenderers'],
-                    'complaintPeriod': {
-                        'startDate': get_now().isoformat()
-                    }
-                })
+                award = make_award(request, auction, status, bid, now)
                 auction.awards.append(award)
-                request.response.headers['Location'] = request.route_url(
-                    '{}:Auction Awards'.format(awarding_type),
-                    auction_id=auction.id,
-                    award_id=award['id']
-                )
+                add_award_route_url(request, auction, award, awarding_type)
         if auction.awards[-1].status == 'pending':
             auction.awardPeriod.endDate = None
             auction.status = 'active.qualification'
         else:
             auction.awardPeriod.endDate = now
             auction.status = 'active.awarded'
+
+
+def next_check_awarding(auction):
+    '''
+        Awarding part of generating next_check field
+    '''
+    checks = []
+    auction_complaints_status = any([i.status in auction.block_complaint_status for i in auction.complaints])
+    auction_award_complaints_status = any([i.status in auction.block_complaint_status for a in auction.awards for i in a.complaints])
+    auction_complaint_and_relatedLot = any([i.status in auction.block_complaint_status and i.relatedLot is None for i in auction.complaints])
+    if not auction.lots and auction.status == 'active.awarded' and not auction_complaints_status and not auction_award_complaints_status:
+        standStillEnds = [
+            a.complaintPeriod.endDate.astimezone(TZ)
+            for a in auction.awards
+            if a.complaintPeriod.endDate
+        ]
+        last_award_status = auction.awards[-1].status if auction.awards else ''
+        if standStillEnds and last_award_status == 'unsuccessful':
+            checks.append(max(standStillEnds))
+    elif auction.lots and auction.status in ['active.qualification', 'active.awarded'] and not auction_complaint_and_relatedLot:
+        for lot in auction.lots:
+            if lot['status'] != 'active':
+                continue
+            lot_awards = [i for i in auction.awards if i.lotID == lot.id]
+            pending_complaints = any([i['status'] in auction.block_complaint_status and i.relatedLot == lot.id for i in auction.complaints])
+            pending_awards_complaints = any([i.status in auction.block_complaint_status for a in lot_awards for i in a.complaints])
+            standStillEnds = [
+                a.complaintPeriod.endDate.astimezone(TZ)
+                for a in lot_awards
+                if a.complaintPeriod.endDate
+            ]
+            last_award_status = lot_awards[-1].status if lot_awards else ''
+            if not pending_complaints and not pending_awards_complaints and standStillEnds and last_award_status == 'unsuccessful':
+                checks.append(max(standStillEnds))
+    return min(checks) if checks else None
