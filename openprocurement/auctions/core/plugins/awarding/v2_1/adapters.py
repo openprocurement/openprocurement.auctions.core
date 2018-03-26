@@ -3,7 +3,6 @@ from .utils import (
     create_awards,
     switch_to_next_award,
     next_check_awarding,
-    check_award_status
 )
 
 from openprocurement.auctions.core.adapters import (
@@ -11,19 +10,18 @@ from openprocurement.auctions.core.adapters import (
 )
 
 
-class AwardingV3ConfiguratorMixin(object):
-    """Brings methods that are needed for the process of Awarding
+class AwardingV2_1ConfiguratorMixin(object):
+    """ Brings methods that are needed for the process of Awarding
         
         start_awarding - call after auction ends in auction view
         back_to_awarding - call when participant was disqualified
     """
     award_model = Award
-    awarding_type = 'awarding_3_0'
+    awarding_type = 'awarding_2_1'
 
     def start_awarding(self):
         """
-            Call create_awards method, that create specified in constant
-            number of awards in pending and pending.waiting status 
+            Call create_awards method, that create 2 awards for 2 bidders
         """
         return create_awards(self.request)
 
@@ -33,12 +31,8 @@ class AwardingV3ConfiguratorMixin(object):
         """
         return switch_to_next_award(self.request)
 
-    def check_award_status(self, request, award, now):
-        """Checking protocol and contract loading by the owner in time."""
-        return check_award_status(request, award, now)
 
-      
-class AwardingNextCheckV3(AuctionAwardingNextCheckAdapter):
-    """Use next_check_awarding from V3 awarding"""
+class AwardingNextCheckV2_1(AuctionAwardingNextCheckAdapter):
+    """Use next_check_awarding from V2 awarding"""
     def add_awarding_checks(self, auction):
         return next_check_awarding(auction)

@@ -355,9 +355,10 @@ def patch_auction_award_participant_disqualification(self):
     response = self.app.patch_json(url, json_data,  status=403)
     self.assertEqual(response.status, '403 Forbidden')
     self.assertEqual(response.content_type, 'application/json')
-    self.assertEqual(response.json['errors'][0]["description"],
-                     'You cannot disqualify the bidder whose'
-                     ' contract has already been activated.')
+    self.assertEqual(
+        response.json['errors'][0]["description"],
+        'You cannot disqualify the bidder the contract for whom has already been downloaded.'
+    )
 
 
 def invalid_patch_auction_award(self):

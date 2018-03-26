@@ -2,9 +2,6 @@
 from barbecue import chef
 
 from openprocurement.api.models import TZ, get_now
-from openprocurement.api.utils import (
-    get_awarding_type_by_procurement_method_type
-)
 
 
 def next_check_awarding(auction):
@@ -44,9 +41,7 @@ def next_check_awarding(auction):
 
 def add_next_award(request):
     auction = request.validated['auction']
-    awarding_type = get_awarding_type_by_procurement_method_type(
-        auction.procurementMethodType
-    )
+    awarding_type = request.content_configurator.awarding_type
     now = get_now()
     if not auction.awardPeriod:
         auction.awardPeriod = type(auction).awardPeriod({})

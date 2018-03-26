@@ -388,7 +388,19 @@ def patch_auction_contract_document(self):
     doc_id = response.json["data"]['id']
     self.assertIn(doc_id, response.headers['Location'])
 
-    response = self.app.patch_json('/auctions/{}/contracts/{}/documents/{}'.format(self.auction_id, self.contract_id, doc_id), {"data": {"description": "document description"}})
+    response = self.app.patch_json(
+        '/auctions/{}/contracts/{}/documents/{}'.format(
+            self.auction_id,
+            self.contract_id,
+            doc_id
+        ),
+        {
+            "data": {
+                "description": "document description",
+                "documentType": "contractSigned",
+            },
+        }
+    )
     self.assertEqual(response.status, '200 OK')
     self.assertEqual(response.content_type, 'application/json')
     self.assertEqual(doc_id, response.json["data"]["id"])
