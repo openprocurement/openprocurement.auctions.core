@@ -42,7 +42,7 @@ def create_awards(request):
     bids_to_qualify = get_bids_to_qualify(bids)
     for bid, status in izip_longest(bids[:bids_to_qualify], ['pending'], fillvalue='pending.waiting'):
         bid = bid.serialize()
-        award = make_award(request, auction, status, bid, now)
+        award = make_award(request, auction, bid, status, now)
         if bid['status'] == 'invalid':
             award.status = 'unsuccessful'
             award.complaintPeriod.endDate = now
@@ -91,10 +91,10 @@ def next_check_awarding(auction):
 def check_award_status(request, award, now):
     """Checking protocol and contract loading by the owner in time."""
     auction = request.validated['auction']
-    protocol_overdue = protocol_overdue_predicate(award, need_status, now)
+    protocol_overdue = protocol_overdue_predicate(award, 'pending', now)
     # seek for contract overdue
     related_contract = get_related_contract_of_award(award['id'], auction)
-    contract_overdue = contract_overdue_predicate(related_contract, now) if related_contract else None
+    contract_overdue = contract_overdue_predicate(related_contract,'pending', now) if related_contract else None
 
     if protocol_overdue or contract_overdue:
         set_unsuccessful_award(request, auction, award, now)

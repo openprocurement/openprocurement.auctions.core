@@ -65,6 +65,7 @@ class Award(BaseAward):
 
     @serializable(serialized_name="verificationPeriod", serialize_when_none=False)
     def award_verificationPeriod(self):
+        import pdb; pdb.set_trace()
         period = self.verificationPeriod
         if not period:
             return
@@ -75,6 +76,7 @@ class Award(BaseAward):
 
     @serializable(serialized_name="paymentPeriod", serialize_when_none=False)
     def award_paymentPeriod(self):
+        import pdb; pdb.set_trace()
         period = self.paymentPeriod
         if not period:
             return
@@ -85,6 +87,7 @@ class Award(BaseAward):
 
     @serializable(serialized_name="signingPeriod", serialize_when_none=False)
     def award_signingPeriod(self):
+        import pdb; pdb.set_trace()
         period = self.signingPeriod
         if not period:
             return

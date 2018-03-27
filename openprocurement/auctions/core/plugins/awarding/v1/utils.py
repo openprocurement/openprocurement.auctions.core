@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 from barbecue import chef
 
-from openprocurement.api.models import TZ, get_now
+from openprocurement.api.models import get_now
 from openprocurement.auctions.core.plugins.awarding.base.utils import (
     make_award,
-    add_award_route_url
+    add_award_route_url,
+    set_stand_still_ends
 )
 
 def add_next_award(request):
@@ -50,7 +51,7 @@ def add_next_award(request):
             bids = chef(bids, features, unsuccessful_awards, True)
             if bids:
                 bid = bids[0]
-                award = make_award(request, auction, status, bid, now)
+                award = make_award(request, auction, bid, 'pending', now)
                 auction.awards.append(award)
                 add_award_route_url(request, auction, award, awarding_type)
                 statuses.add('pending')
@@ -68,7 +69,7 @@ def add_next_award(request):
             bids = chef(auction.bids, auction.features or [], unsuccessful_awards, True)
             if bids:
                 bid = bids[0].serialize()
-                award = make_award(request, auction, status, bid, now)
+                award = make_award(request, auction, 'pending', bid, now)
                 auction.awards.append(award)
                 add_award_route_url(request, auction, award, awarding_type)
         if auction.awards[-1].status == 'pending':

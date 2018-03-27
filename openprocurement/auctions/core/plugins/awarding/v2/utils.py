@@ -43,7 +43,7 @@ def create_awards(request):
         if i == 0:
             status = 'pending.verification'
         bid = bids[i].serialize()
-        award = make_award(request, auction, status, bid, now)
+        award = make_award(request, auction, bid, status, now)
         if bid['status'] == 'invalid':
             award.status = 'unsuccessful'
             award.complaintPeriod.endDate = now
@@ -94,8 +94,8 @@ def next_check_awarding(auction):
 def check_award_status(request, award, now):
     """Checking required documents loading and payment recieving in time."""
     auction = request.validated['auction']
-    protocol_overdue = protocol_overdue_predicate(award, need_status, now)
-    contract_overdue = contract_overdue_predicate(award, need_status, now)
+    protocol_overdue = protocol_overdue_predicate(award, 'pending.verification', now)
+    contract_overdue = contract_overdue_predicate(award, 'active', now)
     payment_overdue = (award.status == 'pending.payment' and award['paymentPeriod']['endDate'] < now)
     if protocol_overdue or contract_overdue or payment_overdue:
         set_unsuccessful_award(request, auction, award, now)
