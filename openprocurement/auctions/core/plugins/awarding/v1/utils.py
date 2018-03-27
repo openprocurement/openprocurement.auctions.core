@@ -52,7 +52,8 @@ def add_next_award(request):
             bids = chef(bids, features, unsuccessful_awards, True)
             if bids:
                 bid = bids[0]
-                award = make_award(request, auction, bid, 'pending', now, lot_id=lot.id, parent=True)
+                award = make_award(request, auction, bid, 'pending', now,
+                                   lot_id=lot.id, parent=None)
                 auction.awards.append(award)
                 add_award_route_url(request, auction, award, awarding_type)
                 statuses.add('pending')
