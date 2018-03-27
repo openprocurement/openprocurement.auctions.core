@@ -21,17 +21,19 @@ def invalidate_bids_under_threshold(auction):
             bid['status'] = 'invalid'
 
 
-def make_award(request, auction, bid, status, now):
-    award = type(auction).awards.model_class({
-        'bid_id': bid['id'],
-        'status': status,
-        'date': now,
-        'value': bid['value'],
-        'suppliers': bid['tenderers'],
-        'complaintPeriod': {
-            'startDate': now.isoformat()
-        }
-    })
+def make_award(request, auction, bid, status, now, lot_id=None, parent=None):
+    data = {}
+    if parent:
+        data['__parent__'] = request.context
+    data['bid_id'] = bid['id']
+    data['status'] = status
+    data['date'] = now
+    data['value'] = bid['value']
+    data['suppliers'] = bid['tenderers']
+    data['complaintPeriod'] = {'startDate': now.isoformat()}
+    if lot_id:
+        data['lotID'] = lot_id
+    award = type(auction).awards.model_class(data)
     return award
 
 

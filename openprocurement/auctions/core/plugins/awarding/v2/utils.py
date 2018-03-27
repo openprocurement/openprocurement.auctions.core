@@ -43,7 +43,7 @@ def create_awards(request):
         if i == 0:
             status = 'pending.verification'
         bid = bids[i].serialize()
-        award = make_award(request, auction, bid, status, now)
+        award = make_award(request, auction, bid, status, now, parent=True)
         if bid['status'] == 'invalid':
             award.status = 'unsuccessful'
             award.complaintPeriod.endDate = now

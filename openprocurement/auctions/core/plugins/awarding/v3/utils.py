@@ -42,7 +42,7 @@ def create_awards(request):
     bids_to_qualify = get_bids_to_qualify(bids)
     for bid, status in izip_longest(bids[:bids_to_qualify], ['pending'], fillvalue='pending.waiting'):
         bid = bid.serialize()
-        award = make_award(request, auction, bid, status, now)
+        award = make_award(request, auction, bid, status, now, parent=True)
         if bid['status'] == 'invalid':
             award.status = 'unsuccessful'
             award.complaintPeriod.endDate = now

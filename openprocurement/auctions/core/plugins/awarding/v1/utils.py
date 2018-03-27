@@ -8,6 +8,7 @@ from openprocurement.auctions.core.plugins.awarding.base.utils import (
     set_stand_still_ends
 )
 
+
 def add_next_award(request):
     auction = request.validated['auction']
     awarding_type = request.content_configurator.awarding_type
@@ -51,7 +52,7 @@ def add_next_award(request):
             bids = chef(bids, features, unsuccessful_awards, True)
             if bids:
                 bid = bids[0]
-                award = make_award(request, auction, bid, 'pending', now)
+                award = make_award(request, auction, bid, 'pending', now, lot_id=lot.id, parent=True)
                 auction.awards.append(award)
                 add_award_route_url(request, auction, award, awarding_type)
                 statuses.add('pending')
@@ -69,7 +70,7 @@ def add_next_award(request):
             bids = chef(auction.bids, auction.features or [], unsuccessful_awards, True)
             if bids:
                 bid = bids[0].serialize()
-                award = make_award(request, auction, 'pending', bid, now)
+                award = make_award(request, auction, bid, 'pending', now, parent=None)
                 auction.awards.append(award)
                 add_award_route_url(request, auction, award, awarding_type)
         if auction.awards[-1].status == 'pending':
@@ -78,7 +79,6 @@ def add_next_award(request):
         else:
             auction.awardPeriod.endDate = now
             auction.status = 'active.awarded'
-
 
 def next_check_awarding(auction):
     '''
