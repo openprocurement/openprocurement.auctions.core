@@ -5,9 +5,9 @@ from openprocurement.api.models import TZ, get_now
 
 
 def next_check_awarding(auction):
-    '''
-        Awarding part of generating next_check field
-    '''
+    """
+    Awarding part of generating next_check field
+    """
     checks = []
     auction_complaints_status = any([i.status in auction.block_complaint_status for i in auction.complaints])
     auction_award_complaints_status = any([i.status in auction.block_complaint_status for a in auction.awards for i in a.complaints])

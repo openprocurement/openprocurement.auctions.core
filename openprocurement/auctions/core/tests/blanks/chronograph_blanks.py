@@ -2,7 +2,6 @@
 from datetime import timedelta
 
 from openprocurement.api.models import get_now
-from openprocurement.api.utils import check_status
 
 
 # AuctionSwitchAuctionResourceTest

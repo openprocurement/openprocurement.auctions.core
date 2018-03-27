@@ -4,10 +4,11 @@ from schematics.types.compound import (
 
 from openprocurement.api.models import (
     ListType,
-    Contract as BaseContract,
 )
+
 from openprocurement.auctions.core.models import (
     flashItem as Item,
+    Contract as BaseContract,
     Document
 )
 

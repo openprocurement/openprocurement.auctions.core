@@ -18,16 +18,21 @@ class Root(object):
         (Deny, 'broker05', 'create_complaint'),
         (Deny, 'broker05', 'create_question'),
         (Deny, 'broker05', 'create_auction'),
+        (Deny, 'broker05', 'create_tender'),
         (Allow, 'g:brokers', 'create_bid'),
         (Allow, 'g:brokers', 'create_complaint'),
         (Allow, 'g:brokers', 'create_question'),
         (Allow, 'g:brokers', 'create_auction'),
+        (Allow, 'g:brokers', 'create_tender'),
         (Allow, 'g:auction', 'auction'),
         (Allow, 'g:auction', 'upload_auction_documents'),
+        (Allow, 'g:auction', 'upload_tender_documents'),
         (Allow, 'g:contracting', 'extract_credentials'),
         (Allow, 'g:chronograph', 'edit_auction'),
+        (Allow, 'g:chronograph', 'edit_tender'),
         (Allow, 'g:convoy', 'edit_auction'),
         (Allow, 'g:Administrator', 'edit_auction'),
+        (Allow, 'g:Administrator', 'edit_tender'),
         (Allow, 'g:Administrator', 'edit_auction_award'),
         (Allow, 'g:Administrator', 'edit_bid'),
         (Allow, 'g:admins', ALL_PERMISSIONS),
@@ -45,7 +50,7 @@ def get_item(parent, key, request):
         from openprocurement.auctions.core.utils import error_handler
         request.errors.add('url', '{}_id'.format(key), 'Not Found')
         request.errors.status = 404
-        raise error_handler(request.errors)
+        raise error_handler(request)
     else:
         if key == 'document':
             request.validated['{}s'.format(key)] = items

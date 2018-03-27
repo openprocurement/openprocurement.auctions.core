@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 from datetime import timedelta, datetime
 
-from openprocurement.api.models import ORA_CODES, TZ
+from openprocurement.api.models import TZ
 from openprocurement.auctions.core.utils import read_json
 
 DOCUMENT_TYPE_OFFLINE = ['x_dgfAssetFamiliarization']
 DOCUMENT_TYPE_URL_ONLY = ['virtualDataRoom', 'x_dgfPublicAssetCertificate', 'x_dgfPlatformLegalDetails']
 
-ORA_CODES = ORA_CODES[:]
+ORA_CODES = [i['code'] for i in read_json('OrganisationRegistrationAgency.json')['data']]
 ORA_CODES[0:0] = ["UA-IPN", "UA-FIN"]
 
 CAV_CODES_FLASH = read_json('cav_flash.json')
@@ -48,3 +48,20 @@ DGF_ELIGIBILITY_CRITERIA = {
 }
 
 DGF_PLATFORM_LEGAL_DETAILS_FROM = datetime(2016, 12, 23, tzinfo=TZ)
+
+
+AWARDING_OF_PROCUREMENT_METHOD_TYPE = {
+    'belowThreshold': 'awarding_1_0',
+    'dgfFinancialAssets': 'awarding_3_0',
+    'dgfOtherAssets': 'awarding_3_0',
+    'dgfInsider': 'awarding_3_0',
+}
+
+ADDITIONAL_CLASSIFICATIONS_SCHEMES = [u'ДКПП', u'NONE', u'ДК003', u'ДК015', u'ДК018']
+
+# Declares what roles can interact with document in different statuses
+STATUS4ROLE = {
+    'complaint_owner': ['draft', 'answered'],
+    'reviewers': ['pending'],
+    'tender_owner': ['claim'],
+}

@@ -8,20 +8,19 @@ from openprocurement.api.utils import (
     APIResource,
 )
 from openprocurement.api.validation import (
-    validate_file_update,
-    validate_file_upload,
-    validate_patch_document_data,
+    validate_patch_document_data
+)
+
+from openprocurement.auctions.core.plugins.contracting.v3.validators import (
+    validate_contract_document
 )
 from openprocurement.auctions.core.utils import (
     save_auction,
     apply_patch,
     opresource,
 )
-from openprocurement.auctions.core.plugins.contracting.v3.validators import (
-    validate_contract_document
-)
-from openprocurement.auctions.core.plugins.contracting.v3.utils.prolongation import (
-    ProlongationManager
+from openprocurement.auctions.core.validation import (
+    validate_file_upload
 )
 
 
