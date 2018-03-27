@@ -98,4 +98,4 @@ def check_award_status(request, award, now):
     contract_overdue = contract_overdue_predicate(award, need_status, now)
     payment_overdue = (award.status == 'pending.payment' and award['paymentPeriod']['endDate'] < now)
     if protocol_overdue or contract_overdue or payment_overdue:
-        set_unsuccessful_award(request, auction, award)
+        set_unsuccessful_award(request, auction, award, now)

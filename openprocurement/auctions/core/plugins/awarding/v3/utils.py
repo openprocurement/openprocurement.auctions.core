@@ -97,4 +97,4 @@ def check_award_status(request, award, now):
     contract_overdue = contract_overdue_predicate(related_contract, now) if related_contract else None
 
     if protocol_overdue or contract_overdue:
-        set_unsuccessful_award(request, auction, award)
+        set_unsuccessful_award(request, auction, award, now)

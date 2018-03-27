@@ -6,6 +6,7 @@ def awarded_predicate(auction):
         and not any([i.status in auction.block_complaint_status for a in auction.awards for i in a.complaints])
     )
 
+
 def awarded_and_lots_predicate(auction):
     return (
         auction.lots
@@ -13,10 +14,11 @@ def awarded_and_lots_predicate(auction):
         and not any([i.status in auction.block_complaint_status and i.relatedLot is None for i in auction.complaints])
     )
 
-def contract_overdue_predicate(contract, need_status, now):
+
+def contract_overdue_predicate(item, need_status, now):
     return (
-        award.status == need_status
-        and award['signingPeriod']['endDate'] < now
+        item.status == need_status
+        and item['signingPeriod']['endDate'] < now
     )
 
 
