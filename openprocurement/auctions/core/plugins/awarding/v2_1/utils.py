@@ -7,16 +7,14 @@ from openprocurement.api.utils import (
     calculate_business_date
 )
 
-from openprocurement.auctions.core.plugins.awarding.base.constants import (
-    NUMBER_OF_BIDS_TO_BE_QUALIFIED
-)
-
 from openprocurement.auctions.core.plugins.awarding.base.utils import (
     check_auction_protocol,
     invalidate_bids_under_threshold,
     make_award,
     check_lots_awarding,
-    add_award_route_url
+    add_award_route_url,
+    set_stand_still_ends,
+    get_bids_to_qualify
 )
 
 from openprocurement.auctions.core.plugins.awarding.base.predicates import (
@@ -38,11 +36,8 @@ def create_awards(request):
     awarding_type = request.content_configurator.awarding_type
     bids = chef(auction.bids, auction.features or [], [], True)
     # minNumberOfQualifiedBids == 1
-    bids_to_qualify = NUMBER_OF_BIDS_TO_BE_QUALIFIED if (len(bids) > NUMBER_OF_BIDS_TO_BE_QUALIFIED) else len(bids)
-
-    for bid, status in izip_longest(bids[:bids_to_qualify],
-                                    ['pending.verification'],
-                                    fillvalue='pending.waiting'):
+    bids_to_qualify = get_bids_to_qualify(bids)
+    for bid, status in izip_longest(bids[:bids_to_qualify], ['pending.verification'], fillvalue='pending.waiting'):
         bid = bid.serialize()
         award = make_award(request, auction, status, bid, now)
         if bid['status'] == 'invalid':
@@ -73,10 +68,10 @@ def switch_to_next_award(request):
 def next_check_awarding(auction):
     checks = []
     if awarded_predicate(auction):
-        standStillEnds = [a.complaintPeriod.endDate.astimezone(TZ) for a in auction.awards if a.complaintPeriod.endDate]
+        stand_still_ends = set_stand_still_ends(auction.awards)
         last_award_status = auction.awards[-1].status if auction.awards else ''
-        if standStillEnds and last_award_status == 'unsuccessful':
-            checks.append(max(standStillEnds))
+        if stand_still_ends and last_award_status == 'unsuccessful':
+            checks.append(max(stand_still_ends))
     elif awarded_and_lots_predicate(auction):
         checks = check_lots_awarding(auction)
     return min(checks) if checks else None

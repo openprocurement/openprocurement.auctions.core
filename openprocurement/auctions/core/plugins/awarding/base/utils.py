@@ -1,3 +1,6 @@
+from openprocurement.api.models import TZ
+from constants import NUMBER_OF_BIDS_TO_BE_QUALIFIED
+
 def check_auction_protocol(award):
     if award.documents:
         for document in award.documents:
@@ -44,11 +47,11 @@ def check_pending_awards_complaints(auction):
             if item.status in auction.block_complaint_status:
                 return True
 
-def set_stand_still_ends(lot_awards):
+def set_stand_still_ends(awards):
     stand_still_ends = []
-    for award in lot_awards:
+    for award in awards:
         if award.complaintPeriod.endDate:
-            stand_still_ends.append(a.complaintPeriod.endDate.astimezone(TZ))
+            stand_still_ends.append(award.complaintPeriod.endDate.astimezone(TZ))
     return stand_still_ends
 
 
@@ -88,3 +91,8 @@ def add_award_route_url(request, auction, award, awarding_type):
     request.response.headers['Location'] = route_url
     return True
 
+def get_bids_to_qualify(bids):
+    len_bids = len(bids)
+    if len_bids > NUMBER_OF_BIDS_TO_BE_QUALIFIED:
+        return NUMBER_OF_BIDS_TO_BE_QUALIFIED
+    return len_bids

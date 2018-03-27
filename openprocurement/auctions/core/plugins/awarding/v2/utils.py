@@ -5,22 +5,22 @@ from openprocurement.api.utils import (
     get_now
 )
 
-from openprocurement.auctions.core.plugins.awarding.base.constants import (
-    NUMBER_OF_BIDS_TO_BE_QUALIFIED
-)
-
 from openprocurement.auctions.core.plugins.awarding.base.utils import (
     check_auction_protocol,
     invalidate_bids_under_threshold,
     make_award,
     check_lots_awarding,
+    add_award_route_url,
+    set_stand_still_ends,
     set_unsuccessful_award,
-    add_award_route_url
+    get_bids_to_qualify
 )
 
 from openprocurement.auctions.core.plugins.awarding.base.predicates import (
     awarded_predicate,
-    awarded_and_lots_predicate
+    awarded_and_lots_predicate,
+    contract_overdue_predicate,
+    protocol_overdue_predicate
 )
 
 
@@ -37,7 +37,7 @@ def create_awards(request):
     awarding_type = request.content_configurator.awarding_type
     valid_bids = [bid for bid in auction.bids if bid['value'] is not None]
     bids = chef(valid_bids, auction.features or [], [], True)
-    bids_to_qualify = NUMBER_OF_BIDS_TO_BE_QUALIFIED if (len(bids) > NUMBER_OF_BIDS_TO_BE_QUALIFIED) else len(bids)
+    bids_to_qualify = get_bids_to_qualify(bids)
     for i in xrange(0, bids_to_qualify):
         status = 'pending.waiting'
         if i == 0:
@@ -73,14 +73,13 @@ def switch_to_next_award(request):
 def next_check_awarding(auction):
     checks = []
     if awarded_predicate(auction):
-        standStillEnds = [a.complaintPeriod.endDate.astimezone(TZ) for a in auction.awards if a.complaintPeriod.endDate]
+        stand_still_ends = set_stand_still_ends(auction.awards)
         for award in auction.awards:
             if award.status == 'active':
                 checks.append(award.signingPeriod.endDate.astimezone(TZ))
-
         last_award_status = auction.awards[-1].status if auction.awards else ''
-        if standStillEnds and last_award_status == 'unsuccessful':
-            checks.append(max(standStillEnds))
+        if stand_still_ends and last_award_status == 'unsuccessful':
+            checks.append(max(stand_still_ends))
     elif not auction.lots and auction.status == 'active.qualification':
         for award in auction.awards:
             if award.status == 'pending.verification':
@@ -95,11 +94,8 @@ def next_check_awarding(auction):
 def check_award_status(request, award, now):
     """Checking required documents loading and payment recieving in time."""
     auction = request.validated['auction']
-    protocol_overdue = (award.status == 'pending.verification' and
-                        award['verificationPeriod']['endDate'] < now)
-    contract_overdue = (award.status == 'active' and
-                        award['signingPeriod']['endDate'] < now)
-    payment_overdue = (award.status == 'pending.payment' and
-                       award['paymentPeriod']['endDate'] < now)
+    protocol_overdue = protocol_overdue_predicate(award, need_status, now)
+    contract_overdue = contract_overdue_predicate(award, need_status, now)
+    payment_overdue = (award.status == 'pending.payment' and award['paymentPeriod']['endDate'] < now)
     if protocol_overdue or contract_overdue or payment_overdue:
         set_unsuccessful_award(request, auction, award)
