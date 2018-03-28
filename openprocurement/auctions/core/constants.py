@@ -49,14 +49,6 @@ DGF_ELIGIBILITY_CRITERIA = {
 
 DGF_PLATFORM_LEGAL_DETAILS_FROM = datetime(2016, 12, 23, tzinfo=TZ)
 
-
-AWARDING_OF_PROCUREMENT_METHOD_TYPE = {
-    'belowThreshold': 'awarding_1_0',
-    'dgfFinancialAssets': 'awarding_3_0',
-    'dgfOtherAssets': 'awarding_3_0',
-    'dgfInsider': 'awarding_3_0',
-}
-
 ADDITIONAL_CLASSIFICATIONS_SCHEMES = [u'ДКПП', u'NONE', u'ДК003', u'ДК015', u'ДК018']
 
 # Declares what roles can interact with document in different statuses

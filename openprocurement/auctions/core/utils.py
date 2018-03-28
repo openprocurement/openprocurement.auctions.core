@@ -14,7 +14,7 @@ from pyramid.exceptions import URLDecodeError
 from schematics.exceptions import ModelValidationError
 
 from openprocurement.api.constants import (
-    TZ, SANDBOX_MODE, AWARDING_OF_PROCUREMENT_METHOD_TYPE,
+    TZ, SANDBOX_MODE,
     AUCTIONS_COMPLAINT_STAND_STILL_TIME
 )
 from openprocurement.api.validation import error_handler
@@ -71,10 +71,7 @@ class awardingTypePredicate(object):
             if not procurement_method_type:
                 return False
 
-            desirable_awarding_version = \
-                AWARDING_OF_PROCUREMENT_METHOD_TYPE.get(
-                    procurement_method_type
-                )
+            desirable_awarding_version = request.content_configurator.awarding_type
             return desirable_awarding_version == self.val
 
         return False

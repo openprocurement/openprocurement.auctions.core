@@ -1,4 +1,4 @@
-def validate_contract_create(request):
+def validate_contract_create(request, **kwargs):
     if request.validated['auction'].status not in ['active.qualification', 'active.awarded']:
         request.errors.add('body', 'data',
                                 'Can\'t add contract in current ({}) auction status'.format(request.validated['auction'].status))
@@ -6,7 +6,7 @@ def validate_contract_create(request):
         return
 
 
-def validate_contract_update(request):
+def validate_contract_update(request, **kwargs):
     if request.validated['auction_status'] not in ['active.qualification', 'active.awarded']:
         request.errors.add('body', 'data', 'Can\'t update contract in current ({}) auction status'.format(
             request.validated['auction_status']))
