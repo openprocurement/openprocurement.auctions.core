@@ -1,14 +1,13 @@
 # -*- coding: utf-8 -*-
-from openprocurement.api.models import (
-    STAND_STILL_TIME,
-    get_now
-)
 from openprocurement.api.utils import (
+    get_now,
     json_view,
     context_unpack,
     APIResource,
     calculate_business_date,
 )
+
+from openprocurement.auctions.core.models import STAND_STILL_TIME
 from openprocurement.auctions.core.utils import (
     apply_patch,
     save_auction,

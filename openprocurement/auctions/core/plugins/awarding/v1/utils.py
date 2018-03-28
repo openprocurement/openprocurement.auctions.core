@@ -8,7 +8,6 @@ from openprocurement.auctions.core.plugins.awarding.base.utils import (
     set_stand_still_ends
 )
 
-
 def add_next_award(request):
     auction = request.validated['auction']
     awarding_type = request.content_configurator.awarding_type

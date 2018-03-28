@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
+import os
 import unittest
 import webtest
-import os
-from uuid import uuid4
 from types import FunctionType
-from openprocurement.api.utils import VERSION
+from uuid import uuid4
+
+from openprocurement.api.constants import VERSION
 from openprocurement.api.design import sync_design
 
 

@@ -1,5 +1,6 @@
-from openprocurement.api.constants import STATUS4ROLE
 from openprocurement.api.utils import get_now
+
+from openprocurement.auctions.core.constants import STATUS4ROLE
 
 
 def validate_award_patch(request):

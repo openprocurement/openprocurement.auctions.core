@@ -9,19 +9,17 @@ from schematics.types.serializable import serializable
 from openprocurement.api.models import (
     ModelType,
     ListType,
-    Period,
-    Award as BaseAward
+    Period
 )
 from openprocurement.api.utils import calculate_business_date
+
 from openprocurement.auctions.core.models import (
     get_auction,
     dgfDocument as Document,
     dgfComplaint as Complaint,
     dgfItem as Item,
-    dgfOrganization as Organization
-)
-from openprocurement.auctions.core.validation import (
-    validate_disallow_dgfPlatformLegalDetails
+    dgfOrganization as Organization,
+    Award as BaseAward
 )
 from openprocurement.auctions.core.plugins.awarding.v3.constants import (
     VERIFY_AUCTION_PROTOCOL_TIME
@@ -29,6 +27,9 @@ from openprocurement.auctions.core.plugins.awarding.v3.constants import (
 from openprocurement.auctions.core.plugins.awarding.base.constants import (
     CONTRACT_SIGNING_TIME,
     AWARD_PAYMENT_TIME
+)
+from openprocurement.auctions.core.validation import (
+    validate_disallow_dgfPlatformLegalDetails
 )
 
 

@@ -80,6 +80,11 @@ def check_lots_awarding(auction):
     return checks
 
 
+def set_award_status_unsuccessful(award, now):
+    award.status = 'unsuccessful'
+    award.complaintPeriod.endDate = now
+
+
 def set_unsuccessful_award(request, auction, award, now):
     if award.status == 'active':
         auction.awardPeriod.endDate = None
@@ -87,8 +92,7 @@ def set_unsuccessful_award(request, auction, award, now):
         for contract in auction.contracts:
             if contract.awardID == award.id:
                 contract.status = 'cancelled'
-    award.status = 'unsuccessful'
-    award.complaintPeriod.endDate = now
+    set_award_status_unsuccessful(award, now)
     request.content_configurator.back_to_awarding()
 
 
@@ -104,3 +108,4 @@ def get_bids_to_qualify(bids):
     if len_bids > NUMBER_OF_BIDS_TO_BE_QUALIFIED:
         return NUMBER_OF_BIDS_TO_BE_QUALIFIED
     return len_bids
+

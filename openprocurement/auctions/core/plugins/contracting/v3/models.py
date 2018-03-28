@@ -1,13 +1,13 @@
 # -*- coding:utf-8 -*-
 from uuid import uuid4
 
-from schematics.types import StringType, MD5Type
-from schematics.types.compound import ModelType
 from schematics.exceptions import ValidationError
 from schematics.transforms import (
     blacklist,
     whitelist
 )
+from schematics.types import StringType, MD5Type
+from schematics.types.compound import ModelType
 
 from openprocurement.api.models import (
     ListType,
@@ -16,23 +16,20 @@ from openprocurement.api.models import (
     Model,
     get_now,
 )
-from openprocurement.api.models import (
-    Contract as BaseContract
-)
 from openprocurement.api.utils import calculate_business_date
-from openprocurement.auctions.core.validation import (
-    validate_disallow_dgfPlatformLegalDetails
-)
+
 from openprocurement.auctions.core.models import (
     dgfOrganization as Organization,
     dgfItem as Item,
     dgfDocument as BaseDocument,
     dgfComplaint as Complaint,
+    Contract as BaseContract
 )
 from openprocurement.auctions.core.plugins.contracting.v3.constants import (
-    PROLONGATION_SHORT_PERIOD,
-    PROLONGATION_LONG_PERIOD,
     PROLONGATION_DATE_PUBLISHED_LIMIT_PERIOD,
+)
+from openprocurement.auctions.core.validation import (
+    validate_disallow_dgfPlatformLegalDetails
 )
 
 

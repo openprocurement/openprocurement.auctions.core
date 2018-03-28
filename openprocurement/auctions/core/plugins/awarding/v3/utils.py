@@ -15,7 +15,8 @@ from openprocurement.auctions.core.plugins.awarding.base.utils import (
     add_award_route_url,
     set_stand_still_ends,
     set_unsuccessful_award,
-    get_bids_to_qualify
+    get_bids_to_qualify,
+    set_award_status_unsuccessful
 )
 
 from openprocurement.auctions.core.plugins.awarding.base.predicates import (
@@ -44,8 +45,7 @@ def create_awards(request):
         bid = bid.serialize()
         award = make_award(request, auction, bid, status, now, parent=True)
         if bid['status'] == 'invalid':
-            award.status = 'unsuccessful'
-            award.complaintPeriod.endDate = now
+            set_award_status_unsuccessful(award, now)
         if award.status == 'pending':
             award.signingPeriod = award.verificationPeriod = {'startDate': now}
             add_award_route_url(request, auction, award, awarding_type)
