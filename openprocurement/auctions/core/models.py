@@ -21,7 +21,6 @@ from schematics.types import (
     MD5Type,
     BooleanType,
     FloatType,
-    DecimalType,
     BaseType
 )
 from schematics.types.serializable import serializable
@@ -46,7 +45,8 @@ from openprocurement.api.models import (
     schematics_default_role,
     IsoDateTimeType,
     Guarantee,
-    Period
+    Period,
+    DecimalType
 )
 from openprocurement.api.utils import get_now
 
