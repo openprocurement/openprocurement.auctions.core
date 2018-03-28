@@ -35,7 +35,8 @@ class ProlongationManager(object):
         contract.signingPeriod.endDate = calculate_business_date(
             contract.signingPeriod.startDate,
             prolongation_period,
-            context=auction
+            context=auction,
+            working_days=True
         )
 
     def _check_documents_are_present(self):
