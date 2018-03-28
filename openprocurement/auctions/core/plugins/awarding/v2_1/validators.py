@@ -3,7 +3,7 @@ from openprocurement.api.utils import get_now
 from openprocurement.auctions.core.constants import STATUS4ROLE
 
 
-def validate_award_patch(request):
+def validate_award_patch(request, **kwargs):
     if request.validated['auction'].status not in ['active.qualification', 'active.awarded']:
         request.errors.add('body', 'data',
                                 'Can\'t update award in current ({}) auction status'.format(request.validated['auction'].status))
@@ -15,7 +15,7 @@ def validate_award_patch(request):
         return
 
 
-def validate_complaint_create(request):
+def validate_complaint_create(request, **kwargs):
     if request.validated['auction'].status not in ['active.qualification', 'active.awarded']:
         request.errors.add('body', 'data',
                                 'Can\'t add complaint in current ({}) auction status'.format(auction.status))
@@ -33,7 +33,7 @@ def validate_complaint_create(request):
         return
 
 
-def validate_complaint_patch(request):
+def validate_complaint_patch(request, **kwargs):
     if request.validated['auction'].status not in ['active.qualification', 'active.awarded']:
         request.errors.add('body', 'data',
                                 'Can\'t update complaint in current ({}) auction status'.format(request.validated['auction'].status))
@@ -50,7 +50,7 @@ def validate_complaint_patch(request):
         return
 
 
-def validate_complaint_document_create(request):
+def validate_complaint_document_create(request, **kwargs):
     if request.validated['auction_status'] not in ['active.qualification', 'active.awarded']:
         request.errors.add('body', 'data', 'Can\'t add document in current ({}) auction status'.format(
             request.validated['auction_status']))
@@ -68,7 +68,7 @@ def validate_complaint_document_create(request):
         return
 
 
-def validate_complaint_document_update(request):
+def validate_complaint_document_update(request, **kwargs):
     if request.authenticated_role != request.context.author:
         request.errors.add('url', 'role', 'Can update document only author')
         request.errors.status = 403

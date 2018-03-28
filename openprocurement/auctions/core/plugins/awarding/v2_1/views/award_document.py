@@ -7,9 +7,11 @@ from openprocurement.api.utils import (
     upload_file,
     update_file_content_type
 )
-from openprocurement.api.validation import (
+from openprocurement.auctions.core.validation import (
     validate_file_update,
-    validate_file_upload,
+    validate_file_upload
+)
+from openprocurement.api.validation import (
     validate_patch_document_data
 )
 from openprocurement.auctions.core.validation import (
