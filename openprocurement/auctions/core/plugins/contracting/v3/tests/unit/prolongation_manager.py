@@ -124,7 +124,8 @@ class TestContractingV3ProlongationManager(BaseWebTest):
         target_signingPeriod_endDate = calculate_business_date(
             contract.signingPeriod.startDate,
             PROLONGATION_SHORT_PERIOD,
-            context=contract.__parent__
+            context=contract.__parent__,
+            working_days=True
         )
         managed_prolongation = ProlongationManager(prolongation)
         managed_prolongation.apply()
@@ -151,7 +152,8 @@ class TestContractingV3ProlongationManager(BaseWebTest):
         target_signingPeriod_endDate = calculate_business_date(
             contract.signingPeriod.startDate,
             PROLONGATION_LONG_PERIOD,
-            context=contract.__parent__
+            context=contract.__parent__,
+            working_days=True
         )
 
         previous_short_prolongation = self.fixture_created()[0]
