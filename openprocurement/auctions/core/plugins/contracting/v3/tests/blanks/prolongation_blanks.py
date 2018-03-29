@@ -146,7 +146,8 @@ def apply_prolongation_short(test_case):
         calculate_business_date(
             pre_prolongation_contract.signingPeriod.startDate,
             PROLONGATION_SHORT_PERIOD,
-            context=auction
+            context=auction,
+            working_days=True
         )
     )
 
@@ -211,7 +212,8 @@ def apply_prolongation_long(test_case):
         calculate_business_date(
             pre_prolongation_contract.signingPeriod.startDate,
             PROLONGATION_LONG_PERIOD,
-            context=auction
+            context=auction,
+            working_days=True
         )
     )
 
@@ -295,7 +297,8 @@ def apply_prolongation_triple_times(test_case):
         calculate_business_date(
             pre_prolongation_contract.signingPeriod.startDate,
             PROLONGATION_LONG_PERIOD,
-            context=auction
+            context=auction,
+            working_days=True
         )
     )
 
