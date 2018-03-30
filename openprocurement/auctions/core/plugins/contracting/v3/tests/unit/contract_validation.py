@@ -2,7 +2,7 @@ from uuid import uuid4
 from datetime import datetime
 from schematics.exceptions import ValidationError
 
-from openprocurement.api.models import Period
+from openprocurement.api.models.auction_models.models import Period
 
 from openprocurement.auctions.core.tests.base import BaseWebTest
 from openprocurement.auctions.core.plugins.contracting.v3.models import (

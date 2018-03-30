@@ -5,7 +5,7 @@ from datetime import timedelta
 from copy import deepcopy
 from uuid import uuid4
 
-from openprocurement.api.models import get_now
+from openprocurement.api.models.auction_models.models import get_now
 from openprocurement.api.utils import ROUTE_PREFIX
 
 

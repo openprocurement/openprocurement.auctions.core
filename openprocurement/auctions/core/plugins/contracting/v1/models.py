@@ -2,7 +2,7 @@ from schematics.types.compound import (
     ModelType,
 )
 
-from openprocurement.api.models import (
+from openprocurement.api.models.auction_models.models import (
     ListType,
 )
 
