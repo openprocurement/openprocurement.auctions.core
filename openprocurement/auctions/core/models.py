@@ -27,7 +27,7 @@ from schematics.types.serializable import serializable
 from zope.interface import Interface
 
 from openprocurement.api.constants import TZ, SANDBOX_MODE
-from openprocurement.api.models import (
+from openprocurement.api.models.auction_models.models import (
     Model,
     Value,
     Contract as BaseContract,
@@ -43,11 +43,10 @@ from openprocurement.api.models import (
     CPV_CODES,
     schematics_embedded_role,
     schematics_default_role,
-    IsoDateTimeType,
-    Guarantee,
-    Period,
-    DecimalType
+    IsoDateTimeType
 )
+from openprocurement.api.models.models import Period, Guarantee
+from openprocurement.api.models.schematics_extender import DecimalType
 from openprocurement.api.utils import get_now
 
 from openprocurement.auctions.core.constants import (
