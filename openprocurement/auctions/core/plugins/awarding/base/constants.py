@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from datetime import timedelta
 
 NUMBER_OF_BIDS_TO_BE_QUALIFIED = 2

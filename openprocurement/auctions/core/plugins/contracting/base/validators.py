@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 def validate_contract_document(request, operation):
     if (
         request.validated['auction_status']
@@ -6,7 +8,7 @@ def validate_contract_document(request, operation):
         request.errors.add(
             'body',
             'data',
-            'Can\'t {0} document in current ({1}) auction status'.format(
+            'can\'t {0} document in current ({1}) auction status'.format(
                 operation,
                 request.validated['auction_status']
             )
@@ -17,15 +19,15 @@ def validate_contract_document(request, operation):
         [
             i.status != 'active' for i in
             request.validated['auction'].lots if
-            i.id in [a.lotID for a in
+            i.id in [a.lotid for a in
             request.validated['auction'].awards if
-            a.id == request.validated['contract'].awardID]
+            a.id == request.validated['contract'].awardid]
         ]
     ):
         request.errors.add(
             'body',
             'data',
-            'Can {} document only in active lot status'.format(operation)
+            'can {} document only in active lot status'.format(operation)
         )
         request.errors.status = 403
         return
@@ -36,7 +38,7 @@ def validate_contract_document(request, operation):
         request.errors.add(
             'body',
             'data',
-            'Can\'t {} document in current contract status'.format(
+            'can\'t {} document in current contract status'.format(
                 operation
             )
         )

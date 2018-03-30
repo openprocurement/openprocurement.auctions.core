@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 def awarded_predicate(auction):
     return (
         not auction.lots

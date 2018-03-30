@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from openprocurement.api.models import TZ
 from constants import NUMBER_OF_BIDS_TO_BE_QUALIFIED
 
