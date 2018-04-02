@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 from schematics.exceptions import ValidationError
 from zope.interface import implementer
 
-from openprocurement.api.models import Period
+from openprocurement.api.models.models import Period
 from openprocurement.api.utils import calculate_business_date
 
 from openprocurement.auctions.core.models import IAuction

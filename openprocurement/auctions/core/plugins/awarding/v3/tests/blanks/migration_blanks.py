@@ -1,7 +1,7 @@
 from uuid import uuid4
 from copy import deepcopy
 
-from openprocurement.api.models import get_now
+from openprocurement.api.models.auction_models.models import get_now
 
 from openprocurement.auctions.core.plugins.awarding.v2.tests.award import (
     award_fixture
