@@ -14,7 +14,7 @@ from openprocurement.api.models.schematics_extender import (
     IsoDateTimeType,
     Model
 )
-from openprocurement.api.models.auction_models.models import get_now
+from openprocurement.api.utils import get_now
 from openprocurement.api.models.models import Period
 from openprocurement.api.utils import calculate_business_date
 
