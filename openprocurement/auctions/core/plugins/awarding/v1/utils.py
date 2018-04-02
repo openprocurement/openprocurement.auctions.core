@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 from barbecue import chef
 
-from openprocurement.api.models.auction_models.models import get_now
 from openprocurement.api.constants import TZ
+from openprocurement.api.utils import get_now
 
 
 def next_check_awarding(auction):
