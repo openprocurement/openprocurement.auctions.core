@@ -1,6 +1,6 @@
 from datetime import timedelta
 
-from openprocurement.api.models.auction_models.models import get_now
+from openprocurement.api.utils import get_now
 
 
 def contract_signing_period_switch_to_qualification(self):

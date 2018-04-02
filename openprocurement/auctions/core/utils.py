@@ -18,7 +18,7 @@ from openprocurement.api.constants import (
     AUCTIONS_COMPLAINT_STAND_STILL_TIME
 )
 from openprocurement.api.validation import error_handler
-from openprocurement.api.models.auction_models.models import get_now
+from openprocurement.api.utils import get_now
 from openprocurement.api.utils import (
     calculate_business_date,
     apply_data_patch,
