@@ -1,7 +1,7 @@
 from itertools import izip_longest
 from barbecue import chef
 
-from openprocurement.api.models.auction_models.models import TZ
+from openprocurement.api.constants import TZ
 from openprocurement.api.utils import (
     get_now
 )
