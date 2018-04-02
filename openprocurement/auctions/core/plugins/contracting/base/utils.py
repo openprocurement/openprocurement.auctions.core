@@ -34,4 +34,3 @@ def check_auction_status(request):
             extra=context_unpack(request, {'MESSAGE_ID': 'switched_auction_complete'})
         )
         auction.status = 'complete'
-

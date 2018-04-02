@@ -43,7 +43,6 @@ def check_pending_awards_complaints(auction, lot_awards):
         if complain['status'] in auction.block_complaint_status:
             if complain.relatedLot == lot_awards.id:
                 return True
-    return False
 
 
 def check_pending_complaints(auction, lot_awards):
@@ -109,4 +108,3 @@ def get_bids_to_qualify(bids):
     if len_bids > NUMBER_OF_BIDS_TO_BE_QUALIFIED:
         return NUMBER_OF_BIDS_TO_BE_QUALIFIED
     return len_bids
-

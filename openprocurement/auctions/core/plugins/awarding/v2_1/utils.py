@@ -15,7 +15,8 @@ from openprocurement.auctions.core.plugins.awarding.base.utils import (
     add_award_route_url,
     set_stand_still_ends,
     get_bids_to_qualify,
-    set_award_status_unsuccessful
+    set_award_status_unsuccessful,
+    set_auction_status_unsuccessful
 )
 
 from openprocurement.auctions.core.plugins.awarding.base.predicates import (
@@ -61,9 +62,7 @@ def switch_to_next_award(request):
         award.verificationPeriod = award.paymentPeriod = award.signingPeriod = {'startDate': now}
         add_award_route_url(request, auction, award, awarding_type)
     elif all([award.status in ['cancelled', 'unsuccessful'] for award in auction.awards]):
-        auction.awardPeriod.endDate = now
-        auction.status = 'unsuccessful'
-
+        set_auction_status_unsuccessful(auction)
 
 def next_check_awarding(auction):
     checks = []

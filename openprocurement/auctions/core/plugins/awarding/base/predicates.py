@@ -4,7 +4,9 @@ def awarded_predicate(auction):
         not auction.lots
         and auction.status == 'active.awarded'
         and not any([i.status in auction.block_complaint_status for i in auction.complaints])
-        and not any([i.status in auction.block_complaint_status for a in auction.awards for i in a.complaints])
+        and not any([i.status in auction.block_complaint_status
+                     for a in auction.awards
+                     for i in a.complaints])
     )
 
 
