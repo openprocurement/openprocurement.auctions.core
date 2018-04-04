@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from barbecue import chef
 
-from openprocurement.api.models import get_now
+from openprocurement.api.utils import get_now
 from openprocurement.auctions.core.plugins.awarding.base.utils import (
     make_award,
     add_award_route_url,

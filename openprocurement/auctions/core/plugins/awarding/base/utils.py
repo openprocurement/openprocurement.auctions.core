@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from openprocurement.api.models import TZ
+from openprocurement.api.constants import TZ
 from constants import NUMBER_OF_BIDS_TO_BE_QUALIFIED
 
 
@@ -78,6 +78,11 @@ def check_lots_awarding(auction):
         ):
             checks.append(max(stand_still_ends))
     return checks
+
+
+def set_auction_status_unsuccessful(auction, now):
+        auction.awardPeriod.endDate = now
+        auction.status = 'unsuccessful'
 
 
 def set_award_status_unsuccessful(award, now):

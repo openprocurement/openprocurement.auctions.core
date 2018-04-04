@@ -2,7 +2,7 @@
 import unittest
 import munch
 from datetime import timedelta
-from openprocurement.api.models import get_now
+from openprocurement.api.utils import get_now
 from openprocurement.auctions.core.plugins.awarding.base.predicates import (
     awarded_predicate,
     awarded_and_lots_predicate,

@@ -5,7 +5,7 @@ import mock
 import munch
 import random
 from openprocurement.api.utils import get_now
-from openprocurement.api.models import TZ
+from openprocurement.api.constants import TZ
 from openprocurement.auctions.core.plugins.awarding.base.constants import (
     NUMBER_OF_BIDS_TO_BE_QUALIFIED
 )
@@ -17,6 +17,7 @@ from openprocurement.auctions.core.plugins.awarding.base.utils import (
     set_stand_still_ends,
     check_lots_awarding,
     set_award_status_unsuccessful,
+    set_auction_status_unsuccessful,
     set_unsuccessful_award,
     get_bids_to_qualify
 )
@@ -180,6 +181,17 @@ class Test(unittest.TestCase):
 
         set_award_status_unsuccessful(award, need_end_date)
         self.assertEqual(award.status, 'unsuccessful')
+        self.assertEqual(need_end_date.isoformat(),
+                         end_data.endDate.isoformat())
+
+    def test_set_auction_status_unsuccessful(self):
+        need_end_date = get_now()
+        end_data = munch.Munch({'endDate': None})
+        auction = munch.Munch({'status': 'successfull',
+                               'awardPeriod': end_data})
+
+        set_auction_status_unsuccessful(auction, need_end_date)
+        self.assertEqual(auction.status, 'unsuccessful')
         self.assertEqual(need_end_date.isoformat(),
                          end_data.endDate.isoformat())
 

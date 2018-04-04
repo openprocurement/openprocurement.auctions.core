@@ -62,7 +62,8 @@ def switch_to_next_award(request):
         award.verificationPeriod = award.paymentPeriod = award.signingPeriod = {'startDate': now}
         add_award_route_url(request, auction, award, awarding_type)
     elif all([award.status in ['cancelled', 'unsuccessful'] for award in auction.awards]):
-        set_auction_status_unsuccessful(auction)
+        set_auction_status_unsuccessful(auction, now)
+
 
 def next_check_awarding(auction):
     checks = []
