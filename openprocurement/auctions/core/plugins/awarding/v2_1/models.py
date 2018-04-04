@@ -19,12 +19,14 @@ from openprocurement.auctions.core.models import (
     Award as BaseAward
 )
 from openprocurement.auctions.core.plugins.awarding.v2_1.constants import (
-    AWARD_PAYMENT_TIME,
-    CONTRACT_SIGNING_TIME,
     VERIFY_AUCTION_PROTOCOL_TIME
 )
 from .utils import calculate_enddate
 
+from openprocurement.auctions.core.plugins.awarding.base.constants import (
+    CONTRACT_SIGNING_TIME,
+    AWARD_PAYMENT_TIME
+)
 
 class Award(BaseAward):
     class Options:

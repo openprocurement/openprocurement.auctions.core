@@ -20,14 +20,16 @@ from openprocurement.auctions.core.models import (
     Award as BaseAward
 )
 from openprocurement.auctions.core.plugins.awarding.v2.constants import (
-    AWARD_PAYMENT_TIME,
-    CONTRACT_SIGNING_TIME,
     VERIFY_AUCTION_PROTOCOL_TIME
 )
 from openprocurement.auctions.core.validation import (
     validate_disallow_dgfPlatformLegalDetails
 )
 
+from openprocurement.auctions.core.plugins.awarding.base.constants import (
+    CONTRACT_SIGNING_TIME,
+    AWARD_PAYMENT_TIME
+)
 
 class Award(BaseAward):
     """
@@ -35,7 +37,10 @@ class Award(BaseAward):
     """
     class Options:
         roles = {
-            'create': blacklist('id', 'status', 'date', 'documents', 'complaints', 'complaintPeriod', 'verificationPeriod', 'paymentPeriod', 'signingPeriod'),
+            'create': blacklist('id', 'status', 'date', 'documents',
+                                'complaints', 'complaintPeriod',
+                                'verificationPeriod', 'paymentPeriod',
+                                'signingPeriod'),
             'Administrator': whitelist('verificationPeriod', 'paymentPeriod', 'signingPeriod'),
         }
 
@@ -56,7 +61,14 @@ class Award(BaseAward):
         return [(Allow, '{}_{}'.format(bid_owner, bid_owner_token), 'edit_auction_award')]
 
     # pending status is deprecated. Only for backward compatibility with awarding 1.0
-    status = StringType(required=True, choices=['pending.waiting', 'pending.verification', 'pending.payment', 'unsuccessful', 'active', 'cancelled', 'pending'], default='pending.verification')
+    status = StringType(required=True, choices=['pending.waiting',
+                                                'pending.verification',
+                                                'pending.payment',
+                                                'unsuccessful',
+                                                'active',
+                                                'cancelled',
+                                                'pending'],
+                        default='pending.verification')
     suppliers = ListType(ModelType(Organization), min_size=1, max_size=1)
     complaints = ListType(ModelType(Complaint), default=list())
     documents = ListType(ModelType(Document), default=list(), validators=[validate_disallow_dgfPlatformLegalDetails])
