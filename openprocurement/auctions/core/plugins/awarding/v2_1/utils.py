@@ -42,8 +42,7 @@ def create_awards(request):
         bid = bid.serialize()
         award = make_award(request, auction, bid, status, now, parent=True)
         if bid['status'] == 'invalid':
-            award.status = 'unsuccessful'
-            award.complaintPeriod.endDate = now
+            set_award_status_unsuccessful(award, now)
         if award.status == 'pending.verification':
             award.verificationPeriod = award.paymentPeriod = award.signingPeriod = {'startDate': now}
             add_award_route_url(request, auction, award, awarding_type)

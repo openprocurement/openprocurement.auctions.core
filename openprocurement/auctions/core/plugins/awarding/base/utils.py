@@ -97,8 +97,7 @@ def set_unsuccessful_award(request, auction, award, now):
         for contract in auction.contracts:
             if contract.awardID == award.id:
                 contract.status = 'cancelled'
-    award.status = 'unsuccessful'
-    award.complaintPeriod.endDate = now
+    set_award_status_unsuccessful(award, now)
     request.content_configurator.back_to_awarding()
 
 
