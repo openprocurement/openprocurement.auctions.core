@@ -1,6 +1,6 @@
 from datetime import timedelta
 
-from openprocurement.api.models import get_now
+from openprocurement.api.utils import get_now
 from openprocurement.api.tests.base import JSON_RENDERER_ERROR
 # AuctionContractResourceTest
 

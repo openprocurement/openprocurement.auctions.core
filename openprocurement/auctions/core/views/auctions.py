@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from functools import partial
 
-from openprocurement.api.models import get_now
+from openprocurement.api.utils import get_now
 from openprocurement.api.utils import (
     context_unpack,
     set_ownership,

@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-from openprocurement.api.models import get_now, Period
+from openprocurement.api.utils import get_now
+from openprocurement.api.models.models import Period
 from openprocurement.api.utils import calculate_business_date
 
 from openprocurement.auctions.core.plugins.awarding.v3.constants import (

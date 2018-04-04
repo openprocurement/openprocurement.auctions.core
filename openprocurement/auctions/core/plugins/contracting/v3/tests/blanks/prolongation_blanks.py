@@ -1,4 +1,4 @@
-from openprocurement.api.models import get_now
+from openprocurement.api.utils import get_now
 from openprocurement.api.utils import calculate_business_date
 
 from openprocurement.auctions.core.tests.blanks.fixtures.auction import get_auction

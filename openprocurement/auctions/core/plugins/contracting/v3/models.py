@@ -9,13 +9,13 @@ from schematics.transforms import (
 from schematics.types import StringType, MD5Type
 from schematics.types.compound import ModelType
 
-from openprocurement.api.models import (
+from openprocurement.api.models.schematics_extender import (
     ListType,
-    Period,
     IsoDateTimeType,
-    Model,
-    get_now,
+    Model
 )
+from openprocurement.api.utils import get_now
+from openprocurement.api.models.models import Period
 from openprocurement.api.utils import calculate_business_date
 
 from openprocurement.auctions.core.models import (

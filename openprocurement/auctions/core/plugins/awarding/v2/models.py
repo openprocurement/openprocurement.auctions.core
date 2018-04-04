@@ -5,13 +5,11 @@ from schematics.transforms import (
 )
 from schematics.types import StringType
 from schematics.types.serializable import serializable
+from schematics.types.compound import ModelType
 
 from openprocurement.api.utils import calculate_business_date
-from openprocurement.api.models import (
-    ModelType,
-    ListType,
-    Period
-)
+from openprocurement.api.models.schematics_extender import ListType
+from openprocurement.api.models.models import Period
 
 from openprocurement.auctions.core.models import (
     get_auction,
