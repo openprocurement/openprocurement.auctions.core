@@ -15,6 +15,7 @@ from openprocurement.auctions.core.plugins.awarding.base.utils import (
     add_award_route_url,
     set_stand_still_ends,
     set_unsuccessful_award,
+    set_auction_status_unsuccessful,
     get_bids_to_qualify
 )
 

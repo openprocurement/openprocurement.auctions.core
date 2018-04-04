@@ -3,6 +3,11 @@ from barbecue import chef
 
 from openprocurement.api.constants import TZ
 from openprocurement.api.utils import get_now
+from openprocurement.auctions.core.plugins.awarding.base.utils import (
+    make_award,
+    add_award_route_url,
+    set_stand_still_ends
+)
 
 
 def add_next_award(request):
