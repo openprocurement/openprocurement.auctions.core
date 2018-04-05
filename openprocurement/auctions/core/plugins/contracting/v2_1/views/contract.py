@@ -10,7 +10,7 @@ from openprocurement.auctions.core.utils import (
     save_auction,
     opresource,
 )
-from openprocurement.auctions.core.plugins.contracting.v2_1.utils import check_auction_status
+from openprocurement.auctions.core.plugins.contracting.base.utils import check_auction_status
 from openprocurement.auctions.core.validation import (
     validate_contract_data,
     validate_patch_contract_data,

@@ -1,3 +1,7 @@
+# -*- coding: utf-8 -*-
+from predicates import not_active_lots_predicate
+
+
 def validate_contract_document(request, operation):
     if (
         request.validated['auction_status']
@@ -13,15 +17,7 @@ def validate_contract_document(request, operation):
         )
         request.errors.status = 403
         return
-    if any(
-        [
-            i.status != 'active' for i in
-            request.validated['auction'].lots if
-            i.id in [a.lotID for a in
-            request.validated['auction'].awards if
-            a.id == request.validated['contract'].awardID]
-        ]
-    ):
+    if not_active_lots_predicate(request):
         request.errors.add(
             'body',
             'data',
@@ -29,10 +25,7 @@ def validate_contract_document(request, operation):
         )
         request.errors.status = 403
         return
-    if request.validated['contract'].status not in [
-        'pending',
-        'active'
-    ]:
+    if request.validated['contract'].status not in ['pending', 'active']:
         request.errors.add(
             'body',
             'data',

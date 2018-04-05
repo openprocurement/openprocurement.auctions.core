@@ -11,7 +11,7 @@ from openprocurement.api.validation import (
     validate_patch_document_data
 )
 
-from openprocurement.auctions.core.plugins.contracting.v3.validators import (
+from openprocurement.auctions.core.plugins.contracting.base.validators import (
     validate_contract_document
 )
 from openprocurement.auctions.core.utils import (
