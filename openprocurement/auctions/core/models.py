@@ -43,11 +43,23 @@ from openprocurement.api.models.auction_models.models import (
     CPV_CODES,
     schematics_embedded_role,
     schematics_default_role,
-    IsoDateTimeType
+    IsoDateTimeType,
+    Revision,  # noqa forwarded import
+    Cancellation,  # noqa forwarded import
+    Feature,  # noqa forwarded import
+    validate_features_uniq,  # noqa forwarded import
+    validate_lots_uniq,  # noqa forwarded import
+    get_now,  # noqa forwarded import
+    ComplaintModelType  # noqa forwarded import
 )
-from openprocurement.api.models.models import Period, Guarantee
+from openprocurement.api.models.models import (
+    Period,
+    Guarantee,
+    PeriodEndRequired,  # noqa forwarded import
+)
 from openprocurement.api.models.schematics_extender import DecimalType
 from openprocurement.api.utils import get_now
+from openprocurement.api.validation import validate_items_uniq  # noqa forwarded import
 
 from openprocurement.auctions.core.constants import (
     DOCUMENT_TYPE_OFFLINE,

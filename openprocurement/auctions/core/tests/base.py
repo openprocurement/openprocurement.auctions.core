@@ -7,6 +7,7 @@ from uuid import uuid4
 
 from openprocurement.api.constants import VERSION
 from openprocurement.api.design import sync_design
+from openprocurement.api.tests.base import JSON_RENDERER_ERROR  # noqa forwarded import
 
 
 def snitch(func):
