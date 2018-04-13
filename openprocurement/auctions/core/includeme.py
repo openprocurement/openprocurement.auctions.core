@@ -57,7 +57,12 @@ def includeme(config):
     )
 
     config.add_request_method(get_content_configurator, 'content_configurator', reify=True)
-    plugins = (config.registry.settings.get('plugins') and 
+
+    settings = config.registry.settings
+    config.registry.pmtConfigurator = {key.split('.')[1]: settings.get(key) for key in settings.keys() if
+                                       key.startswith('pmt')}
+
+    plugins = (config.registry.settings.get('plugins') and
               config.registry.settings['plugins'].split(','))
     for entry_point in iter_entry_points('openprocurement.auctions.core.plugins'):
         if not plugins or entry_point.name in plugins:

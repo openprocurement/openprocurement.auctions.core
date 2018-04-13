@@ -450,8 +450,12 @@ class isAuction(object):
     phash = text
 
     def __call__(self, context, request):
+        pmt = getattr(request.auction, 'procurementMethodType', None)
+        pmtConfigurator = request.registry.pmtConfigurator
+        if pmtConfigurator.get(pmt):
+            pmt = pmtConfigurator[pmt]
         if request.auction is not None:
-            return getattr(request.auction, 'procurementMethodType', None) == self.val
+            return pmt == self.val
         return False
 
 
@@ -462,7 +466,10 @@ def register_auction_procurementMethodType(config, model):
     :param model:
         The auction model class
     """
-    config.registry.auction_procurementMethodTypes[model.procurementMethodType.default] = model
+    pmtConfigurator = config.registry.pmtConfigurator
+    for key in pmtConfigurator:
+        if pmtConfigurator[key] == model.pmt:
+            config.registry.auction_procurementMethodTypes[key] = model
 
 
 def read_json(name):
