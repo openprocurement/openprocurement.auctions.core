@@ -451,11 +451,8 @@ class isAuction(object):
 
     def __call__(self, context, request):
         pmt = getattr(request.auction, 'procurementMethodType', None)
-        pmtConfigurator = request.registry.pmtConfigurator
-        if pmtConfigurator.get(pmt):
-            pmt = pmtConfigurator[pmt]
         if request.auction is not None:
-            return pmt == self.val
+            return request.registry.pmtConfigurator.get(pmt) == self.val
         return False
 
 
