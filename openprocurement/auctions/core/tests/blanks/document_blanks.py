@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from email.header import Header
 
-from openprocurement.api.models import get_now
+from openprocurement.api.utils import get_now
 
 # AuctionDocumentResourceTest
 
@@ -323,7 +323,7 @@ def put_auction_document(self):
 
 
 def patch_auction_document(self):
-    if get_now() > self.dgf_platform_legal_details_from:
+    if hasattr(self, 'dgf_platform_legal_details_from') and get_now() > self.dgf_platform_legal_details_from:
         response = self.app.get('/auctions/{}/documents'.format(self.auction_id))
         self.assertEqual(response.status, '200 OK')
         self.assertEqual(response.content_type, 'application/json')

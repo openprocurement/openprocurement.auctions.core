@@ -1,9 +1,11 @@
 from schematics.types.compound import ModelType
 
-from openprocurement.api.models import (
+from openprocurement.api.models.auction_models.models import (
     ListType,
 )
+
 from openprocurement.auctions.core.models import (
+    Contract as BaseContract,
     dgfOrganization as Organization,
     dgfItem as Item,
     dgfDocument as Document,
@@ -11,9 +13,6 @@ from openprocurement.auctions.core.models import (
 )
 from openprocurement.auctions.core.validation import (
     validate_disallow_dgfPlatformLegalDetails
-)
-from openprocurement.api.models import (
-    Contract as BaseContract
 )
 
 

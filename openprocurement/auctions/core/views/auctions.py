@@ -1,15 +1,7 @@
 # -*- coding: utf-8 -*-
 from functools import partial
-from openprocurement.auctions.core.design import (
-    FIELDS,
-    auctions_by_dateModified_view,
-    auctions_real_by_dateModified_view,
-    auctions_test_by_dateModified_view,
-    auctions_by_local_seq_view,
-    auctions_real_by_local_seq_view,
-    auctions_test_by_local_seq_view,
-)
-from openprocurement.api.models import get_now
+
+from openprocurement.api.utils import get_now
 from openprocurement.api.utils import (
     context_unpack,
     set_ownership,
@@ -18,6 +10,16 @@ from openprocurement.api.utils import (
     generate_id,
     json_view,
     APIResource,
+)
+
+from openprocurement.auctions.core.design import (
+    FIELDS,
+    auctions_by_dateModified_view,
+    auctions_real_by_dateModified_view,
+    auctions_test_by_dateModified_view,
+    auctions_by_local_seq_view,
+    auctions_real_by_local_seq_view,
+    auctions_test_by_local_seq_view,
 )
 from openprocurement.auctions.core.utils import (
     generate_auction_id,
@@ -123,7 +125,7 @@ class AuctionsResource(APIResource):
                 if view_offset and view_offset.isdigit():
                     view_offset = int(view_offset)
                 else:
-                    self.request.errors.add('params', 'offset', 'Offset expired/invalid')
+                    self.request.errors.add('querystring', 'offset', 'Offset expired/invalid')
                     self.request.errors.status = 404
                     return
             if not offset:

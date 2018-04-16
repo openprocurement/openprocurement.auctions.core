@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 import unittest
 
+from datetime import timedelta
 from copy import deepcopy
 from uuid import uuid4
 
-from openprocurement.api.models import get_now
+from openprocurement.api.utils import get_now
 from openprocurement.api.utils import ROUTE_PREFIX
 
 
@@ -310,7 +311,7 @@ def empty_listing(self):
     self.assertEqual(response.content_type, 'application/json')
     self.assertEqual(response.json['status'], 'error')
     self.assertEqual(response.json['errors'], [
-        {u'description': u'Offset expired/invalid', u'location': u'params', u'name': u'offset'}
+        {u'description': u'Offset expired/invalid', u'location': u'querystring', u'name': u'offset'}
     ])
 
     response = self.app.get('/auctions?feed=changes&descending=1&limit=10')

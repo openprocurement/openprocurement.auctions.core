@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from datetime import timedelta
-from openprocurement.api.models import get_now
+from openprocurement.api.utils import get_now
 
 
 def submission_method_details_no_auction(self):

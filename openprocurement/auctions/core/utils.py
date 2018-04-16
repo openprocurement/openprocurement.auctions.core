@@ -1,39 +1,50 @@
 # -*- coding: utf-8 -*-
 from datetime import datetime, time, timedelta
-from pkg_resources import get_distribution
-from schematics.exceptions import ModelValidationError
-from time import sleep
+from functools import partial
+from logging import getLogger
 from re import compile
+from time import sleep
+
+from couchdb.http import ResourceConflict
+from jsonpointer import resolve_pointer
+from cornice.resource import resource, view
+from pkg_resources import get_distribution
 from pyramid.compat import decode_path_info
 from pyramid.exceptions import URLDecodeError
-from cornice.resource import resource, view
-from cornice.util import json_error
-from couchdb.http import ResourceConflict
-from functools import partial
-from json import dumps
-from jsonpointer import resolve_pointer
-from logging import getLogger
+from schematics.exceptions import ModelValidationError
 
-from openprocurement.api.models import get_now, TZ, COMPLAINT_STAND_STILL_TIME, SANDBOX_MODE
+from openprocurement.api.constants import (
+    TZ, SANDBOX_MODE,
+    AUCTIONS_COMPLAINT_STAND_STILL_TIME,
+    DOCUMENT_BLACKLISTED_FIELDS as API_DOCUMENT_BLACKLISTED_FIELDS,  # noqa forwarded import
+    SESSION,  # noqa forwarded import
+)
 from openprocurement.api.validation import error_handler
 from openprocurement.api.utils import (
-    generate_id,
+    get_now,
     calculate_business_date,
     apply_data_patch,
     get_revision_changes,
     set_modetest_titles,
     update_logging_context,
-    context_unpack
+    context_unpack,
+    json_view,  # noqa forwarded import
+    APIResource,  # noqa forwarded import
+    get_file,  # noqa forwarded import
+    upload_file,  # noqa forwarded import
+    update_file_content_type,  # noqa forwarded import
+    set_ownership,  # noqa forwarded import
+    get_request_from_root,  # noqa forwarded import
 )
-from openprocurement.auctions.core.traversal import factory
+
 from openprocurement.auctions.core.plugins.awarding import includeme as awarding
 from openprocurement.auctions.core.plugins.contracting import includeme as contracting
+from openprocurement.auctions.core.traversal import factory
 
 
 PKG = get_distribution(__package__)
 LOGGER = getLogger(PKG.project_name)
 ACCELERATOR_RE = compile(r'.accelerator=(?P<accelerator>\d+)')
-json_view = partial(view, renderer='json')
 VERSION = '{}.{}'.format(
     int(PKG.parsed_version[0]),
     int(PKG.parsed_version[1]) if PKG.parsed_version[1].isdigit() else 0
@@ -47,6 +58,31 @@ DOCUMENT_BLACKLISTED_FIELDS = (
     'url',
     'dateModified',
 )
+
+
+class awardingTypePredicate(object):
+    def __init__(self, val, config):
+        self.val = val
+
+    def text(self):
+        return 'awardingType = {value}'.format(value=self.val)
+
+    phash = text
+
+    def __call__(self, context, request):
+        if request.auction is not None:
+            procurement_method_type = getattr(
+                request.auction,
+                'procurementMethodType',
+                None
+            )
+            if not procurement_method_type:
+                return False
+
+            desirable_awarding_version = request.content_configurator.awarding_type
+            return desirable_awarding_version == self.val
+
+        return False
 
 
 def generate_auction_id(ctime, db, server_id=''):
@@ -184,11 +220,11 @@ def check_bids(request):
 def check_complaint_status(request, complaint, now=None):
     if not now:
         now = get_now()
-    if complaint.status == 'claim' and calculate_business_date(complaint.dateSubmitted, COMPLAINT_STAND_STILL_TIME, request.auction) < now:
+    if complaint.status == 'claim' and calculate_business_date(complaint.dateSubmitted, AUCTIONS_COMPLAINT_STAND_STILL_TIME, request.auction) < now:
         complaint.status = 'pending'
         complaint.type = 'complaint'
         complaint.dateEscalated = now
-    elif complaint.status == 'answered' and calculate_business_date(complaint.dateAnswered, COMPLAINT_STAND_STILL_TIME, request.auction) < now:
+    elif complaint.status == 'answered' and calculate_business_date(complaint.dateAnswered, AUCTIONS_COMPLAINT_STAND_STILL_TIME, request.auction) < now:
         complaint.status = complaint.resolutionType
 
 
@@ -365,9 +401,9 @@ def auction_from_data(request, data, raise_error=True, create=True):
     procurementMethodType = data.get('procurementMethodType', 'belowThreshold')
     model = request.registry.auction_procurementMethodTypes.get(procurementMethodType)
     if model is None and raise_error:
-       request.errors.add('data', 'procurementMethodType', 'Not implemented')
+       request.errors.add('body', 'data', 'procurementMethodType is not implemented')
        request.errors.status = 415
-       raise error_handler(request.errors)
+       raise error_handler(request)
     update_logging_context(request, {'auction_type': procurementMethodType})
     if model is not None and create:
        model = model(data)
@@ -380,7 +416,7 @@ def extract_auction_adapter(request, auction_id):
     if doc is None or doc.get('doc_type') != 'Auction':
         request.errors.add('url', 'auction_id', 'Not Found')
         request.errors.status = 404
-        raise error_handler(request.errors)
+        raise error_handler(request)
 
     return request.auction_from_data(doc)
 
@@ -454,6 +490,11 @@ def get_related_award_of_contract(contract, auction):
 def init_plugins(config):
     awarding.includeme(config)
     contracting.includeme(config)
+
+
+def get_auction_creation_date(data):
+    auction_creation_date = (data.get('revisions')[0].date if data.get('revisions') else get_now())
+    return auction_creation_date
 
 
 def rounding_shouldStartAfter_after_midnigth(start_after, auction, use_from=datetime(2016, 6, 1, tzinfo=TZ)):

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from openprocurement.api.models import get_now
+from openprocurement.api.utils import get_now
 
 # AuctionLotAwardResourceTest
 
@@ -837,8 +837,7 @@ def create_auction_award_complaint_2_lots(self):
 
 
 def patch_auction_award_complaint_2_lots(self):
-    response = self.app.patch_json('/auctions/{}/awards/{}'.format(self.auction_id, self.award_id),
-                                   {"data": {"status": "unsuccessful"}})
+    response = self.app.patch_json('/auctions/{}/awards/{}'.format(self.auction_id, self.award_id), {"data": {"status": "unsuccessful"}})
     self.assertEqual(response.status, '200 OK')
     self.assertEqual(response.content_type, 'application/json')
     self.assertEqual(response.json['data']["status"], "unsuccessful")

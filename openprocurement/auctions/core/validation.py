@@ -1,18 +1,49 @@
 # -*- coding: utf-8 -*-
 from schematics.exceptions import ValidationError
 
-from openprocurement.api.models import get_now, SANDBOX_MODE
+from openprocurement.api.constants import SANDBOX_MODE
 from openprocurement.auctions.core.constants import ENGLISH_AUCTION_PROCUREMENT_METHOD_TYPES
+from openprocurement.api.utils import get_now
 from openprocurement.api.utils import (
-    update_logging_context, error_handler
+    update_logging_context, error_handler, get_now
 )
-from openprocurement.api.validation import validate_json_data, validate_data
-from openprocurement.api.constants import STATUS4ROLE
+from openprocurement.api.validation import (
+    validate_json_data,
+    validate_data,
+    validate_patch_document_data,  # noqa forwarded import
+)
+
+from openprocurement.auctions.core.constants import STATUS4ROLE
+
+
+def validate_document_data(request, **kwargs):
+    context = request.context if 'documents' in request.context else request.context.__parent__
+    model = type(context).documents.model_class
+    return validate_data(request, model)
+
+
+def validate_file_upload(request, **kwargs):
+    update_logging_context(request, {'document_id': '__new__'})
+    if request.registry.docservice_url and request.content_type == "application/json":
+        return validate_document_data(request)
+    if 'file' not in request.POST or not hasattr(request.POST['file'], 'filename'):
+        request.errors.add('body', 'file', 'Not Found')
+        request.errors.status = 404
+        raise error_handler(request)
+    else:
+        request.validated['file'] = request.POST['file']
+
+
+def validate_file_update(request, **kwargs):
+    if request.registry.docservice_url and request.content_type == "application/json":
+        return validate_document_data(request)
+    if request.content_type == 'multipart/form-data':
+        validate_file_upload(request)
 
 from openprocurement.api.validation import validate_json_data, validate_data
 
 
-def validate_auction_data(request):
+def validate_auction_data(request, **kwargs):
     update_logging_context(request, {'auction_id': '__new__'})
 
     data = validate_json_data(request)
@@ -39,7 +70,7 @@ def validate_auction_data(request):
         return
 
 
-def validate_patch_auction_data(request):
+def validate_patch_auction_data(request, **kwargs):
     data = validate_json_data(request)
     if data is None:
         return
@@ -54,7 +85,7 @@ def validate_patch_auction_data(request):
     request.context.status = default_status
 
 
-def validate_auction_auction_data(request):
+def validate_auction_auction_data(request, **kwargs):
     data = validate_patch_auction_data(request)
     auction = request.validated['auction']
     if auction.status != 'active.auction':
@@ -133,7 +164,7 @@ def validate_auction_auction_data(request):
     request.validated['data'] = data
 
 
-def validate_bid_data(request):
+def validate_bid_data(request, **kwargs):
     if not request.check_accreditation(request.auction.edit_accreditation):
         request.errors.add('procurementMethodType', 'accreditation', 'Broker Accreditation level does not permit bid creation')
         request.errors.status = 403
@@ -147,23 +178,23 @@ def validate_bid_data(request):
     return validate_data(request, model)
 
 
-def validate_patch_bid_data(request):
+def validate_patch_bid_data(request, **kwargs):
     model = type(request.auction).bids.model_class
     return validate_data(request, model, True)
 
 
-def validate_award_data(request):
+def validate_award_data(request, **kwargs):
     update_logging_context(request, {'award_id': '__new__'})
     model = type(request.auction).awards.model_class
     return validate_data(request, model)
 
 
-def validate_patch_award_data(request):
+def validate_patch_award_data(request, **kwargs):
     model = type(request.auction).awards.model_class
     return validate_data(request, model, True)
 
 
-def validate_award_data_post_common(request):
+def validate_award_data_post_common(request, **kwargs):
     auction = request.validated['auction']
     award = request.validated['award']
     if auction.status != 'active.qualification':
@@ -176,19 +207,19 @@ def validate_award_data_post_common(request):
     else:
         return
     request.errors.status = 403
-    raise error_handler(request.errors)
+    raise error_handler(request)
 
 
-def validate_patch_award_data_patch_common(request):
+def validate_patch_award_data_patch_common(request, **kwargs):
     auction = request.validated['auction']
     if auction.status not in ['active.qualification', 'active.awarded']:
         request.errors.add('body', 'data',
                            'Can\'t update award in current ({}) auction status'.format(auction.status))
         request.errors.status = 403
-        raise error_handler(request.errors)
+        raise error_handler(request)
 
 
-def validate_complaint_data_post_common(request):
+def validate_complaint_data_post_common(request, **kwargs):
     auction = request.validated['auction']
     context = request.context
     condition_start_date = context.complaintPeriod.startDate and context.complaintPeriod.startDate > get_now()
@@ -205,10 +236,10 @@ def validate_complaint_data_post_common(request):
     else:
         return
     request.errors.status = 403
-    raise error_handler(request.errors)
+    raise error_handler(request)
 
 
-def validate_file_upload_post_common(request):
+def validate_file_upload_post_common(request, **kwargs):
     if request.validated['auction_status'] not in ['active.qualification',
                                                    'active.awarded']:
         request.errors.add('body', 'data',
@@ -225,10 +256,10 @@ def validate_file_upload_post_common(request):
     else:
         return
     request.errors.status = 403
-    raise error_handler(request.errors)
+    raise error_handler(request)
 
 
-def validate_file_update_put_common(request):
+def validate_file_update_put_common(request, **kwargs):
     if request.authenticated_role != request.context.author:
         request.errors.add('url', 'role', 'Can update document only author')
     elif request.validated['auction_status'] not in ['active.qualification',
@@ -247,10 +278,10 @@ def validate_file_update_put_common(request):
     else:
         return
     request.errors.status = 403
-    raise error_handler(request.errors)
+    raise error_handler(request)
 
 
-def validate_patch_document_data_patch_common(request):
+def validate_patch_document_data_patch_common(request, **kwargs):
     if request.authenticated_role != request.context.author:
         request.errors.add('url', 'role', 'Can update document only author')
     elif request.validated['auction_status'] not in ['active.qualification',
@@ -270,7 +301,7 @@ def validate_patch_document_data_patch_common(request):
     else:
         return
     request.errors.status = 403
-    raise error_handler(request.errors)
+    raise error_handler(request)
 
 
 def validate_award_document(request, operation):
@@ -285,22 +316,22 @@ def validate_award_document(request, operation):
     else:
         return True
     request.errors.status = 403
-    raise error_handler(request.errors)
+    raise error_handler(request)
 
 
-def validate_file_upload_award_post_common(request):
+def validate_file_upload_award_post_common(request, **kwargs):
     validate_award_document(request, 'add')
 
 
-def validate_file_update_award_put_common(request):
+def validate_file_update_award_put_common(request, **kwargs):
     validate_award_document(request, 'update')
 
 
-def validate_patch_document_data_award_patch_common(request):
+def validate_patch_document_data_award_patch_common(request, **kwargs):
     validate_award_document(request, 'update')
 
 
-def validate_patch_complaint_data_patch_common(request):
+def validate_patch_complaint_data_patch_common(request, **kwargs):
     auction = request.validated['auction']
     if auction.status not in ['active.qualification', 'active.awarded']:
         request.errors.add('body', 'data', 'Can\'t update complaint in current'
@@ -315,10 +346,10 @@ def validate_patch_complaint_data_patch_common(request):
     else:
         return
     request.errors.status = 403
-    raise error_handler(request.errors)
+    raise error_handler(request)
 
 
-def validate_question_data(request):
+def validate_question_data(request, **kwargs):
     if not request.check_accreditation(request.auction.edit_accreditation):
         request.errors.add('procurementMethodType', 'accreditation', 'Broker Accreditation level does not permit question creation')
         request.errors.status = 403
@@ -332,12 +363,12 @@ def validate_question_data(request):
     return validate_data(request, model)
 
 
-def validate_patch_question_data(request):
+def validate_patch_question_data(request, **kwargs):
     model = type(request.auction).questions.model_class
     return validate_data(request, model, True)
 
 
-def validate_complaint_data(request):
+def validate_complaint_data(request, **kwargs):
     if not request.check_accreditation(request.auction.edit_accreditation):
         request.errors.add('procurementMethodType', 'accreditation', 'Broker Accreditation level does not permit complaint creation')
         request.errors.status = 403
@@ -351,29 +382,29 @@ def validate_complaint_data(request):
     return validate_data(request, model)
 
 
-def validate_patch_complaint_data(request):
+def validate_patch_complaint_data(request, **kwargs):
     model = type(request.auction).complaints.model_class
     return validate_data(request, model, True)
 
 
-def validate_cancellation_data(request):
+def validate_cancellation_data(request, **kwargs):
     update_logging_context(request, {'cancellation_id': '__new__'})
     model = type(request.auction).cancellations.model_class
     return validate_data(request, model)
 
 
-def validate_patch_cancellation_data(request):
+def validate_patch_cancellation_data(request, **kwargs):
     model = type(request.auction).cancellations.model_class
     return validate_data(request, model, True)
 
 
-def validate_contract_data(request):
+def validate_contract_data(request, **kwargs):
     update_logging_context(request, {'contract_id': '__new__'})
     model = type(request.auction).contracts.model_class
     return validate_data(request, model)
 
 
-def validate_prolongation_data(request):
+def validate_prolongation_data(request, **kwargs):
     if request.json_body['data'].get('status') == 'applied':
         request.errors.add(
             'body',
@@ -395,7 +426,7 @@ def validate_prolongation_data(request):
     return validate_data(request, model)
 
 
-def validate_patch_prolongation_data(request):
+def validate_patch_prolongation_data(request, **kwargs):
     if (request.validated['auction_status'] not in ['active.qualification', 'active.awarded']):
         request.errors.add(
             'body',
@@ -422,18 +453,18 @@ def validate_patch_prolongation_data(request):
     return validate_data(request, model, True)
 
 
-def validate_patch_contract_data(request):
+def validate_patch_contract_data(request, **kwargs):
     model = type(request.auction).contracts.model_class
     return validate_data(request, model, True)
 
 
-def validate_lot_data(request):
+def validate_lot_data(request, **kwargs):
     update_logging_context(request, {'lot_id': '__new__'})
     model = type(request.auction).lots.model_class
     return validate_data(request, model)
 
 
-def validate_patch_lot_data(request):
+def validate_patch_lot_data(request, **kwargs):
     model = type(request.auction).lots.model_class
     return validate_data(request, model, True)
 

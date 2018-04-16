@@ -95,4 +95,5 @@ bin/
 src/
 cover/
 output.html
-
+# vim 
+*.swp
