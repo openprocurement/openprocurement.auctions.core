@@ -6,7 +6,7 @@ from schematics.exceptions import ValidationError
 from zope.interface import implementer
 
 from openprocurement.api.models.models import Period
-from openprocurement.api.utils import calculate_business_date
+from openprocurement.api.utils import calculate_business_date, set_specific_hour
 
 from openprocurement.auctions.core.models import IAuction
 from openprocurement.auctions.core.tests.base import BaseWebTest
@@ -22,6 +22,7 @@ from openprocurement.auctions.core.plugins.contracting.v3.constants import (
     PROLONGATION_SHORT_PERIOD,
     PROLONGATION_LONG_PERIOD,
     PROLONGATION_DATE_PUBLISHED_LIMIT_PERIOD,
+    CONTRACT_SIGNING_PERIOD_END_DATE_HOUR
 )
 
 contract_data = {'awardID': uuid4().hex}
@@ -127,6 +128,10 @@ class TestContractingV3ProlongationManager(BaseWebTest):
             context=contract.__parent__,
             working_days=True
         )
+        target_signingPeriod_endDate = set_specific_hour(
+            target_signingPeriod_endDate,
+            CONTRACT_SIGNING_PERIOD_END_DATE_HOUR
+        )
         managed_prolongation = ProlongationManager(prolongation)
         managed_prolongation.apply()
 
@@ -155,7 +160,10 @@ class TestContractingV3ProlongationManager(BaseWebTest):
             context=contract.__parent__,
             working_days=True
         )
-
+        target_signingPeriod_endDate = set_specific_hour(
+            target_signingPeriod_endDate,
+            CONTRACT_SIGNING_PERIOD_END_DATE_HOUR
+        )
         previous_short_prolongation = self.fixture_created()[0]
         previous_short_prolongation.status = 'applied'
         contract.prolongations.append(previous_short_prolongation)
