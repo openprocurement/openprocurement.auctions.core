@@ -16,7 +16,7 @@ from openprocurement.auctions.core.validation import (
     validate_award_data_post_common,
     validate_patch_award_data_patch_common,
 )
-from openprocurement.auctions.core.plugins.awarding.v3.utils import (
+from openprocurement.auctions.core.plugins.awarding.base.utils import (
     check_auction_protocol
 )
 

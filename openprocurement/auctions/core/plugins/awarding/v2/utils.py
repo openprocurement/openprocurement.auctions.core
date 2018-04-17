@@ -6,12 +6,9 @@ from openprocurement.api.utils import (
 )
 
 from openprocurement.auctions.core.plugins.awarding.base.utils import (
-    check_auction_protocol,
-    invalidate_bids_under_threshold,
     make_award,
     check_lots_awarding,
     add_award_route_url,
-    set_stand_still_ends,
     set_unsuccessful_award,
     set_auction_status_unsuccessful,
     set_award_status_unsuccessful,
