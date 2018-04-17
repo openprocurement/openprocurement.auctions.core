@@ -1,26 +1,21 @@
 from itertools import izip_longest
 from barbecue import chef
 
-from openprocurement.api.constants import TZ
 from openprocurement.api.utils import (
     get_now,
     calculate_business_date
 )
 
 from openprocurement.auctions.core.plugins.awarding.base.utils import (
-    check_auction_protocol,
-    invalidate_bids_under_threshold,
     make_award,
     check_lots_awarding,
     add_award_route_url,
-    set_stand_still_ends,
     set_auction_status_unsuccessful,
     set_award_status_unsuccessful,
     get_bids_to_qualify
 )
 
 from openprocurement.auctions.core.plugins.awarding.base.predicates import (
-    awarded_predicate,
     awarded_and_lots_predicate
 )
 
@@ -67,12 +62,7 @@ def switch_to_next_award(request):
 
 def next_check_awarding(auction):
     checks = []
-    if awarded_predicate(auction):
-        stand_still_ends = set_stand_still_ends(auction.awards)
-        last_award_status = auction.awards[-1].status if auction.awards else ''
-        if stand_still_ends and last_award_status == 'unsuccessful':
-            checks.append(max(stand_still_ends))
-    elif awarded_and_lots_predicate(auction):
+    if awarded_and_lots_predicate(auction):
         checks = check_lots_awarding(auction)
     return min(checks) if checks else None
 

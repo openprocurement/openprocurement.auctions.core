@@ -2,7 +2,6 @@ from barbecue import chef
 from uuid import uuid4
 
 from openprocurement.api.utils import get_now
-from openprocurement.auctions.core.plugins.awarding.v2_1.utils import invalidate_bids_under_threshold
 
 
 def switch_auction_to_unsuccessful(auction):
