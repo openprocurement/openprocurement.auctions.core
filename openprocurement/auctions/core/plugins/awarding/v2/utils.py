@@ -6,12 +6,9 @@ from openprocurement.api.utils import (
 )
 
 from openprocurement.auctions.core.plugins.awarding.base.utils import (
-    check_auction_protocol,
-    invalidate_bids_under_threshold,
     make_award,
     check_lots_awarding,
     add_award_route_url,
-    set_stand_still_ends,
     set_unsuccessful_award,
     set_auction_status_unsuccessful,
     set_award_status_unsuccessful,
@@ -69,16 +66,13 @@ def switch_to_next_award(request):
     elif all([award.status in ['cancelled', 'unsuccessful'] for award in auction.awards]):
         set_auction_status_unsuccessful(auction, now)
 
+
 def next_check_awarding(auction):
     checks = []
     if awarded_predicate(auction):
-        stand_still_ends = set_stand_still_ends(auction.awards)
         for award in auction.awards:
             if award.status == 'active':
                 checks.append(award.signingPeriod.endDate.astimezone(TZ))
-        last_award_status = auction.awards[-1].status if auction.awards else ''
-        if stand_still_ends and last_award_status == 'unsuccessful':
-            checks.append(max(stand_still_ends))
     elif not auction.lots and auction.status == 'active.qualification':
         for award in auction.awards:
             if award.status == 'pending.verification':
