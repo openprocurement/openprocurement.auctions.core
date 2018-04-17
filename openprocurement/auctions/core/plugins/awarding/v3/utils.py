@@ -69,16 +69,13 @@ def switch_to_next_award(request):
     
         set_auction_status_unsuccessful(auction, now)
 
+
 def next_check_awarding(auction):
     checks = []
     if awarded_predicate(auction):
-        stand_still_ends = set_stand_still_ends(auction.awards)
         for contract in auction.contracts:
             if contract.status == 'pending':
                 checks.append(contract.signingPeriod.endDate.astimezone(TZ))
-        last_award_status = auction.awards[-1].status if auction.awards else ''
-        if stand_still_ends and last_award_status == 'unsuccessful':
-            checks.append(max(stand_still_ends))
     elif not auction.lots and auction.status == 'active.qualification':
         for award in auction.awards:
             if award.status == 'pending':
