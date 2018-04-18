@@ -456,24 +456,26 @@ class isAuction(object):
         return False
 
 
-def register_auction_procurementMethodType(config, model):
+def register_auction_procurementMethodType(config, model, pmt):
     """Register a auction procurementMethodType.
     :param config:
         The pyramid configuration object that will be populated.
     :param model:
         The auction model class
+    :param pmt:
+        Procurement method type associated with procedure type
     """
-    pmtConfigurator = config.registry.pmtConfigurator
-    for key in pmtConfigurator:
-        if pmtConfigurator[key] == model.pmt:
-            config.registry.auction_procurementMethodTypes[key] = model
+    config.registry.pmtConfigurator[pmt] = model._procedure_type
+    config.registry.auction_procurementMethodTypes[pmt] = model
 
 
 def read_json(name):
+    import inspect
     import os.path
     from json import loads
-    curr_dir = os.path.dirname(os.path.realpath(__file__))
-    file_path = os.path.join(curr_dir, name)
+    caller_file = inspect.stack()[1][1]
+    caller_dir = os.path.dirname(os.path.realpath(caller_file))
+    file_path = os.path.join(caller_dir, name)
     with open(file_path) as lang_file:
         data = lang_file.read()
     return loads(data)
@@ -507,3 +509,9 @@ def rounding_shouldStartAfter_after_midnigth(start_after, auction, use_from=date
         if start_after >= midnigth:
             start_after = midnigth + timedelta(1)
     return start_after
+
+
+def get_auction_route_name(request, auction):
+    pmtConfigurator = request.registry.pmtConfigurator
+    procedure_type = pmtConfigurator[auction.procurementMethodType]
+    return '{}:Auction'.format(procedure_type)

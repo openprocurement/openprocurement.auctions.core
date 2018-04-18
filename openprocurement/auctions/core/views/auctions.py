@@ -26,7 +26,7 @@ from openprocurement.auctions.core.utils import (
     save_auction,
     auction_serialize,
     opresource,
-)
+    get_auction_route_name)
 from openprocurement.auctions.core.validation import validate_auction_data
 
 
@@ -359,12 +359,9 @@ class AuctionsResource(APIResource):
             self.LOGGER.info('Created auction {} ({})'.format(auction_id, auction.auctionID),
                         extra=context_unpack(self.request, {'MESSAGE_ID': 'auction_create'}, {'auction_id': auction_id, 'auctionID': auction.auctionID}))
             self.request.response.status = 201
-
-            pmtConfigurator = self.request.registry.pmtConfigurator
-            pmt = pmtConfigurator[auction.procurementMethodType]
-
+            auction_route_name = get_auction_route_name(self.request, auction)
             self.request.response.headers[
-                'Location'] = self.request.route_url('{}:Auction'.format(pmt), auction_id=auction_id)
+                'Location'] = self.request.route_url(route_name=auction_route_name, auction_id=auction_id)
             return {
                 'data': auction.serialize(auction.status),
                 'access': {
