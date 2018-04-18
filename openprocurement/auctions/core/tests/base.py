@@ -4,10 +4,22 @@ import unittest
 import webtest
 from types import FunctionType
 from uuid import uuid4
+from copy import deepcopy
+from datetime import datetime, timedelta
+from requests.models import Response
+from base64 import b64encode
+from urllib import urlencode
 
 from openprocurement.api.constants import VERSION
 from openprocurement.api.design import sync_design
 from openprocurement.api.tests.base import JSON_RENDERER_ERROR  # noqa forwarded import
+from openprocurement.auctions.core.utils import (
+    apply_data_patch,
+    SESSION,
+)
+
+
+now = datetime.now()
 
 
 def snitch(func):
@@ -78,3 +90,245 @@ class BaseWebTest(unittest.TestCase):
 
     def tearDown(self):
         self.couchdb_server.delete(self.db_name)
+
+
+class BaseAuctionWebTest(BaseWebTest):
+    initial_data = None
+    initial_status = None
+    initial_bids = None
+    initial_lots = None
+    docservice = False
+
+    def set_status(self, status, extra=None):
+        data = {'status': status}
+        if status == 'active.enquiries':
+            data.update({
+                "enquiryPeriod": {
+                    "startDate": (now).isoformat(),
+                    "endDate": (now + timedelta(days=7)).isoformat()
+                },
+                "tenderPeriod": {
+                    "startDate": (now + timedelta(days=7)).isoformat(),
+                    "endDate": (now + timedelta(days=14)).isoformat()
+                }
+            })
+        elif status == 'active.tendering':
+            data.update({
+                "enquiryPeriod": {
+                    "startDate": (now - timedelta(days=10)).isoformat(),
+                    "endDate": (now).isoformat()
+                },
+                "tenderPeriod": {
+                    "startDate": (now).isoformat(),
+                    "endDate": (now + timedelta(days=7)).isoformat()
+                }
+            })
+        elif status == 'active.auction':
+            data.update({
+                "enquiryPeriod": {
+                    "startDate": (now - timedelta(days=14)).isoformat(),
+                    "endDate": (now - timedelta(days=7)).isoformat()
+                },
+                "tenderPeriod": {
+                    "startDate": (now - timedelta(days=7)).isoformat(),
+                    "endDate": (now).isoformat()
+                },
+                "auctionPeriod": {
+                    "startDate": (now).isoformat()
+                }
+            })
+            if self.initial_lots:
+                data.update({
+                    'lots': [
+                        {
+                            "auctionPeriod": {
+                                "startDate": (now).isoformat()
+                            }
+                        }
+                        for i in self.initial_lots
+                    ]
+                })
+        elif status == 'active.qualification':
+            data.update({
+                "enquiryPeriod": {
+                    "startDate": (now - timedelta(days=15)).isoformat(),
+                    "endDate": (now - timedelta(days=8)).isoformat()
+                },
+                "tenderPeriod": {
+                    "startDate": (now - timedelta(days=8)).isoformat(),
+                    "endDate": (now - timedelta(days=1)).isoformat()
+                },
+                "auctionPeriod": {
+                    "startDate": (now - timedelta(days=1)).isoformat(),
+                    "endDate": (now).isoformat()
+                },
+                "awardPeriod": {
+                    "startDate": (now).isoformat()
+                }
+            })
+            if self.initial_lots:
+                data.update({
+                    'lots': [
+                        {
+                            "auctionPeriod": {
+                                "startDate": (now - timedelta(days=1)).isoformat(),
+                                "endDate": (now).isoformat()
+                            }
+                        }
+                        for i in self.initial_lots
+                    ]
+                })
+        elif status == 'active.awarded':
+            data.update({
+                "enquiryPeriod": {
+                    "startDate": (now - timedelta(days=15)).isoformat(),
+                    "endDate": (now - timedelta(days=8)).isoformat()
+                },
+                "tenderPeriod": {
+                    "startDate": (now - timedelta(days=8)).isoformat(),
+                    "endDate": (now - timedelta(days=1)).isoformat()
+                },
+                "auctionPeriod": {
+                    "startDate": (now - timedelta(days=1)).isoformat(),
+                    "endDate": (now).isoformat()
+                },
+                "awardPeriod": {
+                    "startDate": (now).isoformat(),
+                    "endDate": (now).isoformat()
+                }
+            })
+            if self.initial_lots:
+                data.update({
+                    'lots': [
+                        {
+                            "auctionPeriod": {
+                                "startDate": (now - timedelta(days=1)).isoformat(),
+                                "endDate": (now).isoformat()
+                            }
+                        }
+                        for i in self.initial_lots
+                    ]
+                })
+        elif status == 'complete':
+            data.update({
+                "enquiryPeriod": {
+                    "startDate": (now - timedelta(days=25)).isoformat(),
+                    "endDate": (now - timedelta(days=18)).isoformat()
+                },
+                "tenderPeriod": {
+                    "startDate": (now - timedelta(days=18)).isoformat(),
+                    "endDate": (now - timedelta(days=11)).isoformat()
+                },
+                "auctionPeriod": {
+                    "startDate": (now - timedelta(days=11)).isoformat(),
+                    "endDate": (now - timedelta(days=10)).isoformat()
+                },
+                "awardPeriod": {
+                    "startDate": (now - timedelta(days=10)).isoformat(),
+                    "endDate": (now - timedelta(days=10)).isoformat()
+                }
+            })
+            if self.initial_lots:
+                data.update({
+                    'lots': [
+                        {
+                            "auctionPeriod": {
+                                "startDate": (now - timedelta(days=11)).isoformat(),
+                                "endDate": (now - timedelta(days=10)).isoformat()
+                            }
+                        }
+                        for i in self.initial_lots
+                    ]
+                })
+        if extra:
+            data.update(extra)
+        auction = self.db.get(self.auction_id)
+        auction.update(apply_data_patch(auction, data))
+        self.db.save(auction)
+        authorization = self.app.authorization
+        self.app.authorization = ('Basic', ('chronograph', ''))
+        #response = self.app.patch_json('/auctions/{}'.format(self.auction_id), {'data': {'id': self.auction_id}})
+        response = self.app.get('/auctions/{}'.format(self.auction_id))
+        self.app.authorization = authorization
+        self.assertEqual(response.status, '200 OK')
+        self.assertEqual(response.content_type, 'application/json')
+        return response
+
+    def setUp(self):
+        super(BaseAuctionWebTest, self).setUp()
+        self.create_auction()
+        if self.docservice:
+            self.setUpDS()
+
+    def setUpDS(self):
+        self.app.app.registry.docservice_url = 'http://localhost'
+        test = self
+        def request(method, url, **kwargs):
+            response = Response()
+            if method == 'POST' and '/upload' in url:
+                url = test.generate_docservice_url()
+                response.status_code = 200
+                response.encoding = 'application/json'
+                response._content = '{{"data":{{"url":"{url}","hash":"md5:{md5}","format":"application/msword","title":"name.doc"}},"get_url":"{url}"}}'.format(url=url, md5='0'*32)
+                response.reason = '200 OK'
+            return response
+
+        self._srequest = SESSION.request
+        SESSION.request = request
+
+    def generate_docservice_url(self):
+        uuid = uuid4().hex
+        key = self.app.app.registry.docservice_key
+        keyid = key.hex_vk()[:8]
+        signature = b64encode(key.signature("{}\0{}".format(uuid, '0' * 32)))
+        query = {'Signature': signature, 'KeyID': keyid}
+        return "http://localhost/get/{}?{}".format(uuid, urlencode(query))
+
+    def create_auction(self):
+        data = deepcopy(self.initial_data)
+        if self.initial_lots:
+            lots = []
+            for i in self.initial_lots:
+                lot = deepcopy(i)
+                lot['id'] = uuid4().hex
+                lots.append(lot)
+            data['lots'] = self.initial_lots = lots
+            for i, item in enumerate(data['items']):
+                item['relatedLot'] = lots[i % len(lots)]['id']
+        response = self.app.post_json('/auctions', {'data': data})
+        auction = response.json['data']
+        self.auction_token = response.json['access']['token']
+        self.auction_id = auction['id']
+        status = auction['status']
+        if self.initial_bids:
+            self.initial_bids_tokens = {}
+            response = self.set_status('active.tendering')
+            status = response.json['data']['status']
+            bids = []
+            for i in self.initial_bids:
+                if self.initial_lots:
+                    i = i.copy()
+                    value = i.pop('value')
+                    i['lotValues'] = [
+                        {
+                            'value': value,
+                            'relatedLot': l['id'],
+                        }
+                        for l in self.initial_lots
+                    ]
+                response = self.app.post_json('/auctions/{}/bids'.format(self.auction_id), {'data': i})
+                self.assertEqual(response.status, '201 Created')
+                bids.append(response.json['data'])
+                self.initial_bids_tokens[response.json['data']['id']] = response.json['access']['token']
+            self.initial_bids = bids
+        if self.initial_status != status:
+            self.set_status(self.initial_status)
+
+    def tearDownDS(self):
+        SESSION.request = self._srequest
+
+    def tearDown(self):
+        if self.docservice:
+            self.tearDownDS()
+        del self.db[self.auction_id]
+        super(BaseAuctionWebTest, self).tearDown()

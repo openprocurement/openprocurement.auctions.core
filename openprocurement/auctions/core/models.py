@@ -894,3 +894,18 @@ AUCTION_STAND_STILL_TIME = timedelta(minutes=15)
 
 def calc_auction_end_time(bids, start):
     return start + bids * BIDDER_TIME + SERVICE_TIME + AUCTION_STAND_STILL_TIME
+
+
+class ProcuringEntity(Organization):
+    """An organization."""
+    class Options:
+        roles = {
+            'embedded': schematics_embedded_role,
+            'view': schematics_default_role,
+            'edit_active.enquiries': schematics_default_role + blacklist("kind"),
+            'edit_active.tendering': schematics_default_role + blacklist("kind"),
+        }
+
+    kind = StringType(choices=['general', 'special', 'defense', 'other'])
+
+flashProcuringEntity = ProcuringEntity

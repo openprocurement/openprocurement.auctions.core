@@ -81,6 +81,7 @@ def add_next_award(request):
             auction.awardPeriod.endDate = now
             auction.status = 'active.awarded'
 
+
 def next_check_awarding(auction):
     '''
         Awarding part of generating next_check field
@@ -101,7 +102,7 @@ def next_check_awarding(auction):
             lot_awards = [i for i in auction.awards if i.lotID == lot.id]
             pending_complaints = any([i['status'] in auction.block_complaint_status and i.relatedLot == lot.id for i in auction.complaints])
             pending_awards_complaints = any([i.status in auction.block_complaint_status for a in lot_awards for i in a.complaints])
-            stand_still_ends = set_stand_still_ends(lot_awards)
+            stand_still_ends = set_stand_still_ends(lot_awards) if lot_awards else []
             last_award_status = lot_awards[-1].status if lot_awards else ''
             if not pending_complaints and not pending_awards_complaints and stand_still_ends and last_award_status == 'unsuccessful':
                 checks.append(max(stand_still_ends))
