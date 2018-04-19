@@ -35,6 +35,7 @@ from openprocurement.api.utils import (
     update_file_content_type,  # noqa forwarded import
     set_ownership,  # noqa forwarded import
     get_request_from_root,  # noqa forwarded import
+    read_yaml # noqa forwarded import
 )
 
 from openprocurement.auctions.core.plugins.awarding import includeme as awarding
@@ -469,16 +470,13 @@ def register_auction_procurementMethodType(config, model, pmt):
     config.registry.auction_procurementMethodTypes[pmt] = model
 
 
-def read_json(name):
-    import inspect
-    import os.path
-    from json import loads
-    caller_file = inspect.stack()[1][1]
-    caller_dir = os.path.dirname(os.path.realpath(caller_file))
-    file_path = os.path.join(caller_dir, name)
-    with open(file_path) as lang_file:
-        data = lang_file.read()
-    return loads(data)
+def get_plugins(config):
+    plugins = []
+    for plugin in config:
+        plugins.append(plugin)
+        if config[plugin].get('plugins'):
+            plugins.extend(get_plugins(config[plugin]['plugins']))
+    return plugins
 
 
 def get_related_contract_of_award(award_id, auction):

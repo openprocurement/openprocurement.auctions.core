@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
-from pkg_resources import iter_entry_points
+import logging
+import os
+
 from pyramid.events import ContextFound
 from pyramid.interfaces import IRequest
 
@@ -7,7 +9,7 @@ from openprocurement.api.interfaces import (
     IContentConfigurator,
     IAwardingNextCheck
 )
-from openprocurement.api.utils import get_content_configurator
+from openprocurement.api.utils import get_content_configurator, configure_plugins
 
 from openprocurement.auctions.core.adapters import (
     AuctionConfigurator,
@@ -25,13 +27,16 @@ from openprocurement.auctions.core.utils import (
     awardingTypePredicate
 )
 
+LOGGER = logging.getLogger(__name__)
 
-def includeme(config):
+
+def includeme(config, plugin_config=None):
     add_design()
     config.add_subscriber(set_logging_context, ContextFound)
 
     # auction procurementMethodType plugins support
     config.registry.auction_procurementMethodTypes = {}
+    config.registry.pmtConfigurator = {}
     config.add_route_predicate('auctionsprocurementMethodType', isAuction)
     config.add_route_predicate('awardingType', awardingTypePredicate)
     config.add_request_method(extract_auction, 'auction', reify=True)
@@ -57,10 +62,17 @@ def includeme(config):
     )
 
     config.add_request_method(get_content_configurator, 'content_configurator', reify=True)
-    config.registry.pmtConfigurator = {}
-    plugins = (config.registry.settings.get('plugins') and
-              config.registry.settings['plugins'].split(','))
-    for entry_point in iter_entry_points('openprocurement.auctions.core.plugins'):
-        if not plugins or entry_point.name in plugins:
-            plugin = entry_point.load()
-            plugin(config)
+
+    LOGGER.info("Included openprocurement.auctions.core plugin", extra={'MESSAGE_ID': 'included_plugin'})
+
+    if plugin_config and plugin_config.get('plugins'):
+        for name in plugin_config['plugins']:
+            package_config = plugin_config['plugins'][name]
+            configure_plugins(
+                config, {name: package_config}, 'openprocurement.auctions.core.plugins', name
+            )
+            # migrate data
+            if package_config.get('migration') and not os.environ.get('MIGRATION_SKIP'):
+                configure_plugins(
+                    config.registry, {name: None}, 'openprocurement.api.migrations', name
+                )

@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 from datetime import timedelta, datetime
 
-from openprocurement.api.constants import TZ
-from openprocurement.auctions.core.utils import read_json
+from openprocurement.api.constants import TZ, read_json
 
 DOCUMENT_TYPE_OFFLINE = ['x_dgfAssetFamiliarization']
 DOCUMENT_TYPE_URL_ONLY = ['virtualDataRoom', 'x_dgfPublicAssetCertificate', 'x_dgfPlatformLegalDetails']
