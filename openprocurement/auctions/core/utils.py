@@ -398,8 +398,20 @@ def set_logging_context(event):
     update_logging_context(request, params)
 
 
+def get_procurement_method_types(registry, procedure_types):
+    pmtConfigurator = registry.pmtConfigurator
+    procurement_method_types = [
+        pmt for pmt in pmtConfigurator
+        if pmtConfigurator[pmt] in procedure_types
+    ]
+    return procurement_method_types
+
+
 def auction_from_data(request, data, raise_error=True, create=True):
-    procurementMethodType = data.get('procurementMethodType', 'belowThreshold')
+    procurementMethodType = data.get('procurementMethodType')
+    if not procurementMethodType:
+        pmts = get_procurement_method_types(request.registry, ('belowThreshold',))
+        procurementMethodType = pmts[0] if pmts else 'belowThreshold'
     model = request.registry.auction_procurementMethodTypes.get(procurementMethodType)
     if model is None and raise_error:
        request.errors.add('body', 'data', 'procurementMethodType is not implemented')
