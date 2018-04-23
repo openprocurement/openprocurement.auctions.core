@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 from datetime import timedelta, datetime
 
-from openprocurement.api.constants import TZ
-from openprocurement.auctions.core.utils import read_json
+from openprocurement.api.constants import TZ, read_json
 
 ENGLISH_AUCTION_PROCUREMENT_METHOD_TYPES = ["belowThreshold", "dgfOtherAssets", "dgfFinancialAssets"]
 DUTCH_AUCTION_PROCUREMENT_METHOD_TYPES = ["dgfInsider"]
