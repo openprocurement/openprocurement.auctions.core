@@ -8,8 +8,8 @@ def switch_auction_to_unsuccessful(auction):
     pass
 
 
-def migrate_awarding_1_0_to_awarding_2_1(auction):
-    if (auction['procurementMethodType'] not in ['dgfOtherAssets', 'dgfFinancialAssets']
+def migrate_awarding_1_0_to_awarding_2_1(auction, procurementMethodTypes):
+    if (auction['procurementMethodType'] not in procurementMethodTypes
             or auction['status'] not in ['active.qualification', 'active.awarded']
             or 'awards' not in auction):
         return
