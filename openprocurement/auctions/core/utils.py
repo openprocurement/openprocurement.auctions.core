@@ -469,6 +469,16 @@ class isAuction(object):
         return False
 
 
+class SubscribersPicker(isAuction):
+    """ Subscriber predicate. """
+
+    def __call__(self, event):
+        pmt = getattr(event.request.auction, 'procurementMethodType', None)
+        if event.request.auction is not None:
+            return event.request.registry.pmtConfigurator.get(pmt) == self.val
+        return False
+
+
 def register_auction_procurementMethodType(config, model, pmt):
     """Register a auction procurementMethodType.
     :param config:

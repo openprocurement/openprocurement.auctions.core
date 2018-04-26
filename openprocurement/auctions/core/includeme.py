@@ -24,7 +24,8 @@ from openprocurement.auctions.core.utils import (
     isAuction,
     auction_from_data,
     init_plugins,
-    awardingTypePredicate
+    awardingTypePredicate,
+    SubscribersPicker
 )
 
 LOGGER = logging.getLogger(__name__)
@@ -39,6 +40,7 @@ def includeme(config, plugin_config=None):
     config.registry.pmtConfigurator = {}
     config.add_route_predicate('auctionsprocurementMethodType', isAuction)
     config.add_route_predicate('awardingType', awardingTypePredicate)
+    config.add_subscriber_predicate('procurementMethodType', SubscribersPicker)
     config.add_request_method(extract_auction, 'auction', reify=True)
     config.add_request_method(auction_from_data)
     config.add_directive(
@@ -47,6 +49,7 @@ def includeme(config, plugin_config=None):
     )
     config.scan("openprocurement.auctions.core.views")
     config.scan("openprocurement.api.subscribers")
+    config.scan("openprocurement.auctions.core.subscribers")
     init_plugins(config)
 
     # register Adapters
