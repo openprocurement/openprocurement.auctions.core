@@ -529,3 +529,27 @@ def get_auction_route_name(request, auction):
     pmtConfigurator = request.registry.pmtConfigurator
     procedure_type = pmtConfigurator[auction.procurementMethodType]
     return '{}:Auction'.format(procedure_type)
+
+
+def dgf_upload_file(request, blacklisted_fields=API_DOCUMENT_BLACKLISTED_FIELDS):
+    first_document = request.validated['documents'][0] if 'documents' in request.validated and request.validated['documents'] else None
+    if 'data' in request.validated and request.validated['data']:
+        document = request.validated['document']
+        if document.documentType in (DOCUMENT_TYPE_URL_ONLY + DOCUMENT_TYPE_OFFLINE):
+            if first_document:
+                for attr_name in type(first_document)._fields:
+                    if attr_name not in blacklisted_fields:
+                        setattr(document, attr_name, getattr(first_document, attr_name))
+            if document.documentType in DOCUMENT_TYPE_OFFLINE:
+                document.format = 'offline/on-site-examination'
+            return document
+    return upload_file(request, blacklisted_fields)
+
+
+def dgf_get_file(request):
+    document = request.validated['document']
+    if document.documentType in DOCUMENT_TYPE_URL_ONLY:
+        request.response.status = '302 Moved Temporarily'
+        request.response.location = document.url
+        return document.url
+    return get_file(request)
