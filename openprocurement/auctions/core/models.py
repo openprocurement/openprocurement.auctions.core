@@ -58,7 +58,7 @@ from openprocurement.api.models.auction_models.models import (
 from openprocurement.api.models.models import (
     Period,
     Guarantee,
-    PeriodEndRequired,
+    PeriodEndRequired as AuctionPeriodEndRequired,
 )
 from openprocurement.api.models.schematics_extender import DecimalType
 from openprocurement.api.utils import get_now, get_request_from_root
@@ -443,6 +443,16 @@ class Organization(BaseOrganization):
 
 
 dgfOrganization = Organization
+
+
+def validate_ua_fin(items, *args):
+    if items and not any([i.scheme == u"UA-FIN" for i in items]):
+        raise ValidationError(u"One of additional classifications should be UA-FIN.")
+
+
+class FinancialOrganization(dgfOrganization):
+    identifier = ModelType(Identifier, required=True)
+    additionalIdentifiers = ListType(ModelType(Identifier), required=True, validators=[validate_ua_fin])
 
 
 class Complaint(Complaint):
@@ -924,13 +934,6 @@ flash_bid_roles = {
 def validate_cav_group(items, *args):
     if items and len(set([i.classification.id[:3] for i in items])) != 1:
         raise ValidationError(u"CAV group of items be identical")
-
-
-class AuctionPeriodEndRequired(PeriodEndRequired):
-
-    def validate_startDate(self, data, period):
-        if period and data.get('endDate') and data.get('endDate') < period:
-            raise ValidationError(u"period should begin before its end")
 
 
 class AuctionAuctionPeriod(Period):
