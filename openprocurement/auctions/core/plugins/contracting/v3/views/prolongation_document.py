@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from schematics.exceptions import ValidationError
 from openprocurement.api.utils import (
     get_file,
     upload_file,
@@ -45,7 +46,7 @@ class BaseAuctionAwardContractDocumentResource(APIResource):
         if not validate_contract_document(self.request, 'add'):
             return
         document = upload_file(self.request)
-        if self.context['status'] == 'draft':
+        if self.context['status'] in ['draft', 'applied']:
             self.context.documents.append(document)
         else:
             raise ValidationError(

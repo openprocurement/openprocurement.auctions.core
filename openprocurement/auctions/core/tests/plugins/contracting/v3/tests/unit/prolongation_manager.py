@@ -206,5 +206,5 @@ class TestContractingV3ProlongationManager(BaseWebTest):
 
         prolongation.documents = []
         managed_prolongation = ProlongationManager(prolongation)
-        with self.assertRaises(ValidationError) as context:
-            managed_prolongation.apply()
+        response = managed_prolongation.apply()
+        self.assertEqual(prolongation.status, 'applied')
