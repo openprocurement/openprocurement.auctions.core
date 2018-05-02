@@ -7,7 +7,7 @@ from time import sleep
 
 from couchdb.http import ResourceConflict
 from jsonpointer import resolve_pointer
-from cornice.resource import resource, view
+from cornice.resource import resource
 from pkg_resources import get_distribution
 from pyramid.compat import decode_path_info
 from pyramid.exceptions import URLDecodeError
@@ -16,7 +16,7 @@ from schematics.exceptions import ModelValidationError
 from openprocurement.api.constants import (
     TZ, SANDBOX_MODE,
     AUCTIONS_COMPLAINT_STAND_STILL_TIME,
-    DOCUMENT_BLACKLISTED_FIELDS as API_DOCUMENT_BLACKLISTED_FIELDS,  # noqa forwarded import
+    DOCUMENT_BLACKLISTED_FIELDS as API_DOCUMENT_BLACKLISTED_FIELDS,
     SESSION,  # noqa forwarded import
 )
 from openprocurement.api.validation import error_handler
@@ -30,14 +30,18 @@ from openprocurement.api.utils import (
     context_unpack,
     json_view,  # noqa forwarded import
     APIResource,  # noqa forwarded import
-    get_file,  # noqa forwarded import
-    upload_file,  # noqa forwarded import
+    get_file,
+    upload_file,
     update_file_content_type,  # noqa forwarded import
     set_ownership,  # noqa forwarded import
     get_request_from_root,  # noqa forwarded import
     read_yaml # noqa forwarded import
 )
 
+from openprocurement.auctions.core.constants import (
+    DOCUMENT_TYPE_URL_ONLY,
+    DOCUMENT_TYPE_OFFLINE
+)
 from openprocurement.auctions.core.plugins.awarding import includeme as awarding
 from openprocurement.auctions.core.plugins.contracting import includeme as contracting
 from openprocurement.auctions.core.traversal import factory
@@ -535,3 +539,27 @@ def get_auction_route_name(request, auction):
     pmtConfigurator = request.registry.pmtConfigurator
     procedure_type = pmtConfigurator[auction.procurementMethodType]
     return '{}:Auction'.format(procedure_type)
+
+
+def dgf_upload_file(request, blacklisted_fields=API_DOCUMENT_BLACKLISTED_FIELDS):
+    first_document = request.validated['documents'][0] if 'documents' in request.validated and request.validated['documents'] else None
+    if 'data' in request.validated and request.validated['data']:
+        document = request.validated['document']
+        if document.documentType in (DOCUMENT_TYPE_URL_ONLY + DOCUMENT_TYPE_OFFLINE):
+            if first_document:
+                for attr_name in type(first_document)._fields:
+                    if attr_name not in blacklisted_fields:
+                        setattr(document, attr_name, getattr(first_document, attr_name))
+            if document.documentType in DOCUMENT_TYPE_OFFLINE:
+                document.format = 'offline/on-site-examination'
+            return document
+    return upload_file(request, blacklisted_fields)
+
+
+def dgf_get_file(request):
+    document = request.validated['document']
+    if document.documentType in DOCUMENT_TYPE_URL_ONLY:
+        request.response.status = '302 Moved Temporarily'
+        request.response.location = document.url
+        return document.url
+    return get_file(request)
