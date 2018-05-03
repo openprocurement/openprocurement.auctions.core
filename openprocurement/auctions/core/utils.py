@@ -7,7 +7,7 @@ from time import sleep
 
 from couchdb.http import ResourceConflict
 from jsonpointer import resolve_pointer
-from cornice.resource import resource, view
+from cornice.resource import resource
 from pkg_resources import get_distribution
 from pyramid.compat import decode_path_info
 from pyramid.exceptions import URLDecodeError
@@ -16,7 +16,7 @@ from schematics.exceptions import ModelValidationError
 from openprocurement.api.constants import (
     TZ, SANDBOX_MODE,
     AUCTIONS_COMPLAINT_STAND_STILL_TIME,
-    DOCUMENT_BLACKLISTED_FIELDS as API_DOCUMENT_BLACKLISTED_FIELDS,  # noqa forwarded import
+    DOCUMENT_BLACKLISTED_FIELDS as API_DOCUMENT_BLACKLISTED_FIELDS,
     SESSION,  # noqa forwarded import
 )
 from openprocurement.api.validation import error_handler
@@ -30,13 +30,18 @@ from openprocurement.api.utils import (
     context_unpack,
     json_view,  # noqa forwarded import
     APIResource,  # noqa forwarded import
-    get_file,  # noqa forwarded import
-    upload_file,  # noqa forwarded import
+    get_file,
+    upload_file,
     update_file_content_type,  # noqa forwarded import
     set_ownership,  # noqa forwarded import
     get_request_from_root,  # noqa forwarded import
+    read_yaml # noqa forwarded import
 )
 
+from openprocurement.auctions.core.constants import (
+    DOCUMENT_TYPE_URL_ONLY,
+    DOCUMENT_TYPE_OFFLINE
+)
 from openprocurement.auctions.core.plugins.awarding import includeme as awarding
 from openprocurement.auctions.core.plugins.contracting import includeme as contracting
 from openprocurement.auctions.core.traversal import factory
@@ -397,8 +402,20 @@ def set_logging_context(event):
     update_logging_context(request, params)
 
 
+def get_procurement_method_types(registry, procedure_types):
+    pmtConfigurator = registry.pmtConfigurator
+    procurement_method_types = [
+        pmt for pmt in pmtConfigurator
+        if pmtConfigurator[pmt] in procedure_types
+    ]
+    return procurement_method_types
+
+
 def auction_from_data(request, data, raise_error=True, create=True):
-    procurementMethodType = data.get('procurementMethodType', 'belowThreshold')
+    procurementMethodType = data.get('procurementMethodType')
+    if not procurementMethodType:
+        pmts = get_procurement_method_types(request.registry, ('belowThreshold',))
+        procurementMethodType = pmts[0] if pmts else 'belowThreshold'
     model = request.registry.auction_procurementMethodTypes.get(procurementMethodType)
     if model is None and raise_error:
        request.errors.add('body', 'data', 'procurementMethodType is not implemented')
@@ -450,29 +467,42 @@ class isAuction(object):
     phash = text
 
     def __call__(self, context, request):
+        pmt = getattr(request.auction, 'procurementMethodType', None)
         if request.auction is not None:
-            return getattr(request.auction, 'procurementMethodType', None) == self.val
+            return request.registry.pmtConfigurator.get(pmt) == self.val
         return False
 
 
-def register_auction_procurementMethodType(config, model):
+class SubscribersPicker(isAuction):
+    """ Subscriber predicate. """
+
+    def __call__(self, event):
+        pmt = getattr(event.request.auction, 'procurementMethodType', None)
+        if event.request.auction is not None:
+            return event.request.registry.pmtConfigurator.get(pmt) == self.val
+        return False
+
+
+def register_auction_procurementMethodType(config, model, pmt):
     """Register a auction procurementMethodType.
     :param config:
         The pyramid configuration object that will be populated.
     :param model:
         The auction model class
+    :param pmt:
+        Procurement method type associated with procedure type
     """
-    config.registry.auction_procurementMethodTypes[model.procurementMethodType.default] = model
+    config.registry.pmtConfigurator[pmt] = model._procedure_type
+    config.registry.auction_procurementMethodTypes[pmt] = model
 
 
-def read_json(name):
-    import os.path
-    from json import loads
-    curr_dir = os.path.dirname(os.path.realpath(__file__))
-    file_path = os.path.join(curr_dir, name)
-    with open(file_path) as lang_file:
-        data = lang_file.read()
-    return loads(data)
+def get_plugins(config):
+    plugins = []
+    for plugin in config:
+        plugins.append(plugin)
+        if config[plugin].get('plugins'):
+            plugins.extend(get_plugins(config[plugin]['plugins']))
+    return plugins
 
 
 def get_related_contract_of_award(award_id, auction):
@@ -503,3 +533,33 @@ def rounding_shouldStartAfter_after_midnigth(start_after, auction, use_from=date
         if start_after >= midnigth:
             start_after = midnigth + timedelta(1)
     return start_after
+
+
+def get_auction_route_name(request, auction):
+    pmtConfigurator = request.registry.pmtConfigurator
+    procedure_type = pmtConfigurator[auction.procurementMethodType]
+    return '{}:Auction'.format(procedure_type)
+
+
+def dgf_upload_file(request, blacklisted_fields=API_DOCUMENT_BLACKLISTED_FIELDS):
+    first_document = request.validated['documents'][0] if 'documents' in request.validated and request.validated['documents'] else None
+    if 'data' in request.validated and request.validated['data']:
+        document = request.validated['document']
+        if document.documentType in (DOCUMENT_TYPE_URL_ONLY + DOCUMENT_TYPE_OFFLINE):
+            if first_document:
+                for attr_name in type(first_document)._fields:
+                    if attr_name not in blacklisted_fields:
+                        setattr(document, attr_name, getattr(first_document, attr_name))
+            if document.documentType in DOCUMENT_TYPE_OFFLINE:
+                document.format = 'offline/on-site-examination'
+            return document
+    return upload_file(request, blacklisted_fields)
+
+
+def dgf_get_file(request):
+    document = request.validated['document']
+    if document.documentType in DOCUMENT_TYPE_URL_ONLY:
+        request.response.status = '302 Moved Temporarily'
+        request.response.location = document.url
+        return document.url
+    return get_file(request)

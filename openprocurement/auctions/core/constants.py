@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 from datetime import timedelta, datetime
 
-from openprocurement.api.constants import TZ
-from openprocurement.auctions.core.utils import read_json
+from openprocurement.api.constants import TZ, read_json
+
+ENGLISH_AUCTION_PROCUREMENT_METHOD_TYPES = ["belowThreshold", "dgfOtherAssets", "dgfFinancialAssets"]
+DUTCH_AUCTION_PROCUREMENT_METHOD_TYPES = ["dgfInsider"]
 
 DOCUMENT_TYPE_OFFLINE = ['x_dgfAssetFamiliarization']
 DOCUMENT_TYPE_URL_ONLY = ['virtualDataRoom', 'x_dgfPublicAssetCertificate', 'x_dgfPlatformLegalDetails']
@@ -34,7 +36,6 @@ PROLONGATION_LONG_PERIOD = timedelta(days=132)
 # Prolongation and it's actual creation time `dateCreated`
 PROLONGATION_DATE_PUBLISHED_LIMIT_PERIOD = timedelta(days=20)
 
-
 DGF_PLATFORM_LEGAL_DETAILS = {
     'url': 'http://torgi.fg.gov.ua/prozorrosale',
     'title': u'Місце та форма прийому заяв на участь в аукціоні та банківські реквізити для зарахування гарантійних внесків',
@@ -48,6 +49,8 @@ DGF_ELIGIBILITY_CRITERIA = {
 }
 
 DGF_PLATFORM_LEGAL_DETAILS_FROM = datetime(2016, 12, 23, tzinfo=TZ)
+DGF_ID_REQUIRED_FROM = datetime(2017, 1, 1, tzinfo=TZ)
+DGF_DECISION_REQUIRED_FROM = datetime(2017, 1, 1, tzinfo=TZ)
 
 ADDITIONAL_CLASSIFICATIONS_SCHEMES = [u'ДКПП', u'NONE', u'ДК003', u'ДК015', u'ДК018']
 
@@ -57,3 +60,4 @@ STATUS4ROLE = {
     'reviewers': ['pending'],
     'tender_owner': ['claim'],
 }
+
