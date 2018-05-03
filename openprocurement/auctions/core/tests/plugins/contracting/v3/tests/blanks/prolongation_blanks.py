@@ -139,6 +139,12 @@ def apply_prolongation_short(test_case):
         retrieved_prolongation.status,
         'applied'
     )
+    add_document_to_prolongation(
+        test_case,
+        test_case.auction_id,
+        test_case.contract_id,
+        test_case.prolongation_id,
+    )
     post_prolongation_contract = get_related_contract(test_case)
     auction = get_auction(test_case)
     test_case.assertEqual(
