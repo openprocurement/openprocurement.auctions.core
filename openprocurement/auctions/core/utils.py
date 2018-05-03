@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from collections import Mapping
 from datetime import datetime, time, timedelta
 from functools import partial
 from logging import getLogger
@@ -496,12 +497,12 @@ def register_auction_procurementMethodType(config, model, pmt):
     config.registry.auction_procurementMethodTypes[pmt] = model
 
 
-def get_plugins(config):
+def get_plugins(plugins_map):
     plugins = []
-    for plugin in config:
-        plugins.append(plugin)
-        if config[plugin].get('plugins'):
-            plugins.extend(get_plugins(config[plugin]['plugins']))
+    for item in plugins_map:
+        plugins.append(item)
+        if isinstance(plugins_map[item], Mapping) and plugins_map[item].get('plugins'):
+            plugins.extend(get_plugins(plugins_map[item]['plugins']))
     return plugins
 
 

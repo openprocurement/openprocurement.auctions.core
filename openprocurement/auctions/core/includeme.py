@@ -27,11 +27,12 @@ from openprocurement.auctions.core.utils import (
     awardingTypePredicate,
     SubscribersPicker
 )
+from openprocurement.api.app import get_evenly_plugins
 
 LOGGER = logging.getLogger(__name__)
 
 
-def includeme(config, plugin_config=None):
+def includeme(config, plugin_map):
     add_design()
     config.add_subscriber(set_logging_context, ContextFound)
 
@@ -65,17 +66,15 @@ def includeme(config, plugin_config=None):
     )
 
     config.add_request_method(get_content_configurator, 'content_configurator', reify=True)
-
     LOGGER.info("Included openprocurement.auctions.core plugin", extra={'MESSAGE_ID': 'included_plugin'})
+    get_evenly_plugins(config, plugin_map['plugins'],
+                       'openprocurement.auctions.core.plugins')
 
-    if plugin_config and plugin_config.get('plugins'):
-        for name in plugin_config['plugins']:
-            package_config = plugin_config['plugins'][name]
-            configure_plugins(
-                config, {name: package_config}, 'openprocurement.auctions.core.plugins', name
-            )
-            # migrate data
-            if package_config.get('migration') and not os.environ.get('MIGRATION_SKIP'):
-                configure_plugins(
-                    config.registry, {name: None}, 'openprocurement.api.migrations', name
-                )
+        #for name in plugin_config['plugins']:
+        #    package_config = plugin_config['plugins'][name]
+        #    configure_plugins(
+        #        config, {name: package_config}, 'openprocurement.auctions.core.plugins', name
+        #    )
+        #    # migrate data
+        #    if package_config.get('migration') and not os.environ.get('MIGRATION_SKIP'):
+        #        configure_plugins(config.registry, {name: None}, 'openprocurement.api.migrations', name)
