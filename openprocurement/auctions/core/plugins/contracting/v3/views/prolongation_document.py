@@ -45,13 +45,7 @@ class BaseAuctionAwardContractDocumentResource(APIResource):
         if not validate_contract_document(self.request, 'add'):
             return
         document = upload_file(self.request)
-        if self.context['status'] == 'draft':
-            self.context.documents.append(document)
-        else:
-            raise ValidationError(
-                'Document can be added only in `draft` status.'
-            )
-
+        self.context.documents.append(document)
         if save_auction(self.request):
             self.LOGGER.info(
                 'Created auction contract document {}'.format(
