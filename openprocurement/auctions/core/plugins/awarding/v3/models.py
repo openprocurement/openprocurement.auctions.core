@@ -4,11 +4,11 @@ from schematics.transforms import (
     whitelist
 )
 from schematics.types import StringType
-from schematics.types.serializable import serializable
 from schematics.types.compound import ModelType
+from schematics.types.serializable import serializable
 
+from openprocurement.api.models.common import Period
 from openprocurement.api.models.schematics_extender import ListType
-from openprocurement.api.models.models import Period
 from openprocurement.api.utils import calculate_business_date
 
 from openprocurement.auctions.core.models import (
@@ -19,12 +19,11 @@ from openprocurement.auctions.core.models import (
     dgfOrganization as Organization,
     Award as BaseAward
 )
-from openprocurement.auctions.core.plugins.awarding.v3.constants import (
-    VERIFY_AUCTION_PROTOCOL_TIME
-)
 from openprocurement.auctions.core.plugins.awarding.base.constants import (
     CONTRACT_SIGNING_TIME,
-    AWARD_PAYMENT_TIME
+)
+from openprocurement.auctions.core.plugins.awarding.v3.constants import (
+    VERIFY_AUCTION_PROTOCOL_TIME
 )
 from openprocurement.auctions.core.validation import (
     validate_disallow_dgfPlatformLegalDetails

@@ -1,12 +1,11 @@
 # -*- coding: utf-8 -*-
-from openprocurement.api.utils import get_now
-from openprocurement.api.models.models import Period
-from openprocurement.api.utils import calculate_business_date
+from openprocurement.api.models.common import Period
+from openprocurement.api.tests.base import JSON_RENDERER_ERROR
+from openprocurement.api.utils import get_now, calculate_business_date
 
 from openprocurement.auctions.core.plugins.awarding.v3.constants import (
     VERIFY_AUCTION_PROTOCOL_TIME
 )
-from openprocurement.api.tests.base import JSON_RENDERER_ERROR
 # CreateAuctionAwardTest
 
 

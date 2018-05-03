@@ -31,7 +31,7 @@ from barbecue import vnmax
 
 from openprocurement.api.constants import TZ, SANDBOX_MODE, AUCTIONS_COMPLAINT_STAND_STILL_TIME
 from openprocurement.api.interfaces import IAwardingNextCheck
-from openprocurement.api.models.auction_models.models import (
+from openprocurement.api.models.auction_models import (
     Model,
     Value,
     Contract as BaseContract,
@@ -48,17 +48,17 @@ from openprocurement.api.models.auction_models.models import (
     schematics_embedded_role,
     schematics_default_role,
     IsoDateTimeType,
-    Revision,
     Cancellation as BaseCancellation,
     Feature,
     validate_features_uniq,
     validate_lots_uniq,
     ComplaintModelType  # noqa forwarded import
 )
-from openprocurement.api.models.models import (
+from openprocurement.api.models.common import (
     Period,
     Guarantee,
     PeriodEndRequired as AuctionPeriodEndRequired,
+    Revision
 )
 from openprocurement.api.models.schematics_extender import DecimalType
 from openprocurement.api.utils import get_now, get_request_from_root
