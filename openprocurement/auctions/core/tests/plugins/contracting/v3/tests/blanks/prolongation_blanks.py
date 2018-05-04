@@ -1,5 +1,6 @@
-from openprocurement.api.utils import get_now
-from openprocurement.api.utils import calculate_business_date
+from openprocurement.api.utils import (
+    get_now, set_specific_hour, calculate_business_date
+)
 
 from openprocurement.auctions.core.tests.blanks.fixtures.auction import get_auction
 from openprocurement.auctions.core.plugins.contracting.v3.models import (
@@ -9,6 +10,7 @@ from openprocurement.auctions.core.plugins.contracting.v3.models import (
 from openprocurement.auctions.core.plugins.contracting.v3.constants import (
     PROLONGATION_SHORT_PERIOD,
     PROLONGATION_LONG_PERIOD,
+    CONTRACT_SIGNING_PERIOD_END_DATE_HOUR
 )
 from openprocurement.auctions.core.plugins.contracting.v3.tests.constants import (
     PATHS
@@ -147,13 +149,17 @@ def apply_prolongation_short(test_case):
     )
     post_prolongation_contract = get_related_contract(test_case)
     auction = get_auction(test_case)
+    contract_signing_period_end_date = calculate_business_date(
+        pre_prolongation_contract.signingPeriod.startDate,
+        PROLONGATION_SHORT_PERIOD,
+        context=auction,
+        working_days=True
+    )
     test_case.assertEqual(
         post_prolongation_contract.signingPeriod.endDate,
-        calculate_business_date(
-            pre_prolongation_contract.signingPeriod.startDate,
-            PROLONGATION_SHORT_PERIOD,
-            context=auction,
-            working_days=True
+        set_specific_hour(
+            contract_signing_period_end_date,
+            CONTRACT_SIGNING_PERIOD_END_DATE_HOUR
         )
     )
 
@@ -213,13 +219,17 @@ def apply_prolongation_long(test_case):
     )
     post_prolongation_contract = get_related_contract(test_case)
     auction = get_auction(test_case)
+    contract_signing_period_end_date = calculate_business_date(
+        pre_prolongation_contract.signingPeriod.startDate,
+        PROLONGATION_LONG_PERIOD,
+        context=auction,
+        working_days=True
+    )
     test_case.assertEqual(
         post_prolongation_contract.signingPeriod.endDate,
-        calculate_business_date(
-            pre_prolongation_contract.signingPeriod.startDate,
-            PROLONGATION_LONG_PERIOD,
-            context=auction,
-            working_days=True
+        set_specific_hour(
+            contract_signing_period_end_date,
+            CONTRACT_SIGNING_PERIOD_END_DATE_HOUR
         )
     )
 
@@ -298,13 +308,17 @@ def apply_prolongation_triple_times(test_case):
     # check if contract signing was prolongated for the third time
     post_prolongation_contract = get_related_contract(test_case)
     auction = get_auction(test_case)
+    contract_signing_period_end_date = calculate_business_date(
+        pre_prolongation_contract.signingPeriod.startDate,
+        PROLONGATION_LONG_PERIOD,
+        context=auction,
+        working_days=True
+    )
     test_case.assertEqual(
         post_prolongation_contract.signingPeriod.endDate,
-        calculate_business_date(
-            pre_prolongation_contract.signingPeriod.startDate,
-            PROLONGATION_LONG_PERIOD,
-            context=auction,
-            working_days=True
+        set_specific_hour(
+            contract_signing_period_end_date,
+            CONTRACT_SIGNING_PERIOD_END_DATE_HOUR
         )
     )
 

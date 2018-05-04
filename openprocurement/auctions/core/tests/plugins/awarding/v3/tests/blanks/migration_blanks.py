@@ -1,10 +1,15 @@
 from uuid import uuid4
 from copy import deepcopy
 
-from openprocurement.api.utils import get_now
+from isodate import parse_datetime
+
+from openprocurement.api.utils import get_now, set_specific_hour
 
 from openprocurement.auctions.core.plugins.awarding.v2.tests.award import (
     award_fixture
+)
+from openprocurement.auctions.core.plugins.contracting.v3.constants import (
+    CONTRACT_SIGNING_PERIOD_END_DATE_HOUR
 )
 
 
@@ -47,6 +52,11 @@ def migrate_pendingPayment_active(self):
     contracts = response.json['data']
     self.assertEqual(len(contracts), 1)
     self.assertEqual(contracts[0]['status'], 'pending')
+    signing_period_end_date = set_specific_hour(
+        parse_datetime(pending_payment_award['signingPeriod']['endDate']),
+        CONTRACT_SIGNING_PERIOD_END_DATE_HOUR
+    )
+    pending_payment_award['signingPeriod']['endDate'] = signing_period_end_date.isoformat()
     self.assertEqual(contracts[0]['signingPeriod'], pending_payment_award['signingPeriod'])
 
 
@@ -82,6 +92,11 @@ def migrate_contract_cancelled(self):
     contracts = response.json['data']
     self.assertEqual(len(contracts), 1)
     self.assertEqual(contracts[0]['status'], 'cancelled')
+    signing_period_end_date = set_specific_hour(
+        parse_datetime(unsuccessful_award['signingPeriod']['endDate']),
+        CONTRACT_SIGNING_PERIOD_END_DATE_HOUR
+    )
+    unsuccessful_award['signingPeriod']['endDate'] = signing_period_end_date.isoformat()
     self.assertEqual(contracts[0]['signingPeriod'], unsuccessful_award['signingPeriod'])
 
 
@@ -120,4 +135,9 @@ def migrate_contract_pending(self):
     contracts = response.json['data']
     self.assertEqual(len(contracts), 1)
     self.assertEqual(contracts[0]['status'], 'pending')
+    signing_period_end_date = set_specific_hour(
+        parse_datetime(active_award['signingPeriod']['endDate']),
+        CONTRACT_SIGNING_PERIOD_END_DATE_HOUR
+    )
+    active_award['signingPeriod']['endDate'] = signing_period_end_date.isoformat()
     self.assertEqual(contracts[0]['signingPeriod'], active_award['signingPeriod'])

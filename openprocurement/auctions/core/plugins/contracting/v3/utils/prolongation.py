@@ -5,7 +5,8 @@ from openprocurement.api.utils import calculate_business_date
 from openprocurement.auctions.core.models import get_auction
 from openprocurement.auctions.core.plugins.contracting.v3.constants import (
     PROLONGATION_SHORT_PERIOD,
-    PROLONGATION_LONG_PERIOD
+    PROLONGATION_LONG_PERIOD,
+    CONTRACT_SIGNING_PERIOD_END_DATE_HOUR
 )
 
 
@@ -36,7 +37,8 @@ class ProlongationManager(object):
             contract.signingPeriod.startDate,
             prolongation_period,
             context=auction,
-            working_days=True
+            working_days=True,
+            specific_hour=CONTRACT_SIGNING_PERIOD_END_DATE_HOUR
         )
 
     def _check_documents_are_present(self):

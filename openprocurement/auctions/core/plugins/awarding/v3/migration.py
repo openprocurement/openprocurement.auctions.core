@@ -1,5 +1,11 @@
+from datetime import time
 from uuid import uuid4
-from openprocurement.api.utils import get_now
+
+from isodate import parse_datetime
+
+from openprocurement.api.utils import get_now, set_specific_hour
+
+from openprocurement.auctions.core.plugins.contracting.v3.constants import CONTRACT_SIGNING_PERIOD_END_DATE_HOUR
 
 
 def migrate_awarding2_to_awarding3(auction,
@@ -52,4 +58,13 @@ def migrate_awarding2_to_awarding3(auction,
             if not contract.get('signingPeriod', False):
                 contract.update({'signingPeriod': award['signingPeriod']})
                 changed = True
+            # Set specific hour to signingPeriod.endDate of Contract
+            if contract['signingPeriod'].get('endDate'):
+                contract_signing_period_end_date = parse_datetime(contract['signingPeriod']['endDate'])
+                if contract_signing_period_end_date.time() != time(CONTRACT_SIGNING_PERIOD_END_DATE_HOUR):
+                    contract['signingPeriod']['endDate'] = set_specific_hour(
+                        contract_signing_period_end_date,
+                        CONTRACT_SIGNING_PERIOD_END_DATE_HOUR
+                    ).isoformat()
+                    changed = True
     return changed

@@ -1,5 +1,6 @@
 from datetime import timedelta
 
+CONTRACT_SIGNING_PERIOD_END_DATE_HOUR = 18
 
 # Periods of prolongations, that can be applied on Contract
 PROLONGATION_SHORT_PERIOD = timedelta(days=42)
