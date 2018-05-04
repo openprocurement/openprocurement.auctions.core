@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from collections import Mapping
 from datetime import datetime, time, timedelta
 from functools import partial
 from logging import getLogger
@@ -35,7 +36,6 @@ from openprocurement.api.utils import (
     update_file_content_type,  # noqa forwarded import
     set_ownership,  # noqa forwarded import
     get_request_from_root,  # noqa forwarded import
-    read_yaml # noqa forwarded import
 )
 
 from openprocurement.auctions.core.constants import (
@@ -496,12 +496,12 @@ def register_auction_procurementMethodType(config, model, pmt):
     config.registry.auction_procurementMethodTypes[pmt] = model
 
 
-def get_plugins(config):
+def get_plugins(plugins_map):
     plugins = []
-    for plugin in config:
-        plugins.append(plugin)
-        if config[plugin].get('plugins'):
-            plugins.extend(get_plugins(config[plugin]['plugins']))
+    for item in plugins_map:
+        plugins.append(item)
+        if isinstance(plugins_map[item], Mapping) and plugins_map[item].get('plugins'):
+            plugins.extend(get_plugins(plugins_map[item]['plugins']))
     return plugins
 
 

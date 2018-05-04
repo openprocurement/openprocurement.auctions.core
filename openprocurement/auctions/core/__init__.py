@@ -15,6 +15,7 @@ def includeme(config):
     config.scan("openprocurement.auctions.core.views")
 
     # auction procurementMethodType plugins support
+    puginns = config.registry.app_meta(['plugins'])
     config.add_route_predicate('auctionsprocurementMethodType', isAuction)
     config.registry.auction_procurementMethodTypes = {}
     config.add_request_method(extract_auction, 'auction', reify=True)
@@ -22,7 +23,8 @@ def includeme(config):
     config.add_directive('add_auction_procurementMethodType', register_auction_procurementMethodType)
     config.registry.registerAdapter(AuctionConfigurator, (IAuction, IRequest),
                                     IContentConfigurator)
-    plugins = config.registry.settings.get('plugins') and config.registry.settings['plugins'].split(',')
+
+    plugins = config.registry.app_meta(['plugins'])
     for entry_point in iter_entry_points('openprocurement.auctions.core.plugins'):
         if not plugins or entry_point.name in plugins:
             plugin = entry_point.load()
