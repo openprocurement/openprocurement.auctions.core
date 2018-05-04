@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import logging
-import os
 
 from pyramid.events import ContextFound
 from pyramid.interfaces import IRequest

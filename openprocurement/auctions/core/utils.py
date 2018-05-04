@@ -36,7 +36,6 @@ from openprocurement.api.utils import (
     update_file_content_type,  # noqa forwarded import
     set_ownership,  # noqa forwarded import
     get_request_from_root,  # noqa forwarded import
-    read_yaml # noqa forwarded import
 )
 
 from openprocurement.auctions.core.constants import (

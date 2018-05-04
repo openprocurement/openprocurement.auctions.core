@@ -3,13 +3,12 @@ from schematics.exceptions import ValidationError
 
 from openprocurement.api.constants import SANDBOX_MODE
 from openprocurement.auctions.core.constants import ENGLISH_AUCTION_PROCUREMENT_METHOD_TYPES
-from openprocurement.api.utils import get_now
 from openprocurement.api.utils import (
     update_logging_context, error_handler, get_now
 )
 from openprocurement.api.validation import (
-    validate_json_data,
-    validate_data,
+    validate_json_data, # noqa forwarded import
+    validate_data, # noqa forwarded import
     validate_patch_document_data,  # noqa forwarded import
 )
 
