@@ -1,3 +1,4 @@
+from zope.interface import implementer
 from schematics.types import (
     StringType
 )
@@ -14,8 +15,10 @@ from openprocurement.auctions.core.models import (
     flashItem as Item,
     Award as BaseAward
 )
+from .interfaces import IAwardV1
 
 
+@implementer(IAwardV1)
 class Award(BaseAward):
     """
         Awarding Model for Awarding 1.0 procedure

@@ -7,6 +7,19 @@ from .utils import (
 from openprocurement.auctions.core.adapters import (
     AuctionAwardingNextCheckAdapter
 )
+from openprocurement.auctions.core.plugins.awarding.base.adapters import (
+    BaseAwardManagerAdapter
+)
+from openprocurement.api.utils import (
+    get_now,
+    context_unpack,
+    calculate_business_date,
+)
+from openprocurement.auctions.core.utils import (
+    save_auction,
+    apply_patch,
+)
+from openprocurement.auctions.core.models import STAND_STILL_TIME
 
 
 class AwardingV1ConfiguratorMixin(object):
@@ -20,7 +33,7 @@ class AwardingV1ConfiguratorMixin(object):
 
     def start_awarding(self):
         """Using add_next_award method from belowThreshold procedure.
-           
+
            add_next_award create 1 award and Awarding process start with
            1 award object
         """
@@ -40,3 +53,107 @@ class AwardingNextCheckV1(AuctionAwardingNextCheckAdapter):
     """Use next_check_awarding from V1 awarding"""
     def add_awarding_checks(self, auction):
         return next_check_awarding(auction)
+
+
+class AwardManagerV1Adapter(BaseAwardManagerAdapter):
+    """
+    Logic for actions on Award-v1
+    """
+    name = 'Avard-v1 Manager'
+
+    def create_award(self, view):
+        award = view.request.validated['award']
+        award.complaintPeriod = {'startDate': get_now().isoformat()}
+        view.request.validated['auction'].awards.append(award)
+        if save_auction(view.request):
+            view.LOGGER.info(
+                'Created auction award {}'.format(award.id),
+                extra=context_unpack(
+                    view.request,
+                    {'MESSAGE_ID': 'auction_award_create'},
+                    {'award_id': award.id}))
+            view.request.response.status = 201
+            route = view.request.matched_route.name.replace("collection_", "")
+            view.request.response.headers['Location'] = view.request.current_route_url(
+                _route_name=route, award_id=award.id, _query={}
+            )
+            return {'data': award.serialize("view")}
+
+    def change_award(self, view):
+        auction = view.request.validated['auction']
+        award = view.request.context
+        award_status = award.status
+        if any([i.status != 'active' for i in auction.lots if i.id == award.lotID]):
+            view.request.errors.add('body', 'data', 'Can update award only in active lot status')
+            view.request.errors.status = 403
+            return
+        apply_patch(view.request, save=False, src=view.request.context.serialize())
+        if award_status == 'pending' and award.status == 'active':
+            award.complaintPeriod.endDate = calculate_business_date(get_now(), STAND_STILL_TIME, auction, True)
+            auction.contracts.append(type(auction).contracts.model_class({
+                'awardID': award.id,
+                'suppliers': award.suppliers,
+                'value': award.value,
+                'date': get_now(),
+                'items': [i for i in auction.items if i.relatedLot == award.lotID],
+                'contractID': '{}-{}{}'.format(auction.auctionID, view.server_id, len(auction.contracts) + 1)}))
+            view.request.content_configurator.start_awarding()
+        elif award_status == 'active' and award.status == 'cancelled':
+            now = get_now()
+            if award.complaintPeriod.endDate > now:
+                award.complaintPeriod.endDate = now
+            for j in award.complaints:
+                if j.status not in ['invalid', 'resolved', 'declined']:
+                    j.status = 'cancelled'
+                    j.cancellationReason = 'cancelled'
+                    j.dateCanceled = now
+            for i in auction.contracts:
+                if i.awardID == award.id:
+                    i.status = 'cancelled'
+            view.request.content_configurator.back_to_awarding()
+        elif award_status == 'pending' and award.status == 'unsuccessful':
+            award.complaintPeriod.endDate = calculate_business_date(get_now(), STAND_STILL_TIME, auction, True)
+            view.request.content_configurator.back_to_awarding()
+        elif (
+            award_status == 'unsuccessful'
+            and award.status == 'cancelled'
+            and any(
+                [i.status in ['claim', 'answered', 'pending', 'resolved'] for i in award.complaints]
+            )
+        ):
+            if auction.status == 'active.awarded':
+                auction.status = 'active.qualification'
+                auction.awardPeriod.endDate = None
+            now = get_now()
+            award.complaintPeriod.endDate = now
+            cancelled_awards = []
+            for i in auction.awards[auction.awards.index(award):]:
+                if i.lotID != award.lotID:
+                    continue
+                i.complaintPeriod.endDate = now
+                i.status = 'cancelled'
+                for j in i.complaints:
+                    if j.status not in ['invalid', 'resolved', 'declined']:
+                        j.status = 'cancelled'
+                        j.cancellationReason = 'cancelled'
+                        j.dateCanceled = now
+                cancelled_awards.append(i.id)
+            for i in auction.contracts:
+                if i.awardID in cancelled_awards:
+                    i.status = 'cancelled'
+            view.request.content_configurator.back_to_awarding()
+        elif (
+            view.request.authenticated_role != 'Administrator'
+            and not(
+                award_status == 'pending'
+                and award.status == 'pending'
+            )
+        ):
+            view.request.errors.add('body', 'data', 'Can\'t update award in current ({}) status'.format(award_status))
+            view.request.errors.status = 403
+            return
+        if save_auction(view.request):
+            view.LOGGER.info(
+                'Updated auction award {}'.format(view.request.context.id),
+                extra=context_unpack(view.request, {'MESSAGE_ID': 'auction_award_patch'}))
+            return {'data': award.serialize("view")}
