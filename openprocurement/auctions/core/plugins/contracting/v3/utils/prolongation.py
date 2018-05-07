@@ -36,7 +36,7 @@ class ProlongationManager(object):
         contract.signingPeriod.endDate = calculate_business_date(
             contract.signingPeriod.startDate,
             prolongation_period,
-            context=auction,
+            auction,
             working_days=True,
             specific_hour=CONTRACT_SIGNING_PERIOD_END_DATE_HOUR
         )

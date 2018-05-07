@@ -125,7 +125,7 @@ class TestContractingV3ProlongationManager(BaseWebTest):
         target_signingPeriod_endDate = calculate_business_date(
             contract.signingPeriod.startDate,
             PROLONGATION_SHORT_PERIOD,
-            context=contract.__parent__,
+            contract.__parent__,
             working_days=True,
             specific_hour=CONTRACT_SIGNING_PERIOD_END_DATE_HOUR
         )
@@ -154,7 +154,7 @@ class TestContractingV3ProlongationManager(BaseWebTest):
         target_signingPeriod_endDate = calculate_business_date(
             contract.signingPeriod.startDate,
             PROLONGATION_LONG_PERIOD,
-            context=contract.__parent__,
+            contract.__parent__,
             working_days=True,
             specific_hour=CONTRACT_SIGNING_PERIOD_END_DATE_HOUR
         )
