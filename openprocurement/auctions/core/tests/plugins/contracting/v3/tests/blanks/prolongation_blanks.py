@@ -221,6 +221,7 @@ def apply_prolongation_long(test_case):
     contract_signing_period_end_date = calculate_business_date(
         pre_prolongation_contract.signingPeriod.startDate,
         PROLONGATION_LONG_PERIOD,
+	context=auction,
         working_days=True,
         specific_hour=CONTRACT_SIGNING_PERIOD_END_DATE_HOUR
     )
