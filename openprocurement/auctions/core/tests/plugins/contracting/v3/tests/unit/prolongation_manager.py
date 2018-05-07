@@ -6,7 +6,7 @@ from schematics.exceptions import ValidationError
 from zope.interface import implementer
 
 from openprocurement.api.models.common import Period
-from openprocurement.api.utils import calculate_business_date, set_specific_hour
+from openprocurement.api.utils import calculate_business_date
 
 from openprocurement.auctions.core.models import IAuction
 from openprocurement.auctions.core.tests.base import BaseWebTest
