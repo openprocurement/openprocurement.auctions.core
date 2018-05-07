@@ -13,6 +13,7 @@ class Root(object):
     __parent__ = None
     __acl__ = [
         # (Allow, Everyone, ALL_PERMISSIONS),
+        (Allow, Everyone, 'view_listing'),
         (Allow, Everyone, 'view_auction'),
         (Deny, 'broker05', 'create_bid'),
         (Deny, 'broker05', 'create_complaint'),
