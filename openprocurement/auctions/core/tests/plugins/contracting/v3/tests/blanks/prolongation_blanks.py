@@ -1,5 +1,5 @@
 from openprocurement.api.utils import (
-    get_now, set_specific_hour, calculate_business_date
+    get_now, calculate_business_date
 )
 
 from openprocurement.auctions.core.tests.blanks.fixtures.auction import get_auction
@@ -152,15 +152,13 @@ def apply_prolongation_short(test_case):
     contract_signing_period_end_date = calculate_business_date(
         pre_prolongation_contract.signingPeriod.startDate,
         PROLONGATION_SHORT_PERIOD,
-        auction,
-        working_days=True
+        context=auction,
+        working_days=True,
+        specific_hour=CONTRACT_SIGNING_PERIOD_END_DATE_HOUR
     )
     test_case.assertEqual(
         post_prolongation_contract.signingPeriod.endDate,
-        set_specific_hour(
-            contract_signing_period_end_date,
-            CONTRACT_SIGNING_PERIOD_END_DATE_HOUR
-        )
+        contract_signing_period_end_date
     )
 
 
@@ -219,19 +217,18 @@ def apply_prolongation_long(test_case):
     )
     post_prolongation_contract = get_related_contract(test_case)
     auction = get_auction(test_case)
+
     contract_signing_period_end_date = calculate_business_date(
         pre_prolongation_contract.signingPeriod.startDate,
         PROLONGATION_LONG_PERIOD,
-        auction,
-        working_days=True
+        working_days=True,
+        specific_hour=CONTRACT_SIGNING_PERIOD_END_DATE_HOUR
     )
+
     test_case.assertEqual(
         post_prolongation_contract.signingPeriod.endDate,
-        set_specific_hour(
-            contract_signing_period_end_date,
-            CONTRACT_SIGNING_PERIOD_END_DATE_HOUR
-        )
-    )
+		contract_signing_period_end_date
+	)
 
 
 def apply_prolongation_triple_times(test_case):
@@ -311,15 +308,13 @@ def apply_prolongation_triple_times(test_case):
     contract_signing_period_end_date = calculate_business_date(
         pre_prolongation_contract.signingPeriod.startDate,
         PROLONGATION_LONG_PERIOD,
-        auction,
-        working_days=True
+        context=auction,
+        working_days=True,
+        specific_hour=CONTRACT_SIGNING_PERIOD_END_DATE_HOUR
     )
     test_case.assertEqual(
         post_prolongation_contract.signingPeriod.endDate,
-        set_specific_hour(
-            contract_signing_period_end_date,
-            CONTRACT_SIGNING_PERIOD_END_DATE_HOUR
-        )
+		contract_signing_period_end_date
     )
 
 

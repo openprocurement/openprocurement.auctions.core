@@ -145,19 +145,17 @@ def validate_auction_auction_data(request, **kwargs):
         data = {}
     if request.method == 'POST':
         now = get_now().isoformat()
-        if SANDBOX_MODE and auction.submissionMethodDetails and \
-                auction.submissionMethodDetails in [u'quick(mode:no-auction)', u'quick(mode:fast-forward)'] and \
-                auction.procurementMethodType in ENGLISH_AUCTION_PROCUREMENT_METHOD_TYPES:
+        if SANDBOX_MODE \
+        and auction.submissionMethodDetails \
+        and auction.submissionMethodDetails in [u'quick(mode:no-auction)', u'quick(mode:fast-forward)'] \
+        and auction._procedure_type in ENGLISH_AUCTION_PROCUREMENT_METHOD_TYPES:
             if auction.lots:
-                data['lots'] = [{'auctionPeriod':
-                                     {'startDate': now, 'endDate': now}}
-                                if i.id == lot_id else {} for i in auction.lots]
+                data['lots'] = [{'auctionPeriod': {'startDate': now, 'endDate': now}} if i.id == lot_id else {} for i in auction.lots]
             else:
                 data['auctionPeriod'] = {'startDate': now, 'endDate': now}
         else:
             if auction.lots:
-                data['lots'] = [{'auctionPeriod': {'endDate': now}}
-                                if i.id == lot_id else {} for i in auction.lots]
+                data['lots'] = [{'auctionPeriod': {'endDate': now}} if i.id == lot_id else {} for i in auction.lots]
             else:
                 data['auctionPeriod'] = {'endDate': now}
     request.validated['data'] = data
