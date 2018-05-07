@@ -152,7 +152,7 @@ def apply_prolongation_short(test_case):
     contract_signing_period_end_date = calculate_business_date(
         pre_prolongation_contract.signingPeriod.startDate,
         PROLONGATION_SHORT_PERIOD,
-        context=auction,
+        auction,
         working_days=True
     )
     test_case.assertEqual(
@@ -222,7 +222,7 @@ def apply_prolongation_long(test_case):
     contract_signing_period_end_date = calculate_business_date(
         pre_prolongation_contract.signingPeriod.startDate,
         PROLONGATION_LONG_PERIOD,
-        context=auction,
+        auction,
         working_days=True
     )
     test_case.assertEqual(
@@ -311,7 +311,7 @@ def apply_prolongation_triple_times(test_case):
     contract_signing_period_end_date = calculate_business_date(
         pre_prolongation_contract.signingPeriod.startDate,
         PROLONGATION_LONG_PERIOD,
-        context=auction,
+        auction,
         working_days=True
     )
     test_case.assertEqual(
