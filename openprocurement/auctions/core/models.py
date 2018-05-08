@@ -170,7 +170,7 @@ class dgfCDB2CPVCAVClassification(Classification):
             raise ValidationError(BaseType.MESSAGES['choices'].format(unicode(CPV_CODES)))
         elif data.get('scheme') == u'CAV-PS' and code not in CAVPS_CODES_DGF_CDB2:
             raise ValidationError(BaseType.MESSAGES['choices'].format(unicode(CAVPS_CODES_DGF_CDB2)))
-        if code.find("00000-") > 0 and get_auction_creation_date(data) > DGF_CDB2_CLASSIFICATION_PRECISELY_FROM:
+        if code.find("00000-") > 0 and get_auction_creation_date(auction) > DGF_CDB2_CLASSIFICATION_PRECISELY_FROM:
             raise ValidationError('At least {} classification class (XXXX0000-Y) should be specified more precisely'.format(data.get('scheme')))
 
 
@@ -200,7 +200,8 @@ class Item(flashItem):
 
     def validate_address(self, data, address):
         if not address:
-            if get_auction_creation_date(data) > DGF_CDB2_ADDRESS_REQUIRED_FROM:
+            auction = get_auction(data['__parent__'])
+            if get_auction_creation_date(auction) > DGF_CDB2_ADDRESS_REQUIRED_FROM:
                 non_specific_location_cav = data['classification']['scheme'] == u'CAV-PS' and not data['classification']['id'].startswith(CAV_NON_SPECIFIC_LOCATION_UNITS_DGF_CDB2)
                 non_specific_location_cpv = data['classification']['scheme'] == u'CPV' and not data['classification']['id'].startswith(CPV_NON_SPECIFIC_LOCATION_UNITS_DGF_CDB2)
                 if non_specific_location_cav or non_specific_location_cpv:
