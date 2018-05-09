@@ -60,7 +60,9 @@ from openprocurement.api.models.common import (
     Period,
     Guarantee,
     PeriodEndRequired as AuctionPeriodEndRequired,
-    Revision
+    Revision,
+    BankAccount,  # noqa forwarded import
+    AuctionParameters,  # noqa forwarded import
 )
 from openprocurement.api.models.schematics_extender import DecimalType
 from openprocurement.api.utils import get_now, get_request_from_root
