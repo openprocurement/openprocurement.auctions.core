@@ -5,6 +5,7 @@ from functools import partial
 from logging import getLogger
 from re import compile
 from time import sleep
+from zope.component import getGlobalSiteManager
 
 from couchdb.http import ResourceConflict
 from jsonpointer import resolve_pointer
@@ -20,6 +21,7 @@ from openprocurement.api.constants import (
     DOCUMENT_BLACKLISTED_FIELDS as API_DOCUMENT_BLACKLISTED_FIELDS,
     SESSION,  # noqa forwarded import
 )
+from openprocurement.api.interfaces import IContentConfigurator
 from openprocurement.api.validation import error_handler
 from openprocurement.api.utils import (
     get_now,
@@ -105,7 +107,7 @@ def generate_auction_id(ctime, db, server_id=''):
             sleep(1)
         else:
             break
-    return 'UA-EA-{:04}-{:02}-{:02}-{:06}{}'.format(
+    return getGlobalSiteManager().queryUtility(IContentConfigurator).AUCTION_PREFIX + '-{:04}-{:02}-{:02}-{:06}{}'.format(
         ctime.year,
         ctime.month,
         ctime.day,
