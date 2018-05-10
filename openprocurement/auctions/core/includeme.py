@@ -12,10 +12,12 @@ from openprocurement.api.utils import get_content_configurator
 
 from openprocurement.auctions.core.adapters import (
     AuctionConfigurator,
-    AuctionAwardingNextCheckAdapter
+    AuctionAwardingNextCheckAdapter,
+    AuctionManagerAdapter
 )
 from openprocurement.auctions.core.design import add_design
 from openprocurement.auctions.core.models import IAuction
+from openprocurement.auctions.core.interfaces import IAuctionManager
 from openprocurement.auctions.core.utils import (
     set_logging_context,
     extract_auction,
