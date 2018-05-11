@@ -173,6 +173,30 @@ class BaseWebTest(unittest.TestCase):
     def tearDown(self):
         self.couchdb_server.delete(self.db_name)
 
+    def setUpDS(self):
+        self.app.app.registry.docservice_url = 'http://localhost'
+        test = self
+        def request(method, url, **kwargs):
+            response = Response()
+            if method == 'POST' and '/upload' in url:
+                url = test.generate_docservice_url()
+                response.status_code = 200
+                response.encoding = 'application/json'
+                response._content = '{{"data":{{"url":"{url}","hash":"md5:{md5}","format":"application/msword","title":"name.doc"}},"get_url":"{url}"}}'.format(url=url, md5='0'*32)
+                response.reason = '200 OK'
+            return response
+
+        self._srequest = SESSION.request
+        SESSION.request = request
+
+    def generate_docservice_url(self):
+        uuid = uuid4().hex
+        key = self.app.app.registry.docservice_key
+        keyid = key.hex_vk()[:8]
+        signature = b64encode(key.signature("{}\0{}".format(uuid, '0' * 32)))
+        query = {'Signature': signature, 'KeyID': keyid}
+        return "http://localhost/get/{}?{}".format(uuid, urlencode(query))
+
 
 class BaseAuctionWebTest(BaseWebTest):
     initial_data = None
@@ -341,30 +365,6 @@ class BaseAuctionWebTest(BaseWebTest):
         self.create_auction()
         if self.docservice:
             self.setUpDS()
-
-    def setUpDS(self):
-        self.app.app.registry.docservice_url = 'http://localhost'
-        test = self
-        def request(method, url, **kwargs):
-            response = Response()
-            if method == 'POST' and '/upload' in url:
-                url = test.generate_docservice_url()
-                response.status_code = 200
-                response.encoding = 'application/json'
-                response._content = '{{"data":{{"url":"{url}","hash":"md5:{md5}","format":"application/msword","title":"name.doc"}},"get_url":"{url}"}}'.format(url=url, md5='0'*32)
-                response.reason = '200 OK'
-            return response
-
-        self._srequest = SESSION.request
-        SESSION.request = request
-
-    def generate_docservice_url(self):
-        uuid = uuid4().hex
-        key = self.app.app.registry.docservice_key
-        keyid = key.hex_vk()[:8]
-        signature = b64encode(key.signature("{}\0{}".format(uuid, '0' * 32)))
-        query = {'Signature': signature, 'KeyID': keyid}
-        return "http://localhost/get/{}?{}".format(uuid, urlencode(query))
 
     def create_auction(self):
         data = deepcopy(self.initial_data)
