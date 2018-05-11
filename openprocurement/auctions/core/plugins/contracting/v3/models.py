@@ -75,7 +75,8 @@ class Prolongation(Model):
 
         offset_from_date_created = calculate_business_date(
             datePublished,
-            PROLONGATION_DATE_PUBLISHED_LIMIT_PERIOD
+            PROLONGATION_DATE_PUBLISHED_LIMIT_PERIOD,
+            None
         )
         if offset_from_date_created < data['dateCreated']:
             raise ValidationError(
