@@ -3,7 +3,7 @@ from datetime import timedelta, datetime
 
 from openprocurement.api.constants import TZ, read_json
 
-ENGLISH_AUCTION_PROCUREMENT_METHOD_TYPES = ["belowThreshold", "dgfOtherAssets", "dgfFinancialAssets"]
+ENGLISH_AUCTION_PROCUREMENT_METHOD_TYPES = ["belowThreshold", "dgfOtherAssets", "dgfFinancialAssets", 'swiftsure']
 DUTCH_AUCTION_PROCUREMENT_METHOD_TYPES = ["dgfInsider"]
 
 DOCUMENT_TYPE_OFFLINE = ['x_dgfAssetFamiliarization']
