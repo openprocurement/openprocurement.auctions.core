@@ -107,7 +107,7 @@ def validate_auction_auction_data(request, **kwargs):
             request.errors.add('body', 'bids', "Auction bids should be identical to the auction bids")
             request.errors.status = 422
             return
-        data['bids'] = [x for (y, x) in sorted(zip([auction_bids_ids.index(i['id']) for i in bids], bids))]
+        data['bids'] = [x for (_, x) in sorted(zip([auction_bids_ids.index(i['id']) for i in bids], bids))]
         if data.get('lots'):
             auction_lots_ids = [i.id for i in auction.lots]
             if len(data.get('lots', [])) != len(auction.lots):
@@ -445,7 +445,6 @@ def validate_patch_prolongation_data(request, **kwargs):
         request.errors.status = 403
         return
 
-    auction = request.validated['auction']
     model = type(request.auction).contracts.model_class.prolongations.model_class
     return validate_data(request, model, True)
 

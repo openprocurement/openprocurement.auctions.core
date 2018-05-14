@@ -42,7 +42,7 @@ class TestContractingV3ContractValidation(BaseWebTest):
         period.endDate = datetime(2000, 1, 10)
         contract.signingPeriod = period
         self.db.commit()
-        with self.assertRaises(ValidationError) as context:  # noqa: F841
+        with self.assertRaises(ValidationError) as _:  # noqa: F841
             contract.datePaid = datetime(1999, 12, 30)
             contract.validate()
 

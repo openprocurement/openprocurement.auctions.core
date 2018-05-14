@@ -352,7 +352,6 @@ def patch_auction_award_Administrator_change(self):
     award = response.json['data']
     complaintPeriod = award['complaintPeriod'][u'startDate']
 
-    authorization = self.app.authorization
     self.app.authorization = ('Basic', ('administrator', ''))
     response = self.app.patch_json('/auctions/{}/awards/{}'.format(self.auction_id, award['id']), {"data": {"complaintPeriod": {"endDate": award['complaintPeriod'][u'startDate']}}})
     self.assertEqual(response.status, '200 OK')
@@ -640,7 +639,7 @@ def patch_auction_award_complaint(self):
 
 def review_auction_award_complaint(self):
     complaints = []
-    for i in range(3):
+    for _ in range(3):
         response = self.app.post_json('/auctions/{}/awards/{}/complaints'.format(self.auction_id, self.award_id), {'data': {
             'title': 'complaint title',
             'description': 'complaint description',

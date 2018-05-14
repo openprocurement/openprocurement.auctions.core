@@ -634,7 +634,7 @@ def patch_auction_auction_2_lots(self):
     self.assertEqual(response.json['errors'][0]["description"],
                      u'Number of lots did not match the number of auction lots')
 
-    patch_data['lots'] = [patch_data['lots'][0].copy() for i in self.initial_lots]
+    patch_data['lots'] = [patch_data['lots'][0].copy() for _ in self.initial_lots]
     patch_data['lots'][1]['id'] = "00000000000000000000000000000000"
 
     response = self.app.patch_json('/auctions/{}/auction'.format(self.auction_id), {'data': patch_data}, status=422)
@@ -735,7 +735,7 @@ def post_auction_auction_document_2_lots(self):
                             "valueAddedTaxIncluded": True
                         }
                     }
-                    for i in self.initial_lots
+                    for _ in self.initial_lots
                 ]
             },
             {

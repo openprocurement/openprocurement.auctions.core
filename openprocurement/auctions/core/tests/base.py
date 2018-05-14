@@ -227,7 +227,7 @@ class BaseAuctionWebTest(BaseWebTest):
                                 "startDate": (now).isoformat()
                             }
                         }
-                        for i in self.initial_lots
+                        for _ in self.initial_lots
                     ]
                 })
         elif status == 'active.qualification':

@@ -348,7 +348,7 @@ def patch_auction_complaint(self):
 
 def review_auction_complaint(self):
     complaints = []
-    for i in range(3):
+    for _ in range(3):
         response = self.app.post_json('/auctions/{}/complaints'.format(self.auction_id), {'data': {
             'title': 'complaint title',
             'description': 'complaint description',
