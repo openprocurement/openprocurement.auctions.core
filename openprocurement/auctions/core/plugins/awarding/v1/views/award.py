@@ -169,7 +169,20 @@ class AuctionAwardResource(APIResource):
 
         """
         manager = self.request.registry.getAdapter(self.request.validated['award'], IAwardManagerAdapter)
-        return manager.create_award(self)
+        award = manager.create_award(self.request)
+        if save_auction(self.request):
+            self.LOGGER.info(
+                'Created auction award {}'.format(award.id),
+                extra=context_unpack(
+                    self.request,
+                    {'MESSAGE_ID': 'auction_award_create'},
+                    {'award_id': award.id}))
+            self.request.response.status = 201
+            route = self.request.matched_route.name.replace("collection_", "")
+            self.request.response.headers['Location'] = self.request.current_route_url(
+                _route_name=route, award_id=award.id, _query={}
+            )
+            return {'data': award.serialize("view")}
 
     @json_view(permission='view_auction')
     def get(self):
@@ -283,4 +296,9 @@ class AuctionAwardResource(APIResource):
 
         """
         manager = self.request.registry.getAdapter(self.context, IAwardManagerAdapter)
-        return manager.change_award(self)
+        award = manager.change_award(self.request, server_id=self.server_id)
+        if save_auction(self.request) and award:
+            self.LOGGER.info(
+                'Updated auction award {}'.format(self.request.context.id),
+                extra=context_unpack(self.request, {'MESSAGE_ID': 'auction_award_patch'}))
+            return {'data': award.serialize("view")}

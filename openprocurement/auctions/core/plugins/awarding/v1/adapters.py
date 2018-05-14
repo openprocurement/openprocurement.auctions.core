@@ -61,35 +61,24 @@ class AwardManagerV1Adapter(BaseAwardManagerAdapter):
     """
     name = 'Avard-v1 Manager'
 
-    @staticmethod
-    def create_award(view):
-        award = view.request.validated['award']
+    def create_award(self, request, **kwargs):
+        award = request.validated['award']
         award.complaintPeriod = {'startDate': get_now().isoformat()}
-        view.request.validated['auction'].awards.append(award)
-        if save_auction(view.request):
-            view.LOGGER.info(
-                'Created auction award {}'.format(award.id),
-                extra=context_unpack(
-                    view.request,
-                    {'MESSAGE_ID': 'auction_award_create'},
-                    {'award_id': award.id}))
-            view.request.response.status = 201
-            route = view.request.matched_route.name.replace("collection_", "")
-            view.request.response.headers['Location'] = view.request.current_route_url(
-                _route_name=route, award_id=award.id, _query={}
-            )
-            return {'data': award.serialize("view")}
+        request.validated['auction'].awards.append(award)
+        return award
 
-    @staticmethod
-    def change_award(view):
-        auction = view.request.validated['auction']
-        award = view.request.context
+
+    def change_award(self, request, **kwargs):
+        auction = request.validated['auction']
+        award = request.context
         award_status = award.status
+        server_id = kwargs['server_id']
+
         if any([i.status != 'active' for i in auction.lots if i.id == award.lotID]):
-            view.request.errors.add('body', 'data', 'Can update award only in active lot status')
-            view.request.errors.status = 403
+            request.errors.add('body', 'data', 'Can update award only in active lot status')
+            request.errors.status = 403
             return
-        apply_patch(view.request, save=False, src=view.request.context.serialize())
+        apply_patch(request, save=False, src=request.context.serialize())
         if award_status == 'pending' and award.status == 'active':
             award.complaintPeriod.endDate = calculate_business_date(get_now(), STAND_STILL_TIME, auction, True)
             auction.contracts.append(type(auction).contracts.model_class({
@@ -98,8 +87,8 @@ class AwardManagerV1Adapter(BaseAwardManagerAdapter):
                 'value': award.value,
                 'date': get_now(),
                 'items': [i for i in auction.items if i.relatedLot == award.lotID],
-                'contractID': '{}-{}{}'.format(auction.auctionID, view.server_id, len(auction.contracts) + 1)}))
-            view.request.content_configurator.start_awarding()
+                'contractID': '{}-{}{}'.format(auction.auctionID, server_id, len(auction.contracts) + 1)}))
+            request.content_configurator.start_awarding()
         elif award_status == 'active' and award.status == 'cancelled':
             now = get_now()
             if award.complaintPeriod.endDate > now:
@@ -112,10 +101,10 @@ class AwardManagerV1Adapter(BaseAwardManagerAdapter):
             for i in auction.contracts:
                 if i.awardID == award.id:
                     i.status = 'cancelled'
-            view.request.content_configurator.back_to_awarding()
+            request.content_configurator.back_to_awarding()
         elif award_status == 'pending' and award.status == 'unsuccessful':
             award.complaintPeriod.endDate = calculate_business_date(get_now(), STAND_STILL_TIME, auction, True)
-            view.request.content_configurator.back_to_awarding()
+            request.content_configurator.back_to_awarding()
         elif (
             award_status == 'unsuccessful'
             and award.status == 'cancelled'
@@ -143,19 +132,15 @@ class AwardManagerV1Adapter(BaseAwardManagerAdapter):
             for i in auction.contracts:
                 if i.awardID in cancelled_awards:
                     i.status = 'cancelled'
-            view.request.content_configurator.back_to_awarding()
+            request.content_configurator.back_to_awarding()
         elif (
-            view.request.authenticated_role != 'Administrator'
+            request.authenticated_role != 'Administrator'
             and not(
                 award_status == 'pending'
                 and award.status == 'pending'
             )
         ):
-            view.request.errors.add('body', 'data', 'Can\'t update award in current ({}) status'.format(award_status))
-            view.request.errors.status = 403
+            request.errors.add('body', 'data', 'Can\'t update award in current ({}) status'.format(award_status))
+            request.errors.status = 403
             return
-        if save_auction(view.request):
-            view.LOGGER.info(
-                'Updated auction award {}'.format(view.request.context.id),
-                extra=context_unpack(view.request, {'MESSAGE_ID': 'auction_award_patch'}))
-            return {'data': award.serialize("view")}
+        return award

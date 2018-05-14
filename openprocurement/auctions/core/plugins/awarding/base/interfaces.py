@@ -7,8 +7,8 @@ from zope.interface import (
 class IAwardManagerAdapter(Interface):
     name = Attribute('Award name')
 
-    def create_award(self, view):
+    def create_award(self, request, **kwargs):
         raise NotImplementedError
 
-    def change_award(self, view):
+    def change_award(self, request, **kwargs):
         raise NotImplementedError
