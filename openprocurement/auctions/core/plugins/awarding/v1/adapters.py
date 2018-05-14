@@ -61,7 +61,8 @@ class AwardManagerV1Adapter(BaseAwardManagerAdapter):
     """
     name = 'Avard-v1 Manager'
 
-    def create_award(self, view):
+    @staticmethod
+    def create_award(view):
         award = view.request.validated['award']
         award.complaintPeriod = {'startDate': get_now().isoformat()}
         view.request.validated['auction'].awards.append(award)
@@ -79,7 +80,8 @@ class AwardManagerV1Adapter(BaseAwardManagerAdapter):
             )
             return {'data': award.serialize("view")}
 
-    def change_award(self, view):
+    @staticmethod
+    def change_award(view):
         auction = view.request.validated['auction']
         award = view.request.context
         award_status = award.status
