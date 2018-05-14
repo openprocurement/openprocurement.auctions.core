@@ -123,7 +123,7 @@ def validate_dkpp(items, *args):
         raise ValidationError(u"One of additional classifications should be one of [{0}].".format(', '.join(ADDITIONAL_CLASSIFICATIONS_SCHEMES)))
 
 
-class Item(BaseItem):
+class flashItem(BaseItem):
     """A good, service, or work to be contracted."""
     classification = ModelType(flashCAVClassification, required=True)
     additionalClassifications = ListType(ModelType(Classification), default=list(), validators=[validate_dkpp]) # required=True, min_size=1,
@@ -133,11 +133,11 @@ class Item(BaseItem):
         if relatedLot and isinstance(data['__parent__'], Model) and relatedLot not in [i.id for i in get_auction(data['__parent__']).lots]:
             raise ValidationError(u"relatedLot should be one of lots")
 
+flashItem.__name__ = 'Item'
+#flashItem = Item
 
-flashItem = Item
 
-
-class Item(Item):
+class dgfItem(flashItem):
     """A good, service, or work to be contracted."""
     class Options:
         roles = {
@@ -157,7 +157,8 @@ class Item(Item):
             raise ValidationError("classification id mismatch with schema_properties code")
 
 
-dgfItem = Item
+dgfItem.__name__ = 'Item'
+#dgfItem = Item
 
 
 class dgfCDB2CPVCAVClassification(Classification):
@@ -183,7 +184,7 @@ class dgfCDB2AdditionalClassification(Classification):
             raise ValidationError(BaseType.MESSAGES['choices'].format(unicode(CPVS_CODES_DGF_CDB2)))
 
 
-class Item(flashItem):
+class dgfCDB2Item(flashItem):
     """A good, service, or work to be contracted."""
     class Options:
         roles = {
@@ -211,10 +212,11 @@ class Item(flashItem):
                     raise ValidationError(u'This field is required.')
 
 
-dgfCDB2Item = Item
+dgfCDB2Item.__name__ = 'Item'
+#dgfCDB2Item = Item
 
 
-class Document(BaseDocument):
+class flashDocument(BaseDocument):
 
     documentType = StringType(choices=[
         'auctionNotice', 'awardNotice', 'contractNotice',
@@ -240,10 +242,11 @@ class Document(BaseDocument):
                 raise ValidationError(u"relatedItem should be one of items")
 
 
-flashDocument = Document
+flashDocument.__name__ = 'Document'
+#flashDocument = Document
 
 
-class Document(Document):
+class dgfDocument(flashDocument):
     format = StringType(regex='^[-\w]+/[-\.\w\+]+$')
     url = StringType()
     index = IntType()
@@ -321,10 +324,11 @@ class Document(Document):
             raise ValidationError(u'This field is required.')
 
 
-dgfDocument = Document
+dgfDocument.__name__ = 'Document'
+#dgfDocument = Document
 
 
-class Document(dgfDocument):
+class dgfCDB2Document(dgfDocument):
     documentType = StringType(choices=[
         'auctionNotice', 'awardNotice', 'contractNotice',
         'notice', 'biddingDocuments', 'technicalSpecifications',
@@ -340,10 +344,13 @@ class Document(dgfDocument):
     ])
 
 
-dgfCDB2Document = Document
+
+dgfCDB2Document.__name__ = 'Document'
+#dgfCDB2Document = Document
 
 
-class Complaint(Model):
+class flashComplaint(Model):
+
     class Options:
         roles = {
             'create': whitelist('author', 'title', 'description', 'status', 'relatedLot'),
@@ -448,19 +455,21 @@ class Complaint(Model):
             raise ValidationError(u"relatedLot should be one of lots")
 
 
-flashComplaint = Complaint
+flashComplaint.__name__ = 'Complaint'
+#flashComplaint = Complaint
 
 
 class Identifier(BaseIdentifier):
     scheme = StringType(required=True, choices=ORA_CODES)
 
 
-class Organization(BaseOrganization):
+class dgfOrganization(BaseOrganization):
     identifier = ModelType(Identifier, required=True)
     additionalIdentifiers = ListType(ModelType(Identifier))
 
 
-dgfOrganization = Organization
+dgfOrganization.__name__ = 'Organization'
+#dgfOrganization = Organization
 
 
 def validate_ua_fin(items, *args):
@@ -473,34 +482,37 @@ class FinancialOrganization(dgfOrganization):
     additionalIdentifiers = ListType(ModelType(Identifier), required=True, validators=[validate_ua_fin])
 
 
-class Complaint(Complaint):
-    author = ModelType(Organization, required=True)
+class dgfComplaint(flashComplaint):
+    author = ModelType(dgfOrganization, required=True)
     documents = ListType(ModelType(dgfDocument), default=list(), validators=[validate_disallow_dgfPlatformLegalDetails])
 
 
-dgfComplaint = Complaint
+dgfComplaint.__name__ = 'Complaint'
+#dgfComplaint = Complaint
 
 
-class Complaint(flashComplaint):
-    author = ModelType(Organization, required=True)
+class dgfCDB2Complaint(flashComplaint):
+    author = ModelType(dgfOrganization, required=True)
     documents = ListType(ModelType(dgfCDB2Document), default=list())
 
 
-dgfCDB2Complaint = Complaint
+dgfCDB2Complaint.__name__ = 'Complaint'
+#dgfCDB2Complaint = Complaint
 
 
-class Cancellation(BaseCancellation):
+class flashCancellation(BaseCancellation):
     documents = ListType(ModelType(flashDocument), default=list())
 
 
-flashCancellation = Cancellation
+flashCancellation.__name__ = 'Cancellation'
+#flashCancellation = Cancellation
 
-
-class Cancellation(BaseCancellation):
+class dgfCancellation(BaseCancellation):
     documents = ListType(ModelType(dgfDocument), default=list(), validators=[validate_disallow_dgfPlatformLegalDetails])
 
 
-dgfCancellation = Cancellation
+dgfCancellation.__name__ = 'Cancellation'
+#dgfCancellation = Cancellation
 
 
 class Contract(BaseContract):
@@ -605,10 +617,10 @@ class Award(Model):
     status = StringType(required=True, choices=['pending', 'unsuccessful', 'active', 'cancelled'], default='pending')
     date = IsoDateTimeType(default=get_now)
     value = ModelType(Value)
-    suppliers = ListType(ModelType(Organization), required=True, min_size=1, max_size=1)
-    items = ListType(ModelType(Item))
-    documents = ListType(ModelType(Document), default=list())
-    complaints = ListType(ModelType(Complaint), default=list())
+    suppliers = ListType(ModelType(dgfOrganization), required=True, min_size=1, max_size=1)
+    items = ListType(ModelType(dgfCDB2Item))
+    documents = ListType(ModelType(dgfCDB2Document), default=list())
+    complaints = ListType(ModelType(dgfCDB2Complaint), default=list())
     complaintPeriod = ModelType(Period)
 
     def validate_lotID(self, data, lotID):
@@ -672,7 +684,7 @@ class Question(Model):
         }
 
     id = MD5Type(required=True, default=lambda: uuid4().hex)
-    author = ModelType(Organization, required=True)  # who is asking question (contactPoint - person, identification - organization that person represents)
+    author = ModelType(dgfOrganization, required=True)  # who is asking question (contactPoint - person, identification - organization that person represents)
     title = StringType(required=True)  # title of the question
     description = StringType()  # description of the question
     date = IsoDateTimeType(default=get_now)  # autogenerated date of posting
@@ -776,7 +788,7 @@ chronograph_view_role = whitelist('status', 'enquiryPeriod', 'tenderPeriod', 'au
 Administrator_role = whitelist('status', 'mode', 'procuringEntity','auctionPeriod', 'lots', 'suspended')
 
 
-class ProcuringEntity(Organization):
+class ProcuringEntity(dgfOrganization):
     """An organization."""
     class Options:
         roles = {
@@ -866,14 +878,14 @@ class Bid(Model):
     def __local_roles__(self):
         return dict([('{}_{}'.format(self.owner, self.owner_token), 'bid_owner')])
 
-    tenderers = ListType(ModelType(Organization), required=True, min_size=1, max_size=1)
+    tenderers = ListType(ModelType(dgfOrganization), required=True, min_size=1, max_size=1)
     parameters = ListType(ModelType(Parameter), default=list(), validators=[validate_parameters_uniq])
     lotValues = ListType(ModelType(LotValue), default=list())
     date = IsoDateTimeType(default=get_now)
     id = MD5Type(required=True, default=lambda: uuid4().hex)
     status = StringType(choices=['active', 'draft'], default='active')
     value = ModelType(Value)
-    documents = ListType(ModelType(Document), default=list())
+    documents = ListType(ModelType(dgfCDB2Document), default=list())
     participationUrl = URLType()
     owner_token = StringType()
     owner = StringType()
