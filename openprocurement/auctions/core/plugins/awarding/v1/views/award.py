@@ -1,23 +1,16 @@
 # -*- coding: utf-8 -*-
 from openprocurement.api.utils import (
-    get_now,
     json_view,
     context_unpack,
     APIResource,
-    calculate_business_date,
 )
 
-from openprocurement.auctions.core.models import STAND_STILL_TIME
 from openprocurement.auctions.core.utils import (
-    apply_patch,
     save_auction,
     opresource,
 )
 from openprocurement.auctions.core.validation import (
     validate_award_data,
-    validate_patch_award_data,
-    validate_award_data_post_common,
-    validate_patch_award_data_patch_common,
 )
 from openprocurement.auctions.core.plugins.awarding.base.interfaces import IAwardManagerAdapter
 
@@ -40,7 +33,7 @@ class AuctionAwardResource(APIResource):
         return {'data': self.request.validated['award'].serialize("view")}
 
     @json_view(content_type="application/json", permission='create_award',
-               validators=(validate_award_data, validate_award_data_post_common))
+               validators=(validate_award_data,))
     def collection_post(self):
         manager = self.request.registry.getAdapter(self.request.validated['award'], IAwardManagerAdapter)
         manager.create_award(self.request)
@@ -59,8 +52,7 @@ class AuctionAwardResource(APIResource):
             )
             return {'data': award.serialize("view")}
 
-    @json_view(content_type="application/json", permission='edit_auction',
-               validators=(validate_patch_award_data, validate_patch_award_data_patch_common))
+    @json_view(content_type="application/json", permission='edit_auction')
     def patch(self):
         manager = self.request.registry.getAdapter(self.context, IAwardManagerAdapter)
         manager.change_award(self.request, server_id=self.server_id)

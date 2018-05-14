@@ -12,14 +12,18 @@ from openprocurement.auctions.core.plugins.awarding.base.adapters import (
 )
 from openprocurement.api.utils import (
     get_now,
-    context_unpack,
     calculate_business_date,
 )
 from openprocurement.auctions.core.utils import (
-    save_auction,
     apply_patch,
+    validate_with,
 )
 from openprocurement.auctions.core.models import STAND_STILL_TIME
+from openprocurement.auctions.core.validation import (
+    validate_award_data_post_common,
+    validate_patch_award_data,
+    validate_patch_award_data_patch_common,
+)
 
 
 class AwardingV1ConfiguratorMixin(object):
@@ -61,12 +65,21 @@ class AwardManagerV1Adapter(BaseAwardManagerAdapter):
     """
     name = 'Avard-v1 Manager'
 
+    create_validators = (
+        validate_award_data_post_common,
+    )
+    change_validators = (
+        validate_patch_award_data,
+        validate_patch_award_data_patch_common,
+    )
+
+    @validate_with(create_validators)
     def create_award(self, request, **kwargs):
         award = request.validated['award']
         award.complaintPeriod = {'startDate': get_now().isoformat()}
         request.validated['auction'].awards.append(award)
 
-
+    @validate_with(change_validators)
     def change_award(self, request, **kwargs):
         auction = request.validated['auction']
         award = request.context
