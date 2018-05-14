@@ -2462,5 +2462,3 @@ def patch_auction_award_document_2_lots(self):
     self.assertEqual(response.status, '403 Forbidden')
     self.assertEqual(response.content_type, 'application/json')
     self.assertEqual(response.json['errors'][0]["description"], "Can update document only in active lot status")
-
-
