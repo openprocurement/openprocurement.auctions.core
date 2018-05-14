@@ -65,7 +65,6 @@ class AwardManagerV1Adapter(BaseAwardManagerAdapter):
         award = request.validated['award']
         award.complaintPeriod = {'startDate': get_now().isoformat()}
         request.validated['auction'].awards.append(award)
-        return award
 
 
     def change_award(self, request, **kwargs):
@@ -143,4 +142,3 @@ class AwardManagerV1Adapter(BaseAwardManagerAdapter):
             request.errors.add('body', 'data', 'Can\'t update award in current ({}) status'.format(award_status))
             request.errors.status = 403
             return
-        return award
