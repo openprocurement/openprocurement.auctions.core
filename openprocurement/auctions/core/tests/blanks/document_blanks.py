@@ -75,10 +75,11 @@ def not_found(self):
 
 
 def create_auction_document(self):
-    response = self.app.get('/auctions/{}/documents'.format(self.auction_id))
-    self.assertEqual(response.status, '200 OK')
-    self.assertEqual(response.content_type, 'application/json')
-    self.assertEqual(len(response.json['data']), 1)
+    if hasattr(self, 'dgf_platform_legal_details_from') and get_now() > self.dgf_platform_legal_details_from:
+        response = self.app.get('/auctions/{}/documents'.format(self.auction_id))
+        self.assertEqual(response.status, '200 OK')
+        self.assertEqual(response.content_type, 'application/json')
+        self.assertEqual(len(response.json['data']), 1)
 
     response = self.app.post('/auctions/{}/documents'.format(
         self.auction_id), upload_files=[('file', u'укр.doc', 'content')])
@@ -1085,8 +1086,8 @@ def put_auction_offline_document(self):
     response = self.app.get('/auctions/{}/documents?all=true'.format(self.auction_id))
     self.assertEqual(response.status, '200 OK')
     self.assertEqual(response.content_type, 'application/json')
-    self.assertEqual(dateModified, response.json["data"][1]['dateModified'])
-    self.assertEqual(dateModified2, response.json["data"][2]['dateModified'])
+    self.assertEqual(dateModified, response.json["data"][-2]['dateModified'])
+    self.assertEqual(dateModified2, response.json["data"][-1]['dateModified'])
 
     response = self.app.post_json('/auctions/{}/documents'.format(self.auction_id),
         {'data': {
@@ -1103,8 +1104,8 @@ def put_auction_offline_document(self):
     response = self.app.get('/auctions/{}/documents'.format(self.auction_id))
     self.assertEqual(response.status, '200 OK')
     self.assertEqual(response.content_type, 'application/json')
-    self.assertEqual(dateModified2, response.json["data"][1]['dateModified'])
-    self.assertEqual(dateModified, response.json["data"][2]['dateModified'])
+    self.assertEqual(dateModified2, response.json["data"][-2]['dateModified'])
+    self.assertEqual(dateModified, response.json["data"][-1]['dateModified'])
 
     response = self.app.put_json('/auctions/{}/documents/{}'.format(self.auction_id, doc_id),
         {'data': {

@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from copy import deepcopy
 from datetime import datetime, timedelta, time
 from string import hexdigits
 from uuid import uuid4
@@ -60,7 +61,9 @@ from openprocurement.api.models.common import (
     Period,
     Guarantee,
     PeriodEndRequired as AuctionPeriodEndRequired,
-    Revision
+    Revision,
+    BankAccount,  # noqa forwarded import
+    AuctionParameters,  # noqa forwarded import
 )
 from openprocurement.api.models.schematics_extender import DecimalType
 from openprocurement.api.utils import get_now, get_request_from_root
@@ -834,6 +837,9 @@ dgf_auction_roles = {
 
 view_bid_role = (blacklist('owner_token') + schematics_default_role)
 Administrator_bid_role = whitelist('tenderers')
+
+swiftsure_auction_roles = deepcopy(dgf_auction_roles)
+swiftsure_auction_roles['edit_active.tendering'] = (dgf_auction_roles['edit_active.tendering'] + blacklist('registrationFee', 'bankAccount'))
 
 
 class Bid(Model):

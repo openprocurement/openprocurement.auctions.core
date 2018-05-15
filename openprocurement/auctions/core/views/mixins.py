@@ -2,6 +2,7 @@
 from openprocurement.api.utils import (
     update_file_content_type, get_file, upload_file
 )
+from openprocurement.auctions.core.interfaces import IAuctionManager
 from openprocurement.auctions.core.constants import STATUS4ROLE
 from openprocurement.auctions.core.utils import (
     APIResource,
@@ -1319,6 +1320,10 @@ class AuctionResource(APIResource):
             }
 
         """
+        self.request.registry.getAdapter(
+            self.request.context,
+            IAuctionManager
+        ).change_auction(self.request)
         auction = self.context
         if self.request.authenticated_role != 'Administrator' and auction.status in ['complete', 'unsuccessful', 'cancelled']:
             self.request.errors.add('body', 'data', 'Can\'t update auction in current ({}) status'.format(auction.status))

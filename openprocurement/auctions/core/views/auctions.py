@@ -22,6 +22,7 @@ from openprocurement.auctions.core.design import (
     auctions_real_by_local_seq_view,
     auctions_test_by_local_seq_view,
 )
+from openprocurement.auctions.core.interfaces import IAuctionManager
 from openprocurement.auctions.core.utils import (
     generate_auction_id,
     save_auction,
@@ -212,6 +213,10 @@ class AuctionsResource(APIResourceListing):
             }
 
         """
+        self.request.registry.getAdapter(
+            self.request.validated['auction'],
+            IAuctionManager
+        ).create_auction(self.request)
         auction_id = generate_id()
         auction = self.request.validated['auction']
         auction.id = auction_id
