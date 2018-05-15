@@ -3,6 +3,11 @@ from zope.interface import (
     Attribute, Interface
 )
 
+
+class IAuction(Interface):
+    """ Base auction marker interface """
+
+
 class IAuctionManager(Interface):
     name = Attribute('Auction name')
 
