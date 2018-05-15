@@ -1,5 +1,5 @@
 from zope.interface import Interface
 
 
-class IAwardV1(Interface):
+class IAwardV2_1(Interface):
     pass
