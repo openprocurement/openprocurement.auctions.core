@@ -221,15 +221,15 @@ def apply_prolongation_long(test_case):
     contract_signing_period_end_date = calculate_business_date(
         pre_prolongation_contract.signingPeriod.startDate,
         PROLONGATION_LONG_PERIOD,
-	context=auction,
+        context=auction,
         working_days=True,
         specific_hour=CONTRACT_SIGNING_PERIOD_END_DATE_HOUR
     )
 
     test_case.assertEqual(
         post_prolongation_contract.signingPeriod.endDate,
-		contract_signing_period_end_date
-	)
+        contract_signing_period_end_date
+    )
 
 
 def apply_prolongation_triple_times(test_case):
@@ -315,7 +315,7 @@ def apply_prolongation_triple_times(test_case):
     )
     test_case.assertEqual(
         post_prolongation_contract.signingPeriod.endDate,
-		contract_signing_period_end_date
+        contract_signing_period_end_date
     )
 
 
@@ -362,6 +362,7 @@ def apply_applied_prolongation(test_case):
         '403 Forbidden'
     )
 
+
 def create_applied_prolongation(test_case):
     prolongation_create_data = {
         'decisionID': 'very_importante_documente',
@@ -376,7 +377,7 @@ def create_applied_prolongation(test_case):
             test_case.auction_id,
             test_case.contract_id
         ),
-        {'data':prolongation_create_data},
+        {'data': prolongation_create_data},
         status=403
     )
 
@@ -398,18 +399,46 @@ def upload_document(test_case):
         []
     )
 
-    add_document_response = test_case.app.post(
+    response = test_case.app.post_json(
         PATHS['prolongation_documents'].format(
             auction_id=test_case.auction_id,
             contract_id=test_case.contract_id,
             prolongation_id=test_case.prolongation_id,
             token=test_case.auction_token
         ),
-        upload_files=[(
-            'file',
-            'ProlongationDocument.doc',
-            'content_with_prolongation_data'
-        ),]
+        {'data': {
+            'title': u'ProlongationDocument.doc',
+            'url': test_case.generate_docservice_url(),
+            'hash': 'md5:' + '0' * 32,
+            'format': 'application/pdf',
+            "documentType": "wrongDocumentType",
+            "description": "content_with_prolongation_data"
+        }},
+        status=422
+    )
+    test_case.assertEqual(
+        response.status,
+        '422 Unprocessable Entity'
+    )
+    test_case.assertEqual(response.json['errors'], [
+        {u'description': [u"Value must be one of ['prolongationProtocol']."],
+         u'location': u'body', u'name': u'documentType'}
+    ])
+    add_document_response = test_case.app.post_json(
+        PATHS['prolongation_documents'].format(
+            auction_id=test_case.auction_id,
+            contract_id=test_case.contract_id,
+            prolongation_id=test_case.prolongation_id,
+            token=test_case.auction_token
+        ),
+        {'data': {
+            'title': u'ProlongationDocument.doc',
+            'url': test_case.generate_docservice_url(),
+            'hash': 'md5:' + '0' * 32,
+            'format': 'application/pdf',
+            "documentType": "prolongationProtocol",
+            "description": "content_with_prolongation_data"
+        }}
     )
     test_case.assertEqual(
         add_document_response.status,
@@ -434,6 +463,7 @@ def upload_document(test_case):
         add_document_response.status,
         '201 Created'
     )
+
 
 def get_document(test_case):
     document_id, document_key = add_document_to_prolongation(
@@ -462,8 +492,9 @@ def get_document(test_case):
     )
     test_case.assertEqual(
         get_document_response.content_type,
-        'application/msword'
+        'application/json'
     )
+
 
 def get_list_of_documents(test_case):
     document_id, document_key = add_document_to_prolongation(
@@ -495,6 +526,7 @@ def get_list_of_documents(test_case):
         2
     )
 
+
 def patch_document(test_case):
     document_id, document_key = add_document_to_prolongation(
         test_case,
@@ -502,7 +534,7 @@ def patch_document(test_case):
         test_case.contract_id,
         test_case.prolongation_id,
     )
-    pre_patch_prolongation_response = test_case.app.get(
+    test_case.app.get(
         PATHS['prolongation'].format(
             auction_id=test_case.auction_id,
             contract_id=test_case.contract_id,
@@ -510,7 +542,6 @@ def patch_document(test_case):
             token=test_case.auction_token
         )
     )
-    pre_patch_doc_title = pre_patch_prolongation_response.json['data']['documents'][0]['title']
     patch_document_response = test_case.app.patch_json(
         PATHS['prolongation_document'].format(
             auction_id=test_case.auction_id,
@@ -521,7 +552,7 @@ def patch_document(test_case):
         ),
         {'data':
             {'title': 'updated.doc'}
-        }
+         }
     )
     test_case.assertEqual(
         patch_document_response.status,

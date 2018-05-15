@@ -418,12 +418,12 @@ def auction_from_data(request, data, raise_error=True, create=True):
         procurementMethodType = pmts[0] if pmts else 'belowThreshold'
     model = request.registry.auction_procurementMethodTypes.get(procurementMethodType)
     if model is None and raise_error:
-       request.errors.add('body', 'data', 'procurementMethodType is not implemented')
-       request.errors.status = 415
-       raise error_handler(request)
+        request.errors.add('body', 'data', 'procurementMethodType is not implemented')
+        request.errors.status = 415
+        raise error_handler(request)
     update_logging_context(request, {'auction_type': procurementMethodType})
     if model is not None and create:
-       model = model(data)
+        model = model(data)
     return model
 
 
