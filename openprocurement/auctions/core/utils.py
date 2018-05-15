@@ -44,6 +44,7 @@ from openprocurement.auctions.core.constants import (
     DOCUMENT_TYPE_URL_ONLY,
     DOCUMENT_TYPE_OFFLINE
 )
+from openprocurement.auctions.core.interfaces import IAuction
 from openprocurement.auctions.core.plugins.awarding import includeme as awarding
 from openprocurement.auctions.core.plugins.contracting import includeme as contracting
 from openprocurement.auctions.core.traversal import factory
@@ -397,7 +398,7 @@ def set_logging_context(event):
     if request.matchdict:
         for x, j in request.matchdict.items():
             params[x.upper()] = j
-    if 'auction' in request.validated:
+    if 'auction' in request.validated and IAuction.providedBy(request.validated['auction']):
         params['AUCTION_REV'] = request.validated['auction'].rev
         params['AUCTIONID'] = request.validated['auction'].auctionID
         params['AUCTION_STATUS'] = request.validated['auction'].status

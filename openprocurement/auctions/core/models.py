@@ -27,6 +27,7 @@ from schematics.types import (
 from schematics.types.compound import DictType
 from schematics.types.serializable import serializable
 from zope.interface import Interface
+from zope.deprecation import deprecated
 from schematics_flexible.schematics_flexible import FlexibleModelType
 from openprocurement.schemas.dgf.schemas_store import SchemaStore
 
@@ -83,6 +84,7 @@ from openprocurement.auctions.core.constants import (
     DGF_CDB2_CLASSIFICATION_PRECISELY_FROM
 )
 from openprocurement.auctions.core.utils import get_auction_creation_date
+from openprocurement.auctions.core.interfaces import IAuction
 from openprocurement.auctions.core.validation import (
     validate_disallow_dgfPlatformLegalDetails
 )
@@ -94,9 +96,7 @@ auction_view_role = whitelist('auctionID', 'dateModified', 'bids',
                               'features', 'lots', 'items',
                               'procurementMethodType', 'submissionMethodDetails')
 
-
-class IAuction(Interface):
-    """ Base auction marker interface """
+deprecated('IAuction', 'IAuction moved to interfaces.py')
 
 
 def get_auction(model):
