@@ -54,7 +54,7 @@ def migrate_awarding2_to_awarding3(auction,
             changed = True
         # Migrate signingPeriod from Award to Contract
         for contract in auction.get('contracts', ''):
-            award = filter(lambda x: x['id'] == contract['awardID'], auction['awards'])[0]
+            award = [x for x in auction['awards'] if x['id'] == contract['awardID']][0]
             if not contract.get('signingPeriod', False):
                 contract.update({'signingPeriod': award['signingPeriod']})
                 changed = True

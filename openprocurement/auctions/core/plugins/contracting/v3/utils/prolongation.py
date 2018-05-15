@@ -42,7 +42,7 @@ class ProlongationManager(object):
         )
 
     def _check_documents_are_present(self):
-        if len(self.prolongation.documents) == 0:
+        if not self.prolongation.documents:
             raise ValidationError(
                 'Prolongation must have documents to apply'
             )

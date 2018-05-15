@@ -3,7 +3,7 @@ from collections import Mapping
 from datetime import datetime, time, timedelta
 from functools import partial
 from logging import getLogger
-from re import compile
+from re import compile as re_compile
 from time import sleep
 
 from couchdb.http import ResourceConflict
@@ -49,7 +49,7 @@ from openprocurement.auctions.core.traversal import factory
 
 PKG = get_distribution(__package__)
 LOGGER = getLogger(PKG.project_name)
-ACCELERATOR_RE = compile(r'.accelerator=(?P<accelerator>\d+)')
+ACCELERATOR_RE = re_compile(r'.accelerator=(?P<accelerator>\d+)')
 VERSION = '{}.{}'.format(
     int(PKG.parsed_version[0]),
     int(PKG.parsed_version[1]) if PKG.parsed_version[1].isdigit() else 0
@@ -205,8 +205,8 @@ def remove_draft_bids(request):
 def check_bids(request):
     auction = request.validated['auction']
     if auction.lots:
-        [setattr(i.auctionPeriod, 'startDate', None) for i in auction.lots if i.numberOfBids < 2 and i.auctionPeriod and i.auctionPeriod.startDate]
-        [setattr(i, 'status', 'unsuccessful') for i in auction.lots if i.numberOfBids == 0 and i.status == 'active']
+        _ = [setattr(i.auctionPeriod, 'startDate', None) for i in auction.lots if i.numberOfBids < 2 and i.auctionPeriod and i.auctionPeriod.startDate]
+        _ = [setattr(i, 'status', 'unsuccessful') for i in auction.lots if i.numberOfBids == 0 and i.status == 'active']
         cleanup_bids_for_cancelled_lots(auction)
         if not set([i.status for i in auction.lots]).difference(set(['unsuccessful', 'cancelled'])):
             auction.status = 'unsuccessful'
@@ -263,7 +263,7 @@ def check_status(request):
         auction.status = 'active.auction'
         remove_draft_bids(request)
         check_bids(request)
-        [setattr(i.auctionPeriod, 'startDate', None) for i in auction.lots if i.numberOfBids < 2 and i.auctionPeriod]
+        _ = [setattr(i.auctionPeriod, 'startDate', None) for i in auction.lots if i.numberOfBids < 2 and i.auctionPeriod]
         return
     elif not auction.lots and auction.status == 'active.awarded':
         standStillEnds = [

@@ -39,8 +39,6 @@ def validate_file_update(request, **kwargs):
     if request.content_type == 'multipart/form-data':
         validate_file_upload(request)
 
-from openprocurement.api.validation import validate_json_data, validate_data
-
 
 def validate_auction_data(request, **kwargs):
     update_logging_context(request, {'auction_id': '__new__'})
