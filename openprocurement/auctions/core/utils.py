@@ -16,7 +16,7 @@ from schematics.exceptions import ModelValidationError
 
 from openprocurement.api.constants import (
     TZ, SANDBOX_MODE,
-    global_registry,
+    project_configurator,
     AUCTIONS_COMPLAINT_STAND_STILL_TIME,
     DOCUMENT_BLACKLISTED_FIELDS as API_DOCUMENT_BLACKLISTED_FIELDS,
     SESSION,  # noqa forwarded import
@@ -107,7 +107,7 @@ def generate_auction_id(ctime, db, server_id=''):
             sleep(1)
         else:
             break
-    return global_registry.queryUtility(IProjectConfigurator).AUCTION_PREFIX + '-{:04}-{:02}-{:02}-{:06}{}'.format(
+    return project_configurator.AUCTION_PREFIX + '-{:04}-{:02}-{:02}-{:06}{}'.format(
         ctime.year,
         ctime.month,
         ctime.day,
