@@ -683,7 +683,7 @@ def put_auction_document_json(self):
     self.assertEqual(dateModified, response.json["data"][-2]['dateModified'])
     self.assertEqual(dateModified2, response.json["data"][-1]['dateModified'])
 
-    response = self.app.post_json('/auctions/{}/documents'.format(self.auction_id, doc_id),
+    response = self.app.post_json('/auctions/{}/documents'.format(self.auction_id),
         {'data': {
             'title': 'name.doc',
             'url': self.generate_docservice_url(),

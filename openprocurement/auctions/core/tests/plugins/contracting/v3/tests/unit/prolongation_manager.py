@@ -83,7 +83,7 @@ class TestContractingV3ProlongationManager(BaseWebTest):
         return (contract, prolongation)
 
     def test_date_created(self):
-        contract, prolongation = self.fixture_created()
+        _, prolongation = self.fixture_created()
         self.assertNotEqual(prolongation.dateCreated, None)
         fields_awailable_for_creation = prolongation.serialize('create')
         self.assertNotIn(
@@ -100,22 +100,22 @@ class TestContractingV3ProlongationManager(BaseWebTest):
         )
 
     def test_datePublished_validation(self):
-        contract, prolongation = self.fixture_created()
+        _, prolongation = self.fixture_created()
 
         prolongation.dateCreated = datetime(2000, 1, 1)
         prolongation.datePublished = prolongation.dateCreated - PROLONGATION_DATE_PUBLISHED_LIMIT_PERIOD + timedelta(days=1)
         prolongation.validate()
 
         prolongation.datePublished = prolongation.dateCreated - PROLONGATION_DATE_PUBLISHED_LIMIT_PERIOD - timedelta(days=1)
-        with self.assertRaises(ValidationError) as context:  # noqa: F841
+        with self.assertRaises(ValidationError) as _:  # noqa: F841
             prolongation.validate()
 
     def test_delete_when_applied(self):
-        contract, prolongation = self.fixture_created()
+        _, prolongation = self.fixture_created()
         prolongation.status = 'applied'
 
         managed_prolongation = ProlongationManager(prolongation)
-        with self.assertRaises(Exception) as context:  # noqa: F841
+        with self.assertRaises(Exception) as _:  # noqa: F841
             managed_prolongation.delete()
 
     def test_apply_short(self):
@@ -183,7 +183,7 @@ class TestContractingV3ProlongationManager(BaseWebTest):
         )
 
     def test_apply_when_need_to_apply_short(self):
-        contract, prolongation = self.fixture_created()
+        _, prolongation = self.fixture_created()
 
         managed_prolongation = ProlongationManager(prolongation)
         managed_prolongation.apply()
@@ -205,9 +205,9 @@ class TestContractingV3ProlongationManager(BaseWebTest):
         self.assertEqual(previous_applied_prolongation.status, 'applied')
 
     def test_apply_without_documents(self):
-        contract, prolongation = self.fixture_created()
+        _, prolongation = self.fixture_created()
 
         prolongation.documents = []
         managed_prolongation = ProlongationManager(prolongation)
-        with self.assertRaises(ValidationError) as context:
+        with self.assertRaises(ValidationError) as _:
             managed_prolongation.apply()

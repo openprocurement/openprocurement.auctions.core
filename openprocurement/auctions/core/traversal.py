@@ -88,8 +88,7 @@ def factory(request):
                 return complaint
         elif request.matchdict.get('document_id'):
             return get_item(award, 'document', request)
-        else:
-            return award
+        return award
     #  Contract branch
     elif request.matchdict.get('contract_id'):
         contract = get_item(auction, 'contract', request)
@@ -102,29 +101,25 @@ def factory(request):
                 return get_item(prolongation, 'document', request)
             else:
                 return prolongation
-        else:
-            return contract
+        return contract
     #  Bid branch
     elif request.matchdict.get('bid_id'):
         bid = get_item(auction, 'bid', request)
         if request.matchdict.get('document_id'):
             return get_item(bid, 'document', request)
-        else:
-            return bid
+        return bid
     #  Complaint branch
     elif request.matchdict.get('complaint_id'):
         complaint = get_item(auction, 'complaint', request)
         if request.matchdict.get('document_id'):
             return get_item(complaint, 'document', request)
-        else:
-            return complaint
+        return complaint
     #  Cancellation branch
     elif request.matchdict.get('cancellation_id'):
         cancellation = get_item(auction, 'cancellation', request)
         if request.matchdict.get('document_id'):
             return get_item(cancellation, 'document', request)
-        else:
-            return cancellation
+        return cancellation
     #  Document branch
     elif request.matchdict.get('document_id'):
         return get_item(auction, 'document', request)

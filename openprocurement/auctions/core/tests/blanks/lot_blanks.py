@@ -1044,7 +1044,7 @@ def two_lot_0bid(self):
     auction_id = self.auction_id = response.json['data']['id']
     owner_token = response.json['access']['token']
     lots = []
-    for lot in 2 * self.test_lots:
+    for _ in 2 * self.test_lots:
         # add lot
         response = self.app.post_json('/auctions/{}/lots?acc_token={}'.format(auction_id, owner_token),
                                       {'data': self.test_lots[0]})
@@ -1083,7 +1083,7 @@ def two_lot_2can(self):
     auction_id = self.auction_id = response.json['data']['id']
     owner_token = response.json['access']['token']
     lots = []
-    for lot in 2 * self.test_lots:
+    for _ in 2 * self.test_lots:
         # add lot
         response = self.app.post_json('/auctions/{}/lots?acc_token={}'.format(auction_id, owner_token),
                                       {'data': self.test_lots[0]})
@@ -1123,7 +1123,7 @@ def two_lot_2bid_0com_1can_before_auction(self):
     auction_id = self.auction_id = response.json['data']['id']
     owner_token = response.json['access']['token']
     lots = []
-    for lot in 2 * self.test_lots:
+    for _ in 2 * self.test_lots:
         # add lot
         response = self.app.post_json('/auctions/{}/lots?acc_token={}'.format(auction_id, owner_token),
                                       {'data': self.test_lots[0]})
@@ -1204,7 +1204,7 @@ def two_lot_1bid_0com_1can(self):
     auction_id = self.auction_id = response.json['data']['id']
     owner_token = response.json['access']['token']
     lots = []
-    for lot in 2 * self.test_lots:
+    for _ in 2 * self.test_lots:
         # add lot
         response = self.app.post_json('/auctions/{}/lots?acc_token={}'.format(auction_id, owner_token),
                                       {'data': self.test_lots[0]})
@@ -1282,7 +1282,7 @@ def two_lot_1bid_2com_1win(self):
     auction_id = self.auction_id = response.json['data']['id']
     owner_token = response.json['access']['token']
     lots = []
-    for lot in 2 * self.test_lots:
+    for _ in 2 * self.test_lots:
         # add lot
         response = self.app.post_json('/auctions/{}/lots?acc_token={}'.format(auction_id, owner_token),
                                       {'data': self.test_lots[0]})
@@ -1353,7 +1353,7 @@ def two_lot_1bid_0com_0win(self):
     auction_id = self.auction_id = response.json['data']['id']
     owner_token = response.json['access']['token']
     lots = []
-    for lot in 2 * self.test_lots:
+    for _ in 2 * self.test_lots:
         # add lot
         response = self.app.post_json('/auctions/{}/lots?acc_token={}'.format(auction_id, owner_token),
                                       {'data': self.test_lots[0]})
@@ -1422,7 +1422,7 @@ def two_lot_1bid_1com_1win(self):
     auction_id = self.auction_id = response.json['data']['id']
     owner_token = response.json['access']['token']
     lots = []
-    for lot in 2 * self.test_lots:
+    for _ in 2 * self.test_lots:
         # add lot
         response = self.app.post_json('/auctions/{}/lots?acc_token={}'.format(auction_id, owner_token),
                                       {'data': self.test_lots[0]})
@@ -1514,7 +1514,7 @@ def two_lot_2bid_2com_2win(self):
     auction_id = self.auction_id = response.json['data']['id']
     owner_token = response.json['access']['token']
     lots = []
-    for lot in 2 * self.test_lots:
+    for _ in 2 * self.test_lots:
         # add lot
         response = self.app.post_json('/auctions/{}/lots?acc_token={}'.format(auction_id, owner_token),
                                       {'data': self.test_lots[0]})
@@ -1653,7 +1653,7 @@ def two_lot_1feature_2bid_2com_2win(self):
     auction_id = self.auction_id = response.json['data']['id']
     owner_token = response.json['access']['token']
     lots = []
-    for lot in 2 * self.test_lots:
+    for _ in 2 * self.test_lots:
         # add lot
         response = self.app.post_json('/auctions/{}/lots?acc_token={}'.format(auction_id, owner_token),
                                       {'data': self.test_lots[0]})

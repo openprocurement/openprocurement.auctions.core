@@ -19,13 +19,11 @@ def switch_verification_to_unsuccessful(self):
 
 
 def switch_payment_to_unsuccessful(self):
-    bid_token = self.initial_bids_tokens[self.award['bid_id']]
     response = self.app.post('/auctions/{}/awards/{}/documents?acc_token={}'.format(
         self.auction_id, self.award_id, self.auction_token), upload_files=[('file', 'auction_protocol.pdf', 'content')])
     self.assertEqual(response.status, '201 Created')
     self.assertEqual(response.content_type, 'application/json')
     doc_id = response.json["data"]['id']
-    key = response.json["data"]["url"].split('?')[-1]
 
     response = self.app.patch_json(
         '/auctions/{}/awards/{}/documents/{}?acc_token={}'.format(self.auction_id, self.award_id, doc_id,
@@ -59,13 +57,11 @@ def switch_payment_to_unsuccessful(self):
 
 
 def switch_active_to_unsuccessful(self):
-    bid_token = self.initial_bids_tokens[self.award['bid_id']]
     response = self.app.post('/auctions/{}/awards/{}/documents?acc_token={}'.format(
         self.auction_id, self.award_id, self.auction_token), upload_files=[('file', 'auction_protocol.pdf', 'content')])
     self.assertEqual(response.status, '201 Created')
     self.assertEqual(response.content_type, 'application/json')
     doc_id = response.json["data"]['id']
-    key = response.json["data"]["url"].split('?')[-1]
 
     response = self.app.patch_json(
         '/auctions/{}/awards/{}/documents/{}?acc_token={}'.format(self.auction_id, self.award_id, doc_id,
@@ -137,13 +133,11 @@ def switch_suspended_verification_to_unsuccessful(self):
 
 
 def switch_suspended_payment_to_unsuccessful(self):
-    bid_token = self.initial_bids_tokens[self.award['bid_id']]
     response = self.app.post('/auctions/{}/awards/{}/documents?acc_token={}'.format(
         self.auction_id, self.award_id, self.auction_token), upload_files=[('file', 'auction_protocol.pdf', 'content')])
     self.assertEqual(response.status, '201 Created')
     self.assertEqual(response.content_type, 'application/json')
     doc_id = response.json["data"]['id']
-    key = response.json["data"]["url"].split('?')[-1]
 
     response = self.app.patch_json(
         '/auctions/{}/awards/{}/documents/{}?acc_token={}'.format(self.auction_id, self.award_id, doc_id,
@@ -191,13 +185,11 @@ def switch_suspended_payment_to_unsuccessful(self):
 
 
 def switch_suspended_active_to_unsuccessful(self):
-    bid_token = self.initial_bids_tokens[self.award['bid_id']]
     response = self.app.post('/auctions/{}/awards/{}/documents?acc_token={}'.format(
         self.auction_id, self.award_id, self.auction_token), upload_files=[('file', 'auction_protocol.pdf', 'content')])
     self.assertEqual(response.status, '201 Created')
     self.assertEqual(response.content_type, 'application/json')
     doc_id = response.json["data"]['id']
-    key = response.json["data"]["url"].split('?')[-1]
 
     response = self.app.patch_json(
         '/auctions/{}/awards/{}/documents/{}?acc_token={}'.format(self.auction_id, self.award_id, doc_id,
@@ -272,13 +264,11 @@ def switch_verification_to_unsuccessful_2(self):
 
 
 def switch_payment_to_unsuccessful_2(self):
-    bid_token = self.initial_bids_tokens[self.award['bid_id']]
     response = self.app.post('/auctions/{}/awards/{}/documents?acc_token={}'.format(
         self.auction_id, self.award_id, self.auction_token), upload_files=[('file', 'auction_protocol.pdf', 'content')])
     self.assertEqual(response.status, '201 Created')
     self.assertEqual(response.content_type, 'application/json')
     doc_id = response.json["data"]['id']
-    key = response.json["data"]["url"].split('?')[-1]
 
     response = self.app.patch_json(
         '/auctions/{}/awards/{}/documents/{}?acc_token={}'.format(self.auction_id, self.award_id, doc_id,
@@ -312,13 +302,11 @@ def switch_payment_to_unsuccessful_2(self):
 
 
 def switch_active_to_unsuccessful_2(self):
-    bid_token = self.initial_bids_tokens[self.award['bid_id']]
     response = self.app.post('/auctions/{}/awards/{}/documents?acc_token={}'.format(
         self.auction_id, self.award_id, self.auction_token), upload_files=[('file', 'auction_protocol.pdf', 'content')])
     self.assertEqual(response.status, '201 Created')
     self.assertEqual(response.content_type, 'application/json')
     doc_id = response.json["data"]['id']
-    key = response.json["data"]["url"].split('?')[-1]
 
     response = self.app.patch_json(
         '/auctions/{}/awards/{}/documents/{}?acc_token={}'.format(self.auction_id, self.award_id, doc_id,

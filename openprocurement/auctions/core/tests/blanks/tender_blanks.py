@@ -622,8 +622,6 @@ def patch_tender_jsonpatch(self):
     response = self.app.post_json('/auctions', {'data': self.initial_data})
     self.assertEqual(response.status, '201 Created')
     tender = response.json['data']
-    owner_token = response.json['access']['token']
-    dateModified = tender.pop('dateModified')
 
     import random
     response = self.app.patch_json('/auctions/{}'.format(tender['id']),

@@ -98,4 +98,3 @@ class BaseAuctionAwardContractDocumentResource(APIResource):
             self.LOGGER.info('Updated auction contract document {}'.format(self.request.context.id),
                         extra=context_unpack(self.request, {'MESSAGE_ID': 'auction_contract_document_patch'}))
             return {'data': self.request.context.serialize("view")}
-

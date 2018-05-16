@@ -277,9 +277,7 @@ def create_auction_contract_document(self):
     response = self.app.get('/auctions/{}/contracts/{}/documents/{}?{}'.format(
         self.auction_id, self.contract_id, doc_id, key))
     self.assertEqual(response.status, '200 OK')
-    self.assertEqual(response.content_type, 'application/msword')
-    self.assertEqual(response.content_length, 7)
-    self.assertEqual(response.body, 'content')
+    self.assertEqual(response.content_type, 'application/json')
 
     response = self.app.get('/auctions/{}/contracts/{}/documents/{}'.format(
         self.auction_id, self.contract_id, doc_id))
@@ -336,9 +334,7 @@ def put_auction_contract_document(self):
     response = self.app.get('/auctions/{}/contracts/{}/documents/{}?{}'.format(
         self.auction_id, self.contract_id, doc_id, key))
     self.assertEqual(response.status, '200 OK')
-    self.assertEqual(response.content_type, 'application/msword')
-    self.assertEqual(response.content_length, 8)
-    self.assertEqual(response.body, 'content2')
+    self.assertEqual(response.content_type, 'application/json')
 
     response = self.app.get('/auctions/{}/contracts/{}/documents/{}'.format(
         self.auction_id, self.contract_id, doc_id))
@@ -357,9 +353,7 @@ def put_auction_contract_document(self):
     response = self.app.get('/auctions/{}/contracts/{}/documents/{}?{}'.format(
         self.auction_id, self.contract_id, doc_id, key))
     self.assertEqual(response.status, '200 OK')
-    self.assertEqual(response.content_type, 'application/msword')
-    self.assertEqual(response.content_length, 8)
-    self.assertEqual(response.body, 'content3')
+    self.assertEqual(response.content_type, 'application/json')
 
     auction = self.db.get(self.auction_id)
     auction['contracts'][-1]["status"] = "cancelled"
@@ -439,7 +433,6 @@ def create_auction_2_lot_contract_document(self):
     doc_id = response.json["data"]['id']
     self.assertIn(doc_id, response.headers['Location'])
     self.assertEqual('name.doc', response.json["data"]["title"])
-    key = response.json["data"]["url"].split('?')[-1]
 
     response = self.app.post_json('/auctions/{}/cancellations'.format(self.auction_id), {'data': {
         'reason': 'cancellation reason',
@@ -479,7 +472,6 @@ def put_auction_2_lot_contract_document(self):
     self.assertEqual(response.status, '200 OK')
     self.assertEqual(response.content_type, 'application/json')
     self.assertEqual(doc_id, response.json["data"]["id"])
-    key = response.json["data"]["url"].split('?')[-1]
 
     response = self.app.post_json('/auctions/{}/cancellations'.format(self.auction_id), {'data': {
         'reason': 'cancellation reason',

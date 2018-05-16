@@ -4,24 +4,25 @@ from schematics.transforms import (
     whitelist
 )
 from schematics.types import StringType
-from schematics.types.serializable import serializable
 from schematics.types.compound import ModelType
+from schematics.types.serializable import serializable
+from zope.interface import implementer
 
 from openprocurement.api.models.common import Period
 from openprocurement.api.models.schematics_extender import ListType
 from openprocurement.api.utils import calculate_business_date
 
 from openprocurement.auctions.core.models import (
-    get_auction,
-    dgfDocument as Document,
+    Award as BaseAward,
     dgfComplaint as Complaint,
+    dgfDocument as Document,
     dgfItem as Item,
     dgfOrganization as Organization,
-    Award as BaseAward
+    get_auction,
 )
 from openprocurement.auctions.core.plugins.awarding.base.constants import (
+    AWARD_PAYMENT_TIME,
     CONTRACT_SIGNING_TIME,
-    AWARD_PAYMENT_TIME
 )
 from openprocurement.auctions.core.plugins.awarding.v2.constants import (
     VERIFY_AUCTION_PROTOCOL_TIME
@@ -29,11 +30,13 @@ from openprocurement.auctions.core.plugins.awarding.v2.constants import (
 from openprocurement.auctions.core.validation import (
     validate_disallow_dgfPlatformLegalDetails
 )
+from .interfaces import IAwardV2
 
 
+@implementer(IAwardV2)
 class Award(BaseAward):
     """
-        Award model for Awarding 2.0 procedure 
+        Award model for Awarding 2.0 procedure
     """
     class Options:
         roles = {

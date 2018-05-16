@@ -12,7 +12,7 @@ from openprocurement.auctions.core.adapters import (
 
 class AwardingV2_1ConfiguratorMixin(object):
     """ Brings methods that are needed for the process of Awarding
-        
+
         start_awarding - call after auction ends in auction view
         back_to_awarding - call when participant was disqualified
     """
@@ -36,3 +36,4 @@ class AwardingNextCheckV2_1(AuctionAwardingNextCheckAdapter):
     """Use next_check_awarding from V2 awarding"""
     def add_awarding_checks(self, auction):
         return next_check_awarding(auction)
+

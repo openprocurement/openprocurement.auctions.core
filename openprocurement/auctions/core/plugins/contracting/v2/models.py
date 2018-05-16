@@ -28,4 +28,3 @@ class Contract(BaseContract):
         default=list(),
         validators=[validate_disallow_dgfPlatformLegalDetails]
     )
-

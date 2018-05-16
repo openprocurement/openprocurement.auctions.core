@@ -38,7 +38,6 @@ class AuctionAwardContractProlongationResource(APIResource):
     )
     def collection_post(self):
         """Create prolongation for a Contract"""
-        auction = self.request.validated['auction']
         contract = self.request.validated['contract']
 
         new_prolongation = self.request.validated['prolongation']
@@ -54,7 +53,7 @@ class AuctionAwardContractProlongationResource(APIResource):
                 ),
             )
             self.request.response.status = 201
-            
+
             self.request.response.headers['Location'] = self.request.current_route_url(
                     _route_name=self.request.matched_route.name,
                     contract_id=contract.id,
