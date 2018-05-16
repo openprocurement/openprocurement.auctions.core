@@ -198,7 +198,7 @@ class dgfCDB2Item(flashItem):
     contractPeriod = ModelType(Period)
 
     def __init__(self, *args, **kwargs):
-        super(Item, self).__init__(*args, **kwargs)
+        super(dgfCDB2Item, self).__init__(*args, **kwargs)
         if hasattr(self, 'deliveryDate'):
             del self.deliveryDate
 
