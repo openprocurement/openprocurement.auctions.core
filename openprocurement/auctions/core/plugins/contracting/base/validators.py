@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
-from predicates import not_active_lots_predicate
-
+from openprocurement.auctions.core.plugins.contracting.base.predicates import (
+    not_active_lots_predicate
+)
 
 def validate_contract_document(request, operation):
     if (
@@ -16,7 +17,7 @@ def validate_contract_document(request, operation):
             )
         )
         request.errors.status = 403
-        return
+        return None
     if not_active_lots_predicate(request):
         request.errors.add(
             'body',
@@ -24,7 +25,7 @@ def validate_contract_document(request, operation):
             'Can {} document only in active lot status'.format(operation)
         )
         request.errors.status = 403
-        return
+        return None
     if request.validated['contract'].status not in ['pending', 'active']:
         request.errors.add(
             'body',
@@ -34,5 +35,5 @@ def validate_contract_document(request, operation):
             )
         )
         request.errors.status = 403
-        return
+        return None
     return True

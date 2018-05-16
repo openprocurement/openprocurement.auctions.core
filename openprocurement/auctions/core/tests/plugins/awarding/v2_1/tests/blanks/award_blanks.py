@@ -422,7 +422,6 @@ def successful_second_auction_award(self):
     self.assertEqual(response.content_type, 'application/json')
     self.assertEqual(len(response.json['data']), 2)
     self.assertIn(response.json['data'][1]['id'], new_award_location)
-    new_award = response.json['data'][-1]
 
     self.upload_auction_protocol(self.second_award)
 
@@ -572,7 +571,6 @@ def patch_auction_award_Administrator_change(self):
     self.assertEqual(response.content_type, 'application/json')
     award = response.json['data']
     verificationPeriod = award['verificationPeriod'][u'startDate']
-    authorization = self.app.authorization
     self.app.authorization = ('Basic', ('administrator', ''))
     response = self.app.patch_json('/auctions/{}/awards/{}'.format(self.auction_id, award['id']), {"data": {"verificationPeriod": {"endDate": award['verificationPeriod'][u'startDate']}}})
 
@@ -671,7 +669,6 @@ def patch_auction_award_lot(self):
     self.assertEqual(response.content_type, 'application/json')
     self.assertEqual(len(response.json['data']), 3)
     self.assertIn(response.json['data'][-1]['id'], new_award_location)
-    new_award = response.json['data'][-1]
 
     response = self.app.patch_json('/auctions/{}/awards/{}'.format(self.auction_id, self.second_award_id), {"data": {"status": "active"}})
     self.assertEqual(response.status, '200 OK')
@@ -838,7 +835,6 @@ def patch_auction_award_2_lots(self):
     self.assertEqual(response.status, '200 OK')
     self.assertEqual(response.content_type, 'application/json')
     self.assertEqual(len(response.json['data']), 2)
-    new_award = response.json['data'][-1]
     response = self.app.post_json('/auctions/{}/cancellations'.format(self.auction_id), {'data': {
         'reason': 'cancellation reason',
         'status': 'active',
@@ -1001,7 +997,7 @@ def patch_auction_award_complaint(self):
     self.assertEqual(response.content_type, 'application/json')
     self.assertEqual(response.json['errors'][0]["description"], "Forbidden")
 
-    response = self.app.patch_json('/auctions/{}/awards/{}'.format(self.auction_id, self.award_id, complaint['id']), {"data": {"status": "active"}})
+    response = self.app.patch_json('/auctions/{}/awards/{}'.format(self.auction_id, self.award_id), {"data": {"status": "active"}})
     self.assertEqual(response.status, '200 OK')
     self.assertEqual(response.content_type, 'application/json')
     self.assertEqual(response.json['data']["status"], "active")
@@ -1127,7 +1123,7 @@ def patch_auction_award_complaint(self):
 
 def review_auction_award_complaint(self):
     complaints = []
-    for i in range(2):
+    for _ in range(2):
         response = self.app.post_json('/auctions/{}/awards/{}/complaints'.format(self.auction_id, self.award_id), {'data': {
             'title': 'complaint title',
             'description': 'complaint description',
@@ -2466,5 +2462,3 @@ def patch_auction_award_document_2_lots(self):
     self.assertEqual(response.status, '403 Forbidden')
     self.assertEqual(response.content_type, 'application/json')
     self.assertEqual(response.json['errors'][0]["description"], "Can update document only in active lot status")
-
-

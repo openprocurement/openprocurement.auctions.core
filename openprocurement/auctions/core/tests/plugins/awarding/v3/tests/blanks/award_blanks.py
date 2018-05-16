@@ -141,7 +141,6 @@ def create_auction_award_invalid(self):
 
 def create_auction_award(self):
     request_path = '/auctions/{}/awards'.format(self.auction_id)
-    now = get_now()
     response = self.app.post_json(request_path, {
         'data': {'suppliers': [self.initial_organization], 'bid_id': self.initial_bids[0]['id']}})
     self.assertEqual(response.status, '201 Created')
@@ -164,7 +163,6 @@ def create_auction_award(self):
     doc_id = response.json["data"]['id']
     self.assertIn(doc_id, response.headers['Location'])
     self.assertEqual('auction_protocol.pdf', response.json["data"]["title"])
-    key = response.json["data"]["url"].split('?')[-1]
 
     response = self.app.patch_json(
         '/auctions/{}/awards/{}/documents/{}?acc_token={}'.format(self.auction_id, award['id'], doc_id, bid_token),
@@ -261,7 +259,6 @@ def award_activation_creates_contract(self):
         )]
     )
     doc_id = response.json["data"]['id']
-    key = response.json["data"]["url"].split('?')[-1]
 
     response = self.app.patch_json(
         '/auctions/{}/awards/{}/documents/{}?acc_token={}'.format(
@@ -796,7 +793,6 @@ def successful_second_auction_award(self):
     self.assertEqual(response.content_type, 'application/json')
     self.assertEqual(len(response.json['data']), 2)
     self.assertIn(response.json['data'][1]['id'], new_award_location)
-    new_award = response.json['data'][-1]
 
     self.upload_auction_protocol(self.second_award)
 

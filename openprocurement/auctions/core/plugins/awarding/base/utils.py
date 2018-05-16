@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 from openprocurement.api.constants import TZ
-from constants import NUMBER_OF_BIDS_TO_BE_QUALIFIED
-
+from openprocurement.auctions.core.plugins.awarding.base.constants import (
+    NUMBER_OF_BIDS_TO_BE_QUALIFIED
+)
 
 def check_auction_protocol(award):
     if award.documents:

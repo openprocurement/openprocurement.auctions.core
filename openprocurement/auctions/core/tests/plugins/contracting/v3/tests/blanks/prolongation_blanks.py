@@ -259,7 +259,7 @@ def apply_prolongation_triple_times(test_case):
         }
     }
     # apply some short prolongation to be able apply long one
-    short_prolongation_patch_response = test_case.app.patch_json(
+    test_case.app.patch_json(
         PATHS['prolongation'].format(
             auction_id=test_case.auction_id,
             contract_id=test_case.contract_id,
@@ -497,13 +497,13 @@ def get_document(test_case):
 
 
 def get_list_of_documents(test_case):
-    document_id, document_key = add_document_to_prolongation(
+    add_document_to_prolongation(
         test_case,
         test_case.auction_id,
         test_case.contract_id,
         test_case.prolongation_id,
     )
-    document_id_2, document_key_2 = add_document_to_prolongation(
+    add_document_to_prolongation(
         test_case,
         test_case.auction_id,
         test_case.contract_id,

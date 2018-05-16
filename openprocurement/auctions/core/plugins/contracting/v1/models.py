@@ -9,7 +9,7 @@ from openprocurement.api.models.schematics_extender import (
 from openprocurement.auctions.core.models import (
     flashItem as Item,
     Contract as BaseContract,
-    Document
+    dgfCDB2Document as Document
 )
 
 

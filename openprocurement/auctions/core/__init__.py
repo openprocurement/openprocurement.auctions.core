@@ -15,7 +15,6 @@ def includeme(config):
     config.scan("openprocurement.auctions.core.views")
 
     # auction procurementMethodType plugins support
-    puginns = config.registry.app_meta(['plugins'])
     config.add_route_predicate('auctionsprocurementMethodType', isAuction)
     config.registry.auction_procurementMethodTypes = {}
     config.add_request_method(extract_auction, 'auction', reify=True)
