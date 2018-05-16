@@ -75,7 +75,7 @@ class AwardManagerV2Adapter(BaseAwardManagerAdapter):
     )
 
     @validate_with(create_validators)
-    def create_adapter(self, request, **kwargs):
+    def create_award(self, request, **kwargs):
         award = request.validated['award']
         award.complaintPeriod = award.signingPeriod = award.paymentPeriod = award.verificationPeriod = {
             'startDate': get_now()
@@ -83,7 +83,7 @@ class AwardManagerV2Adapter(BaseAwardManagerAdapter):
         request.validated['auction'].awards.append(award)
 
     @validate_with(change_validators)
-    def change_adapter(self, request, **kwargs):
+    def change_award(self, request, **kwargs):
         auction = request.validated['auction']
         award = request.context
         award_status = award.status
