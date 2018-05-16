@@ -7,7 +7,8 @@ from urlparse import (
     urlparse,
     parse_qs
 )
-
+from zope.deprecation import deprecated
+from openprocurement.auctions.core.interfaces import IAuction
 from couchdb_schematics.document import SchematicsDocument
 from pyramid.security import Allow
 from schematics.exceptions import ValidationError
@@ -26,8 +27,6 @@ from schematics.types import (
 )
 from schematics.types.compound import DictType
 from schematics.types.serializable import serializable
-from zope.interface import Interface
-from zope.deprecation import deprecated
 from schematics_flexible.schematics_flexible import FlexibleModelType
 from openprocurement.schemas.dgf.schemas_store import SchemaStore
 
@@ -84,7 +83,6 @@ from openprocurement.auctions.core.constants import (
     DGF_CDB2_CLASSIFICATION_PRECISELY_FROM
 )
 from openprocurement.auctions.core.utils import get_auction_creation_date
-from openprocurement.auctions.core.interfaces import IAuction
 from openprocurement.auctions.core.validation import (
     validate_disallow_dgfPlatformLegalDetails
 )
@@ -96,8 +94,8 @@ auction_view_role = whitelist('auctionID', 'dateModified', 'bids',
                               'features', 'lots', 'items',
                               'procurementMethodType', 'submissionMethodDetails')
 
-deprecated('IAuction', 'IAuction moved to interfaces.py')
 
+deprecated('IAuction', 'IAuction moved to interfaces.py')
 
 def get_auction(model):
     while not IAuction.providedBy(model):
@@ -133,9 +131,6 @@ class flashItem(BaseItem):
         if relatedLot and isinstance(data['__parent__'], Model) and relatedLot not in [i.id for i in get_auction(data['__parent__']).lots]:
             raise ValidationError(u"relatedLot should be one of lots")
 
-flashItem.__name__ = 'Item'
-#flashItem = Item
-
 
 class dgfItem(flashItem):
     """A good, service, or work to be contracted."""
@@ -155,10 +150,6 @@ class dgfItem(flashItem):
             with classification id """
         if new_schema_properties and not data['classification']['id'].startswith(new_schema_properties['code']):
             raise ValidationError("classification id mismatch with schema_properties code")
-
-
-dgfItem.__name__ = 'Item'
-#dgfItem = Item
 
 
 class dgfCDB2CPVCAVClassification(Classification):
@@ -212,10 +203,6 @@ class dgfCDB2Item(flashItem):
                     raise ValidationError(u'This field is required.')
 
 
-dgfCDB2Item.__name__ = 'Item'
-#dgfCDB2Item = Item
-
-
 class flashDocument(BaseDocument):
 
     documentType = StringType(choices=[
@@ -240,10 +227,6 @@ class flashDocument(BaseDocument):
                 raise ValidationError(u"relatedItem should be one of lots")
             if data.get('documentOf') == 'item' and relatedItem not in [i.id for i in auction.items]:
                 raise ValidationError(u"relatedItem should be one of items")
-
-
-flashDocument.__name__ = 'Document'
-#flashDocument = Document
 
 
 class dgfDocument(flashDocument):
@@ -324,10 +307,6 @@ class dgfDocument(flashDocument):
             raise ValidationError(u'This field is required.')
 
 
-dgfDocument.__name__ = 'Document'
-#dgfDocument = Document
-
-
 class dgfCDB2Document(dgfDocument):
     documentType = StringType(choices=[
         'auctionNotice', 'awardNotice', 'contractNotice',
@@ -344,13 +323,7 @@ class dgfCDB2Document(dgfDocument):
     ])
 
 
-
-dgfCDB2Document.__name__ = 'Document'
-#dgfCDB2Document = Document
-
-
 class flashComplaint(Model):
-
     class Options:
         roles = {
             'create': whitelist('author', 'title', 'description', 'status', 'relatedLot'),
@@ -455,10 +428,6 @@ class flashComplaint(Model):
             raise ValidationError(u"relatedLot should be one of lots")
 
 
-flashComplaint.__name__ = 'Complaint'
-#flashComplaint = Complaint
-
-
 class Identifier(BaseIdentifier):
     scheme = StringType(required=True, choices=ORA_CODES)
 
@@ -466,10 +435,6 @@ class Identifier(BaseIdentifier):
 class dgfOrganization(BaseOrganization):
     identifier = ModelType(Identifier, required=True)
     additionalIdentifiers = ListType(ModelType(Identifier))
-
-
-dgfOrganization.__name__ = 'Organization'
-#dgfOrganization = Organization
 
 
 def validate_ua_fin(items, *args):
@@ -487,32 +452,18 @@ class dgfComplaint(flashComplaint):
     documents = ListType(ModelType(dgfDocument), default=list(), validators=[validate_disallow_dgfPlatformLegalDetails])
 
 
-dgfComplaint.__name__ = 'Complaint'
-#dgfComplaint = Complaint
-
-
 class dgfCDB2Complaint(flashComplaint):
     author = ModelType(dgfOrganization, required=True)
     documents = ListType(ModelType(dgfCDB2Document), default=list())
-
-
-dgfCDB2Complaint.__name__ = 'Complaint'
-#dgfCDB2Complaint = Complaint
 
 
 class flashCancellation(BaseCancellation):
     documents = ListType(ModelType(flashDocument), default=list())
 
 
-flashCancellation.__name__ = 'Cancellation'
-#flashCancellation = Cancellation
-
 class dgfCancellation(BaseCancellation):
     documents = ListType(ModelType(dgfDocument), default=list(), validators=[validate_disallow_dgfPlatformLegalDetails])
 
-
-dgfCancellation.__name__ = 'Cancellation'
-#dgfCancellation = Cancellation
 
 
 class Contract(BaseContract):
@@ -785,7 +736,7 @@ auction_role = (blacklist('owner_token', '_attachments', 'revisions', 'bids', 'n
 #chronograph_role = whitelist('status', 'enquiryPeriod', 'tenderPeriod', 'auctionPeriod', 'awardPeriod', 'lots')
 chronograph_role = whitelist('auctionPeriod', 'lots', 'next_check')
 chronograph_view_role = whitelist('status', 'enquiryPeriod', 'tenderPeriod', 'auctionPeriod', 'awardPeriod', 'awards', 'lots', 'doc_id', 'submissionMethodDetails', 'mode', 'numberOfBids', 'complaints', 'procurementMethodType')
-Administrator_role = whitelist('status', 'mode', 'procuringEntity','auctionPeriod', 'lots', 'suspended')
+Administrator_role = whitelist('status', 'mode', 'procuringEntity', 'auctionPeriod', 'lots', 'suspended')
 
 
 class ProcuringEntity(dgfOrganization):
@@ -1002,6 +953,10 @@ class Auction(SchematicsDocument, Model):
         for i in self.bids:
             roles['{}_{}'.format(i.owner, i.owner_token)] = 'bid_owner'
         return roles
+
+    def __init__(self, *args, **kwargs):
+        super(Auction, self).__init__(*args, **kwargs)
+        self.doc_type = "Auction"
 
     title = StringType(required=True)
     title_en = StringType()

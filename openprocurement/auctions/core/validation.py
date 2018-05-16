@@ -18,7 +18,7 @@ from openprocurement.auctions.core.constants import STATUS4ROLE
 def validate_document_data(request, **kwargs):
     context = request.context if 'documents' in request.context else request.context.__parent__
     model = type(context).documents.model_class
-    return validate_data(request, model)
+    return validate_data(request, model, "document")
 
 
 def validate_file_upload(request, **kwargs):
@@ -56,7 +56,7 @@ def validate_auction_data(request, **kwargs):
         )
         request.errors.status = 403
         return
-    data = validate_data(request, model, data=data)
+    data = validate_data(request, model, "auction", data=data)
     if data and data.get('mode', None) is None and request.check_accreditation('t'):
         request.errors.add(
             'procurementMethodType',
@@ -72,7 +72,7 @@ def validate_patch_auction_data(request, **kwargs):
     if data is None:
         return
     if request.context.status != 'draft':
-        return validate_data(request, type(request.auction), True, data)
+        return validate_data(request, type(request.auction), data=data)
     default_status = type(request.auction).fields['status'].default
     if data.get('status') != default_status:
         request.errors.add('body', 'data', 'Can\'t update auction in current (draft) status')
@@ -170,23 +170,23 @@ def validate_bid_data(request, **kwargs):
         return
     update_logging_context(request, {'bid_id': '__new__'})
     model = type(request.auction).bids.model_class
-    return validate_data(request, model)
+    return validate_data(request, model, "bid")
 
 
 def validate_patch_bid_data(request, **kwargs):
     model = type(request.auction).bids.model_class
-    return validate_data(request, model, True)
+    return validate_data(request, model)
 
 
 def validate_award_data(request, **kwargs):
     update_logging_context(request, {'award_id': '__new__'})
     model = type(request.auction).awards.model_class
-    return validate_data(request, model)
+    return validate_data(request, model, "award")
 
 
 def validate_patch_award_data(request, **kwargs):
     model = type(request.auction).awards.model_class
-    return validate_data(request, model, True)
+    return validate_data(request, model)
 
 
 def validate_award_data_post_common(request, **kwargs):
@@ -333,7 +333,7 @@ def validate_patch_complaint_data_patch_common(request, **kwargs):
                                            ' ({}) auction status'.format(auction.status))
     elif any([i.status != 'active' for i in auction.lots if
             i.id == request.validated['award'].lotID]):
-        request.errors.add('body', 'data','Can update complaint only'
+        request.errors.add('body', 'data', 'Can update complaint only'
                                           ' in active lot status')
     elif request.context.status not in ['draft', 'claim', 'answered', 'pending']:
         request.errors.add('body', 'data', 'Can\'t update complaint in current'
@@ -355,12 +355,12 @@ def validate_question_data(request, **kwargs):
         return
     update_logging_context(request, {'question_id': '__new__'})
     model = type(request.auction).questions.model_class
-    return validate_data(request, model)
+    return validate_data(request, model, "question")
 
 
 def validate_patch_question_data(request, **kwargs):
     model = type(request.auction).questions.model_class
-    return validate_data(request, model, True)
+    return validate_data(request, model)
 
 
 def validate_complaint_data(request, **kwargs):
@@ -374,29 +374,29 @@ def validate_complaint_data(request, **kwargs):
         return
     update_logging_context(request, {'complaint_id': '__new__'})
     model = type(request.auction).complaints.model_class
-    return validate_data(request, model)
+    return validate_data(request, model, "complaint")
 
 
 def validate_patch_complaint_data(request, **kwargs):
     model = type(request.auction).complaints.model_class
-    return validate_data(request, model, True)
+    return validate_data(request, model)
 
 
 def validate_cancellation_data(request, **kwargs):
     update_logging_context(request, {'cancellation_id': '__new__'})
     model = type(request.auction).cancellations.model_class
-    return validate_data(request, model)
+    return validate_data(request, model, "cancellation")
 
 
 def validate_patch_cancellation_data(request, **kwargs):
     model = type(request.auction).cancellations.model_class
-    return validate_data(request, model, True)
+    return validate_data(request, model)
 
 
 def validate_contract_data(request, **kwargs):
     update_logging_context(request, {'contract_id': '__new__'})
     model = type(request.auction).contracts.model_class
-    return validate_data(request, model)
+    return validate_data(request, model, "contract")
 
 
 def validate_prolongation_data(request, **kwargs):
@@ -418,7 +418,7 @@ def validate_prolongation_data(request, **kwargs):
         return
     update_logging_context(request, {'prolongation_id': '__new__'})
     model = type(request.auction).contracts.model_class.prolongations.model_class
-    return validate_data(request, model)
+    return validate_data(request, model, "prolongation")
 
 
 def validate_patch_prolongation_data(request, **kwargs):
@@ -444,23 +444,23 @@ def validate_patch_prolongation_data(request, **kwargs):
         return
 
     model = type(request.auction).contracts.model_class.prolongations.model_class
-    return validate_data(request, model, True)
+    return validate_data(request, model)
 
 
 def validate_patch_contract_data(request, **kwargs):
     model = type(request.auction).contracts.model_class
-    return validate_data(request, model, True)
+    return validate_data(request, model)
 
 
 def validate_lot_data(request, **kwargs):
     update_logging_context(request, {'lot_id': '__new__'})
     model = type(request.auction).lots.model_class
-    return validate_data(request, model)
+    return validate_data(request, model, "lot")
 
 
 def validate_patch_lot_data(request, **kwargs):
     model = type(request.auction).lots.model_class
-    return validate_data(request, model, True)
+    return validate_data(request, model)
 
 
 def validate_disallow_dgfPlatformLegalDetails(docs, *args):
