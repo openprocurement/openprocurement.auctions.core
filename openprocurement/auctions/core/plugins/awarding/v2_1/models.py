@@ -1,3 +1,4 @@
+from zope.interface import implementer
 from pyramid.security import Allow
 from schematics.transforms import (
     blacklist,
@@ -11,23 +12,25 @@ from openprocurement.api.models.common import Period
 from openprocurement.api.models.schematics_extender import ListType
 
 from openprocurement.auctions.core.models import (
-    get_auction,
-    dgfCDB2Document as Document,
+    Award as BaseAward,
     dgfCDB2Complaint as Complaint,
+    dgfCDB2Document as Document,
     dgfCDB2Item as Item,
     dgfOrganization as Organization,
-    Award as BaseAward
+    get_auction,
 )
 from openprocurement.auctions.core.plugins.awarding.base.constants import (
+    AWARD_PAYMENT_TIME,
     CONTRACT_SIGNING_TIME,
-    AWARD_PAYMENT_TIME
 )
 from openprocurement.auctions.core.plugins.awarding.v2_1.constants import (
     VERIFY_AUCTION_PROTOCOL_TIME
 )
 from .utils import calculate_enddate
+from .interfaces import IAwardV2_1
 
 
+@implementer(IAwardV2_1)
 class Award(BaseAward):
     class Options:
         roles = {

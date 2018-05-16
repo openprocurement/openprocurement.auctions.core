@@ -35,9 +35,10 @@ class AuctionAwardResource(APIResource):
     @json_view(content_type="application/json", permission='create_award',
                validators=(validate_award_data,))
     def collection_post(self):
-        manager = self.request.registry.getAdapter(self.request.validated['award'], IAwardManagerAdapter)
-        manager.create_award(self.request)
         award = self.request.validated['award']
+
+        manager = self.request.registry.getAdapter(award, IAwardManagerAdapter)
+        manager.create_award(self.request)
         if save_auction(self.request):
             self.LOGGER.info(
                 'Created auction award {}'.format(award.id),
@@ -54,9 +55,10 @@ class AuctionAwardResource(APIResource):
 
     @json_view(content_type="application/json", permission='edit_auction')
     def patch(self):
-        manager = self.request.registry.getAdapter(self.context, IAwardManagerAdapter)
-        manager.change_award(self.request, server_id=self.server_id)
         award = self.request.validated['award']
+
+        manager = self.request.registry.getAdapter(award, IAwardManagerAdapter)
+        manager.change_award(self.request, server_id=self.server_id)
         if save_auction(self.request):
             self.LOGGER.info(
                 'Updated auction award {}'.format(self.request.context.id),
