@@ -10,9 +10,13 @@ from requests.models import Response
 from base64 import b64encode
 from urllib import urlencode
 
+from openprocurement.api.config import DS
 from openprocurement.api.constants import VERSION
 from openprocurement.api.design import sync_design
-from openprocurement.api.tests.base import JSON_RENDERER_ERROR  # noqa forwarded import
+from openprocurement.api.tests.base import (
+    JSON_RENDERER_ERROR,  # noqa forwarded import
+    test_config_data
+)
 from openprocurement.auctions.core.utils import (
     apply_data_patch,
     SESSION,
@@ -148,7 +152,10 @@ class BaseWebTest(unittest.TestCase):
             else:
                 cls.app = webtest.TestApp("config:tests.ini", relative_to=cls.relative_to)
         cls.app.RequestClass = PrefixedRequestClass
-        cls.couchdb_server = cls.app.app.registry.couchdb_server
+        if getattr(cls.app.app.registry, 'admin_couchdb_server', None):
+            cls.couchdb_server = cls.app.app.registry.admin_couchdb_server
+        else:
+            cls.couchdb_server = cls.app.app.registry.couchdb_server
         cls.db = cls.app.app.registry.db
         cls.db_name = cls.db.name
 
@@ -343,7 +350,16 @@ class BaseAuctionWebTest(BaseWebTest):
             self.setUpDS()
 
     def setUpDS(self):
-        self.app.app.registry.docservice_url = 'http://localhost'
+        self.app.app.registry.use_docservice = True
+        ds_config = deepcopy(test_config_data['config']['ds'])
+        docservice = DS(ds_config)
+        self.app.app.registry.docservice_url = docservice.download_url
+        self.app.app.registry.docservice_upload_url = docservice.upload_url
+        self.app.app.registry.docservice_username = docservice.user.name
+        self.app.app.registry.docservice_password = docservice.user.password
+        self.app.app.registry.docservice_key = dockey = docservice.signer
+        self.app.app.registry.keyring = docservice.init_keyring(dockey)
+
         test = self
         def request(method, url, **kwargs):
             response = Response()
