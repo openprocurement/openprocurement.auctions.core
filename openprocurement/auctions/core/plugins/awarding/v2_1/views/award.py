@@ -3,24 +3,15 @@ from openprocurement.api.utils import (
     json_view,
     context_unpack,
     APIResource,
-    get_now,
 )
 from openprocurement.auctions.core.utils import (
     save_auction,
     opresource,
-    apply_patch,
 )
 from openprocurement.auctions.core.validation import (
     validate_award_data,
-    validate_patch_award_data,
 )
 from openprocurement.auctions.core.plugins.awarding.base.interfaces import IAwardManagerAdapter
-from openprocurement.auctions.core.plugins.awarding.v2_1.validators import (
-    validate_award_patch
-)
-from openprocurement.auctions.core.plugins.awarding.base.utils import (
-    check_auction_protocol,
-)
 
 
 @opresource(
@@ -69,7 +60,6 @@ class AuctionAwardResource(APIResource):
         content_type="application/json",
         permission='edit_auction_award')
     def patch(self):
-        auction = self.request.validated['auction']
         award = self.request.context
 
         award_manager = self.request.registry.getAdapter(award, IAwardManagerAdapter)
