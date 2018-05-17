@@ -16,7 +16,6 @@ from schematics.exceptions import ModelValidationError
 
 from openprocurement.api.constants import (
     TZ, SANDBOX_MODE,
-    project_configurator,
     AUCTIONS_COMPLAINT_STAND_STILL_TIME,
     DOCUMENT_BLACKLISTED_FIELDS as API_DOCUMENT_BLACKLISTED_FIELDS,
     SESSION,  # noqa forwarded import
@@ -48,6 +47,7 @@ from openprocurement.auctions.core.interfaces import IAuction
 from openprocurement.auctions.core.plugins.awarding import includeme as awarding
 from openprocurement.auctions.core.plugins.contracting import includeme as contracting
 from openprocurement.auctions.core.traversal import factory
+from openprocurement.auctions.core.configurator import project_configurator
 
 
 PKG = get_distribution(__package__)
