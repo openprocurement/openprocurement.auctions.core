@@ -7,8 +7,3 @@ class BaseAwardManagerAdapter(object):
 
     def __init__(self, context):
         self.context = context
-
-    def _validate(self, request, validators):
-        kwargs = {'request': request, 'error_handler': error_handler}
-        for validator in validators:
-            validator(**kwargs)

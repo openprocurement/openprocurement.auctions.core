@@ -154,10 +154,20 @@ def create_auction_award(self):
 # AuctionAwardProcessTest
 
 def invalid_patch_auction_award(self):
-    response = self.app.patch_json('/auctions/{}/awards/{}'.format(self.auction_id, self.first_award_id), {"data": {"status": "pending.payment"}}, status=403)
+    # assume that first_award status is 'pending.verification'
+    self.check_award_status(self.auction_id, self.first_award_id, 'pending.verification')
+    response = self.app.patch_json(
+        '/auctions/{}/awards/{}'.format(
+            self.auction_id, self.first_award_id
+        ),
+        {"data": {"status": "pending.payment"}},
+        status=403
+    )
     self.assertEqual(response.status, '403 Forbidden')
     self.assertEqual(response.content_type, 'application/json')
     self.assertEqual(response.json['errors'][0]["description"], "Can't switch award status to (pending.payment) before auction owner load auction protocol")
+    # assume that status doesn't has been changed
+    self.check_award_status(self.auction_id, self.first_award_id, 'pending.verification')
 
     for i in ["pending.waiting", "active", "cancelled"]:
         self.forbidden_patch_award(self.first_award_id, "pending.verification", i)
