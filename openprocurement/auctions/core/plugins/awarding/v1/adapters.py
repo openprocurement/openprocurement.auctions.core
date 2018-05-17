@@ -1,7 +1,7 @@
 from .models import Award
 from .utils import (
     add_next_award,
-    next_check_awarding
+    next_check_awarding,
 )
 
 from openprocurement.auctions.core.adapters import (
@@ -11,8 +11,9 @@ from openprocurement.auctions.core.plugins.awarding.base.adapters import (
     BaseAwardManagerAdapter
 )
 from openprocurement.api.utils import (
-    get_now,
     calculate_business_date,
+    error_handler,
+    get_now,
 )
 from openprocurement.auctions.core.utils import (
     apply_patch,
@@ -89,7 +90,7 @@ class AwardManagerV1Adapter(BaseAwardManagerAdapter):
         if any([i.status != 'active' for i in auction.lots if i.id == award.lotID]):
             request.errors.add('body', 'data', 'Can update award only in active lot status')
             request.errors.status = 403
-            return
+            raise error_handler(request)
         apply_patch(request, save=False, src=request.context.serialize())
         if award_status == 'pending' and award.status == 'active':
             award.complaintPeriod.endDate = calculate_business_date(get_now(), STAND_STILL_TIME, auction, True)
@@ -154,4 +155,4 @@ class AwardManagerV1Adapter(BaseAwardManagerAdapter):
         ):
             request.errors.add('body', 'data', 'Can\'t update award in current ({}) status'.format(award_status))
             request.errors.status = 403
-            return
+            raise error_handler(request)

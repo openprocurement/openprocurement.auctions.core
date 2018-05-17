@@ -631,7 +631,7 @@ class AuctionCancellationResource(APIResource):
         if not cancellation:
             cancellation = self.context
         auction = self.request.validated['auction']
-        [setattr(i, 'status', 'cancelled') for i in auction.lots if i.id == cancellation.relatedLot]
+        _ = [setattr(i, 'status', 'cancelled') for i in auction.lots if i.id == cancellation.relatedLot]
         statuses = set([lot.status for lot in auction.lots])
         if statuses == set(['cancelled']):
             self.cancel_auction()
