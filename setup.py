@@ -11,6 +11,13 @@ entry_points = {
         'auctions.core = openprocurement.auctions.core.tests.main:suite'
     ]
 }
+requires = [
+    'setuptools',
+    'openprocurement.api',
+    'openprocurement.schemas.dgf',
+    'schematics-flexible'
+]
+test_requires = requires + []
 
 setup(name='openprocurement.auctions.core',
       version=version,
@@ -31,11 +38,8 @@ setup(name='openprocurement.auctions.core',
       namespace_packages=['openprocurement', 'openprocurement.auctions'],
       include_package_data=True,
       zip_safe=False,
-      install_requires=[
-          'setuptools',
-          'openprocurement.api',
-          'openprocurement.schemas.dgf',
-          'schematics-flexible'
-      ],
+      extras_require={'test': test_requires},
+      install_requires=requires,
+      test_requires=test_requires,
       entry_points=entry_points,
       )
