@@ -20,6 +20,7 @@ from openprocurement.api.constants import (
     DOCUMENT_BLACKLISTED_FIELDS as API_DOCUMENT_BLACKLISTED_FIELDS,
     SESSION,  # noqa forwarded import
 )
+from openprocurement.api.interfaces import IProjectConfigurator
 from openprocurement.api.validation import error_handler
 from openprocurement.api.utils import (
     get_now,
@@ -46,6 +47,7 @@ from openprocurement.auctions.core.interfaces import IAuction
 from openprocurement.auctions.core.plugins.awarding import includeme as awarding
 from openprocurement.auctions.core.plugins.contracting import includeme as contracting
 from openprocurement.auctions.core.traversal import factory
+from openprocurement.auctions.core.configurator import project_configurator
 
 
 PKG = get_distribution(__package__)
@@ -106,7 +108,7 @@ def generate_auction_id(ctime, db, server_id=''):
             sleep(1)
         else:
             break
-    return 'UA-EA-{:04}-{:02}-{:02}-{:06}{}'.format(
+    return project_configurator.AUCTION_PREFIX + '-{:04}-{:02}-{:02}-{:06}{}'.format(
         ctime.year,
         ctime.month,
         ctime.day,
