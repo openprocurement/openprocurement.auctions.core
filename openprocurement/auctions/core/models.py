@@ -90,11 +90,7 @@ from openprocurement.auctions.core.validation import (
 )
 
 view_complaint_role = (blacklist('owner_token', 'owner') + schematics_default_role)
-
-auction_view_role = whitelist('auctionID', 'dateModified', 'bids',
-                              'auctionPeriod', 'minimalStep', 'auctionUrl',
-                              'features', 'lots', 'items',
-                              'procurementMethodType', 'submissionMethodDetails')
+auction_embedded_role = (blacklist('owner_token', 'transfer_token') + schematics_embedded_role)
 
 deprecated('IAuction', 'IAuction moved to interfaces.py')
 
@@ -780,16 +776,16 @@ class Lot(Model):
 
 
 plain_role = (blacklist('_attachments', 'revisions', 'dateModified') + schematics_embedded_role)
-create_role = (blacklist('owner_token', 'owner', '_attachments', 'revisions', 'date', 'dateModified', 'doc_id', 'auctionID', 'bids', 'documents', 'awards', 'questions', 'complaints', 'auctionUrl', 'status', 'auctionPeriod', 'awardPeriod', 'procurementMethod', 'awardCriteria', 'submissionMethod', 'cancellations', 'numberOfBidders', 'contracts') + schematics_embedded_role)
+create_role = (blacklist('owner', '_attachments', 'revisions', 'date', 'dateModified', 'doc_id', 'auctionID', 'bids', 'documents', 'awards', 'questions', 'complaints', 'auctionUrl', 'status', 'auctionPeriod', 'awardPeriod', 'procurementMethod', 'awardCriteria', 'submissionMethod', 'cancellations', 'numberOfBidders', 'contracts') + auction_embedded_role)
 draft_role = whitelist('status')
-edit_role = (blacklist('status', 'procurementMethodType', 'lots', 'owner_token', 'owner', '_attachments', 'revisions', 'date', 'dateModified', 'doc_id', 'auctionID', 'bids', 'documents', 'awards', 'questions', 'complaints', 'auctionUrl', 'auctionPeriod', 'awardPeriod', 'procurementMethod', 'awardCriteria', 'submissionMethod', 'mode', 'cancellations', 'numberOfBidders', 'contracts') + schematics_embedded_role)
-view_role = (blacklist('owner_token', '_attachments', 'revisions') + schematics_embedded_role)
+edit_role = (blacklist('status', 'procurementMethodType', 'lots', 'owner', '_attachments', 'revisions', 'date', 'dateModified', 'doc_id', 'auctionID', 'bids', 'documents', 'awards', 'questions', 'complaints', 'auctionUrl', 'auctionPeriod', 'awardPeriod', 'procurementMethod', 'awardCriteria', 'submissionMethod', 'mode', 'cancellations', 'numberOfBidders', 'contracts') + auction_embedded_role)
+view_role = (blacklist('_attachments', 'revisions') + auction_embedded_role)
 listing_role = whitelist('dateModified', 'doc_id')
 auction_view_role = whitelist('auctionID', 'dateModified', 'bids', 'auctionPeriod', 'minimalStep', 'auctionUrl', 'features', 'lots', 'items', 'procurementMethodType')
 auction_post_role = whitelist('bids')
 auction_patch_role = whitelist('auctionUrl', 'bids', 'lots')
-enquiries_role = (blacklist('owner_token', '_attachments', 'revisions', 'bids', 'numberOfBids') + schematics_embedded_role)
-auction_role = (blacklist('owner_token', '_attachments', 'revisions', 'bids', 'numberOfBids') + schematics_embedded_role)
+enquiries_role = (blacklist('_attachments', 'revisions', 'bids', 'numberOfBids') + auction_embedded_role)
+auction_role = (blacklist('_attachments', 'revisions', 'bids', 'numberOfBids') + auction_embedded_role)
 #chronograph_role = whitelist('status', 'enquiryPeriod', 'tenderPeriod', 'auctionPeriod', 'awardPeriod', 'lots')
 chronograph_role = whitelist('auctionPeriod', 'lots', 'next_check')
 chronograph_view_role = whitelist('status', 'enquiryPeriod', 'tenderPeriod', 'auctionPeriod', 'awardPeriod', 'awards', 'lots', 'doc_id', 'submissionMethodDetails', 'mode', 'numberOfBids', 'complaints', 'procurementMethodType')
@@ -844,7 +840,7 @@ flash_auction_roles = {
     }
 
 dgf_auction_roles = {
-    'create': (schematics_embedded_role + blacklist('owner_token', 'owner', '_attachments', 'revisions', 'date', 'dateModified', 'doc_id', 'auctionID', 'bids', 'documents', 'awards', 'questions', 'complaints', 'auctionUrl', 'status', 'enquiryPeriod', 'tenderPeriod', 'awardPeriod', 'procurementMethod', 'eligibilityCriteria', 'eligibilityCriteria_en', 'eligibilityCriteria_ru', 'awardCriteria', 'submissionMethod', 'cancellations', 'numberOfBidders', 'contracts', 'suspended')),
+    'create': (auction_embedded_role + blacklist('owner', '_attachments', 'revisions', 'date', 'dateModified', 'doc_id', 'auctionID', 'bids', 'documents', 'awards', 'questions', 'complaints', 'auctionUrl', 'status', 'enquiryPeriod', 'tenderPeriod', 'awardPeriod', 'procurementMethod', 'eligibilityCriteria', 'eligibilityCriteria_en', 'eligibilityCriteria_ru', 'awardCriteria', 'submissionMethod', 'cancellations', 'numberOfBidders', 'contracts', 'suspended')),
     'edit_active.tendering': (edit_role + blacklist('enquiryPeriod', 'tenderPeriod', 'value', 'auction_value', 'minimalStep', 'auction_minimalStep', 'guarantee', 'auction_guarantee', 'eligibilityCriteria', 'eligibilityCriteria_en', 'eligibilityCriteria_ru', 'awardCriteriaDetails', 'awardCriteriaDetails_en', 'awardCriteriaDetails_ru', 'procurementMethodRationale', 'procurementMethodRationale_en', 'procurementMethodRationale_ru', 'submissionMethodDetails', 'submissionMethodDetails_en', 'submissionMethodDetails_ru', 'items', 'procuringEntity', 'suspended', 'auctionParameters')),
     'Administrator': (whitelist('suspended', 'awards', 'auctionParameters') + Administrator_role),
     'pending.verification': enquiries_role,
@@ -855,11 +851,12 @@ dgf_auction_roles = {
     'auction_view': (auction_view_role + whitelist('auctionParameters')),
 }
 
-view_bid_role = (blacklist('owner_token') + schematics_default_role)
+view_bid_role = (blacklist('owner_token', 'transfer_token') + schematics_default_role)
 Administrator_bid_role = whitelist('tenderers')
 
 swiftsure_auction_roles = deepcopy(dgf_auction_roles)
-swiftsure_auction_roles['edit_active.tendering'] = (dgf_auction_roles['edit_active.tendering'] + blacklist('registrationFee', 'bankAccount'))
+swiftsure_auction_roles['edit_active.tendering'] = (dgf_auction_roles['edit_active.tendering'] + blacklist('registrationFee', 'bankAccount', 'minNumberOfQualifiedBids'))
+swiftsure_auction_roles['auction_view'] = (dgf_auction_roles['auction_view'] + whitelist('minNumberOfQualifiedBids', 'registrationFee', 'bankAccount'))
 
 
 class Bid(Model):

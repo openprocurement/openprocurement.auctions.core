@@ -304,7 +304,7 @@ class AuctionBidResource(APIResource):
             self.request.errors.status = 403
             return
         bid = self.request.validated['bid']
-        set_ownership(bid, self.request)
+        acc = set_ownership(bid, self.request)
         auction.bids.append(bid)
         auction.modified = False
         if save_auction(self.request):
@@ -313,12 +313,7 @@ class AuctionBidResource(APIResource):
             self.request.response.status = 201
             route = self.request.matched_route.name.replace("collection_", "")
             self.request.response.headers['Location'] = self.request.current_route_url(_route_name=route, bid_id=bid.id, _query={})
-            return {
-                'data': bid.serialize('view'),
-                'access': {
-                    'token': bid.owner_token
-                }
-            }
+            return {'data': bid.serialize('view'), 'access': acc}
 
     @json_view(permission='view_auction')
     def collection_get(self):
