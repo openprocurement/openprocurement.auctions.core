@@ -226,7 +226,7 @@ class AuctionsResource(APIResourceListing):
         status = self.request.json_body['data'].get('status')
         if status and status in ['draft', 'pending.verification']:
             auction.status = status
-        set_ownership(auction, self.request)
+        acc = set_ownership(auction, self.request)
         self.request.validated['auction'] = auction
         self.request.validated['auction_src'] = {}
         if save_auction(self.request):
@@ -236,9 +236,4 @@ class AuctionsResource(APIResourceListing):
             auction_route_name = get_auction_route_name(self.request, auction)
             self.request.response.headers[
                 'Location'] = self.request.route_url(route_name=auction_route_name, auction_id=auction_id)
-            return {
-                'data': auction.serialize(auction.status),
-                'access': {
-                    'token': auction.owner_token
-                }
-            }
+            return {'data': auction.serialize(auction.status), 'access': acc}
