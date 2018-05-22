@@ -26,7 +26,7 @@ from openprocurement.auctions.core.validation import (
     validate_patch_award_data_patch_common,
 )
 from openprocurement.auctions.core.plugins.awarding.base.utils import (
-    check_auction_protocol
+    check_document_existence
 )
 
 
@@ -117,7 +117,7 @@ class AwardManagerV3_1Adapter(BaseAwardManagerAdapter):
                 return
 
         elif current_award_status == 'pending' and new_award_status == 'active':
-            if check_auction_protocol(award):
+            if check_document_existence(award, 'auctionProtocol'):
                 award.verificationPeriod.endDate = now
             else:
                 request.errors.add(

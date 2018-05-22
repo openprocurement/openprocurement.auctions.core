@@ -10,7 +10,7 @@ from openprocurement.auctions.core.plugins.awarding.base.constants import (
     NUMBER_OF_BIDS_TO_BE_QUALIFIED
 )
 from openprocurement.auctions.core.plugins.awarding.base.utils import (
-    check_auction_protocol,
+    check_document_existence,
     invalidate_bids_under_threshold,
     check_pending_awards_complaints,
     check_pending_complaints,
@@ -36,21 +36,21 @@ class Test(unittest.TestCase):
 
         document = get_document('auctionProtocol', 'auction_owner')
         award = munch.Munch({'documents': [document]})
-        result = check_auction_protocol(award)
+        result = check_document_existence(award, 'auctionProtocol')
         self.assertEqual(result, True)
 
         document = get_document('auctionProtocol', 'not_auction_owner')
         award = munch.Munch({'documents': [document]})
-        result = check_auction_protocol(award)
+        result = check_document_existence(award, 'auctionProtocol')
         self.assertEqual(result, False)
 
         award = munch.Munch({'documents': []})
-        result = check_auction_protocol(award)
+        result = check_document_existence(award, 'auctionProtocol')
         self.assertEqual(result, False)
 
         document = get_document('not_auctionProtocol', 'auction_owner')
         award = munch.Munch({'documents': [document]})
-        result = check_auction_protocol(award)
+        result = check_document_existence(award, 'auctionProtocol')
         self.assertEqual(result, False)
 
     def test_invalidate_bids_under_threshold(self):

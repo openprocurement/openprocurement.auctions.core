@@ -25,7 +25,7 @@ from openprocurement.auctions.core.plugins.awarding.v2_1.validators import (
     validate_award_patch
 )
 from openprocurement.auctions.core.plugins.awarding.base.utils import (
-    check_auction_protocol
+    check_document_existence
 )
 from openprocurement.auctions.core.plugins.awarding.base.adapters import (
     BaseAwardManagerAdapter,
@@ -109,7 +109,7 @@ class AwardManagerV2_1Adapter(BaseAwardManagerAdapter):
                 request.errors.status = 403
                 raise error_handler(request)
         elif current_award_status == 'pending.verification' and award.status == 'pending.payment':
-            if check_auction_protocol(award):
+            if check_document_existence(award, 'auctionProtocol'):
                 award.verificationPeriod.endDate = now
             else:
                 request.errors.add(
