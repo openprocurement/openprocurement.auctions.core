@@ -79,7 +79,7 @@ class AwardManagerV3_1Adapter(BaseAwardManagerAdapter):
     @validate_with(create_validators)
     def create_award(self, request, **kwargs):
         award = request.validated['award']
-        award.complaintPeriod = award.signingPeriod = award.paymentPeriod = award.verificationPeriod = {
+        award.complaintPeriod = award.signingPeriod = award.verificationPeriod = {
             'startDate': get_now()
         }
         request.validated['auction'].awards.append(award)
@@ -112,6 +112,20 @@ class AwardManagerV3_1Adapter(BaseAwardManagerAdapter):
                     'body',
                     'data',
                     'Only bid owner may cancel award in current ({}) status'.format(current_award_status)
+                )
+                request.errors.status = 403
+                return
+
+        elif current_award_status == 'pendig.admission' and new_award_status == 'pending':
+            if check_document_existence(award, 'admissionProtocol'):
+                award.admissionPeriod.endDate = now
+                award.signingPeriod = award.verificationPeriod = {'startDate': now}
+            else:
+                request.errors.add(
+                    'body',
+                    'data',
+                    'Can\'t switch award status to (pending) before'
+                    ' auction owner load admission protocol'
                 )
                 request.errors.status = 403
                 return

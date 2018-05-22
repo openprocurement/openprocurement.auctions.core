@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from itertools import izip_longest
 from barbecue import chef
 
@@ -6,7 +7,6 @@ from openprocurement.api.utils import (
     get_now
 )
 
-from openprocurement.auctions.core.utils import get_related_contract_of_award
 from openprocurement.auctions.core.plugins.awarding.base.utils import (
     make_award,
     check_lots_awarding,
@@ -20,9 +20,7 @@ from openprocurement.auctions.core.plugins.awarding.base.utils import (
 from openprocurement.auctions.core.plugins.awarding.base.predicates import (
     awarded_predicate,
     awarded_and_lots_predicate,
-    contract_overdue_predicate,
-    protocol_overdue_predicate
-)
+    admission_overdue_predicate)
 
 
 def create_awards(request):
@@ -30,6 +28,8 @@ def create_awards(request):
         Function create NUMBER_OF_BIDS_TO_BE_QUALIFIED awards objects
         First award always in pending.verification status
         others in pending.waiting status
+        In case that only one bid was applied, award object
+        in pending.admission status will be created for that bid
     """
     auction = request.validated['auction']
     auction.status = 'active.qualification'
@@ -37,17 +37,27 @@ def create_awards(request):
     auction.awardPeriod = type(auction).awardPeriod({'startDate': now})
     awarding_type = request.content_configurator.awarding_type
     valid_bids = [bid for bid in auction.bids if bid['value'] is not None]
-    bids = chef(valid_bids, auction.features or [], [], True)
-    bids_to_qualify = get_bids_to_qualify(bids)
-    for bid, status in izip_longest(bids[:bids_to_qualify], ['pending'], fillvalue='pending.waiting'):
-        bid = bid.serialize()
-        award = make_award(request, auction, bid, status, now, parent=True)
+    if len(valid_bids) == 1:
+        bid = valid_bids[0].serialize()
+        award = make_award(request, auction, bid, 'pending.admission', now, parent=True)
         if bid['status'] == 'invalid':
             set_award_status_unsuccessful(award, now)
-        if award.status == 'pending':
-            award.signingPeriod = award.verificationPeriod = {'startDate': now}
+        if award.status == 'pending.admission':
+            award.admissionPeriod.startDate = {'startDate': now}
             add_award_route_url(request, auction, award, awarding_type)
         auction.awards.append(award)
+    else:
+        bids = chef(valid_bids, auction.features or [], [], True)
+        bids_to_qualify = get_bids_to_qualify(bids)
+        for bid, status in izip_longest(bids[:bids_to_qualify], ['pending'], fillvalue='pending.waiting'):
+            bid = bid.serialize()
+            award = make_award(request, auction, bid, status, now, parent=True)
+            if bid['status'] == 'invalid':
+                set_award_status_unsuccessful(award, now)
+            if award.status == 'pending':
+                award.signingPeriod = award.verificationPeriod = {'startDate': now}
+                add_award_route_url(request, auction, award, awarding_type)
+            auction.awards.append(award)
 
 
 def switch_to_next_award(request):
@@ -77,18 +87,17 @@ def next_check_awarding(auction):
         for award in auction.awards:
             if award.status == 'pending':
                 checks.append(award.verificationPeriod.endDate.astimezone(TZ))
+            elif award.status == 'pending.admission':
+                checks.append(award.admissionPeriod.endDate.astimezone(TZ))
     elif awarded_and_lots_predicate(auction):
         checks = check_lots_awarding(auction)
     return min(checks) if checks else None
 
 
 def check_award_status(request, award, now):
-    """Checking protocol and contract loading by the owner in time."""
+    """Checking admission protocol loading by the owner in time."""
     auction = request.validated['auction']
-    protocol_overdue = protocol_overdue_predicate(award, 'pending', now)
-    # seek for contract overdue
-    related_contract = get_related_contract_of_award(award['id'], auction)
-    contract_overdue = contract_overdue_predicate(related_contract,'pending', now) if related_contract else None
+    admission_protocol_overdue = admission_overdue_predicate(award, 'pending', now)
 
-    if protocol_overdue or contract_overdue:
+    if admission_protocol_overdue:
         set_unsuccessful_award(request, auction, award, now)
