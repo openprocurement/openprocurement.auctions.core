@@ -317,7 +317,7 @@ class dgfCDB2Document(dgfDocument):
         'illustration', 'auctionProtocol', 'x_dgfAssetFamiliarization',
         'x_presentation', 'x_nda'
     ])
-    
+
 
 class swiftsureDocument(dgfDocument):
     documentType = StringType(choices=[
@@ -332,8 +332,8 @@ class swiftsureDocument(dgfDocument):
         'qualificationDocuments', 'eligibilityDocuments', 'tenderNotice',
         'illustration', 'financialLicense', 'virtualDataRoom',
         'auctionProtocol', 'x_dgfPublicAssetCertificate',
-        'x_presentation', 'x_nda', 'x_dgfAssetFamiliarization',
-        'x_dgfPlatformLegalDetails', 'admissionProtocol'
+        'x_presentation', 'x_nda', 'x_dgfAssetFamiliarization', 'act',
+        'x_dgfPlatformLegalDetails', 'admissionProtocol', 'rejectionProtocol'
     ])
 
 

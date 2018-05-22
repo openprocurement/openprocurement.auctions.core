@@ -92,7 +92,7 @@ class AwardManagerV3_1Adapter(BaseAwardManagerAdapter):
         server_id = kwargs['server_id']
 
         now = get_now()
-        if current_award_status in ['unsuccessful', 'cancelled']:
+        if current_award_status in ['unsuccessful', 'cancelled', 'active']:
             request.errors.add(
                 'body',
                 'data',
@@ -159,27 +159,25 @@ class AwardManagerV3_1Adapter(BaseAwardManagerAdapter):
             }))
             auction.status = 'active.awarded'
             auction.awardPeriod.endDate = now
+
         elif current_award_status != 'pending.waiting' and new_award_status == 'unsuccessful':
-            if current_award_status == 'pending':
+            if not (check_document_existence(award, 'rejectionProtocol') or
+                    check_document_existence(award, 'act')):
+                request.errors.add(
+                    'body',
+                    'data',
+                    'Can\'t switch award status to (unsuccessful) before'
+                    ' auction owner load reject protocol or act'
+                )
+                request.errors.status = 403
+                return
+            if current_award_status == 'pending.admission':
+                award.admissionPeriod.endDate = now
+            elif current_award_status == 'pending':
                 award.verificationPeriod.endDate = now
-            elif current_award_status == 'active':
-                contract = None
-                for contract in auction.contracts:
-                    if contract.awardID == award.id:
-                        break
-                if getattr(contract, 'dateSigned', False):
-                    err_message = 'You cannot disqualify the bidder the contract for whom has already been downloaded.'
-                    request.errors.add('body', 'data', err_message)
-                    request.errors.status = 403
-                    return
-                award.signingPeriod.endDate = now
-                auction.awardPeriod.endDate = None
-                auction.status = 'active.qualification'
-                for i in auction.contracts:
-                    if i.awardID == award.id:
-                        i.status = 'cancelled'
             award.complaintPeriod.endDate = now
             request.content_configurator.back_to_awarding()
+
         elif current_award_status != new_award_status:
             request.errors.add(
                 'body',
