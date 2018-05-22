@@ -258,7 +258,7 @@ class dgfDocument(flashDocument):
             parents[0:0] = [root]
             root = root.__parent__
         request = root.request
-        if not request.registry.docservice_url:
+        if not request.registry.use_docservice:
             return url
         if 'status' in parents[0] and parents[0].status in type(parents[0])._options.roles:
             role = parents[0].status
