@@ -116,7 +116,7 @@ class AwardManagerV3_1Adapter(BaseAwardManagerAdapter):
                 request.errors.status = 403
                 return
 
-        elif current_award_status == 'pendig.admission' and new_award_status == 'pending':
+        elif current_award_status == 'pending.admission' and new_award_status == 'pending':
             if check_document_existence(award, 'admissionProtocol'):
                 award.admissionPeriod.endDate = now
                 award.signingPeriod = award.verificationPeriod = {'startDate': now}
