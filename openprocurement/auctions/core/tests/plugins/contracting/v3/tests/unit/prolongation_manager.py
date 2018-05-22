@@ -3,12 +3,10 @@ import os
 from uuid import uuid4
 from datetime import datetime, timedelta
 from schematics.exceptions import ValidationError
-from zope.interface import implementer
 
 from openprocurement.api.models.common import Period
 from openprocurement.api.utils import calculate_business_date
 
-from openprocurement.auctions.core.models import IAuction
 from openprocurement.auctions.core.tests.base import BaseWebTest
 from openprocurement.auctions.core.plugins.contracting.v3.models import (
     Contract,
@@ -24,6 +22,7 @@ from openprocurement.auctions.core.plugins.contracting.v3.constants import (
     PROLONGATION_DATE_PUBLISHED_LIMIT_PERIOD,
     CONTRACT_SIGNING_PERIOD_END_DATE_HOUR
 )
+from openprocurement.auctions.core.tests.fixtures.auction import fixture_auction
 
 contract_data = {'awardID': uuid4().hex}
 
@@ -47,27 +46,9 @@ class TestContractingV3ProlongationManager(BaseWebTest):
         prolongation_doc = ProlongationDocument(doc_data)
         return prolongation_doc
 
-    def fixture_auction(self):
-        @implementer(IAuction)
-        class MockAuction(object):
-            """Auction mock for sandbox mode compatibility
-            """
-            def __init__(self):
-                if os.environ.get('SANDBOX_MODE'):
-                    self.procurementMethodDetails = 'quick, accelerator=1440'
-
-            def __contains__(self, item):
-                if item in dir(self):
-                    return True
-
-            def __getitem__(self, key):
-                return getattr(self, key, None)
-
-        return MockAuction()
-
     def fixture_created(self):
         contract = Contract(contract_data)
-        contract.__parent__ = self.fixture_auction()
+        contract.__parent__ = fixture_auction()
         contract.signingPeriod = Period({
             'startDate': '2000-01-01T10:00:00+02:00',
             'endDate': '2000-01-10T10:00:00+02:00'
