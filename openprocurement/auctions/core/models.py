@@ -317,6 +317,24 @@ class dgfCDB2Document(dgfDocument):
         'illustration', 'auctionProtocol', 'x_dgfAssetFamiliarization',
         'x_presentation', 'x_nda'
     ])
+    
+
+class swiftsureDocument(dgfDocument):
+    documentType = StringType(choices=[
+        'auctionNotice', 'awardNotice', 'contractNotice',
+        'notice', 'biddingDocuments', 'technicalSpecifications',
+        'evaluationCriteria', 'clarifications', 'shortlistedFirms',
+        'riskProvisions', 'billOfQuantity', 'bidders', 'conflictOfInterest',
+        'debarments', 'evaluationReports', 'winningBid', 'complaints',
+        'contractSigned', 'contractArrangements', 'contractSchedule',
+        'contractAnnexe', 'contractGuarantees', 'subContract',
+        'eligibilityCriteria', 'contractProforma', 'commercialProposal',
+        'qualificationDocuments', 'eligibilityDocuments', 'tenderNotice',
+        'illustration', 'financialLicense', 'virtualDataRoom',
+        'auctionProtocol', 'x_dgfPublicAssetCertificate',
+        'x_presentation', 'x_nda', 'x_dgfAssetFamiliarization',
+        'x_dgfPlatformLegalDetails', 'admissionProtocol'
+    ])
 
 
 class flashComplaint(Model):

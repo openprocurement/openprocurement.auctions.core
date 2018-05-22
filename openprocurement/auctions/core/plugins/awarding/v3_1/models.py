@@ -13,7 +13,7 @@ from openprocurement.api.utils import calculate_business_date
 
 from openprocurement.auctions.core.models import (
     get_auction,
-    dgfDocument as Document,
+    swiftsureDocument as Document,
     dgfComplaint as Complaint,
     dgfItem as Item,
     dgfOrganization as Organization,
