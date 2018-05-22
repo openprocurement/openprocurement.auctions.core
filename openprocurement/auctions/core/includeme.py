@@ -8,7 +8,7 @@ from openprocurement.api.interfaces import (
     IContentConfigurator,
     IAwardingNextCheck
 )
-from openprocurement.api.utils import get_content_configurator
+from openprocurement.api.utils import (get_content_configurator)
 
 from openprocurement.auctions.core.adapters import (
     AuctionConfigurator,
@@ -29,6 +29,7 @@ from openprocurement.auctions.core.utils import (
     SubscribersPicker
 )
 from openprocurement.api.app import get_evenly_plugins
+from openprocurement.api.utils import get_plugin_aliases
 
 LOGGER = logging.getLogger(__name__)
 
@@ -69,4 +70,12 @@ def includeme(config, plugin_map):
     config.add_request_method(get_content_configurator, 'content_configurator', reify=True)
     LOGGER.info("Included openprocurement.auctions.core plugin",
                 extra={'MESSAGE_ID': 'included_plugin'})
+
+    # Aliases information
+    LOGGER.info('Start aliases')
+    aliases = get_plugin_aliases(plugin_map)
+    for alias in aliases:
+        LOGGER.info(alias)
+    LOGGER.info('End aliases')
+
     get_evenly_plugins(config, plugin_map['plugins'], 'openprocurement.auctions.core.plugins')
