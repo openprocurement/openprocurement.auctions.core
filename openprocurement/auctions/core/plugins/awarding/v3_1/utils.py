@@ -97,7 +97,7 @@ def next_check_awarding(auction):
 def check_award_status(request, award, now):
     """Checking admission protocol loading by the owner in time."""
     auction = request.validated['auction']
-    admission_protocol_overdue = admission_overdue_predicate(award, 'pending', now)
+    admission_protocol_overdue = admission_overdue_predicate(award, 'pending.admission', now)
 
     if admission_protocol_overdue:
         set_unsuccessful_award(request, auction, award, now)
