@@ -50,7 +50,7 @@ def validate_auction_data(request, **kwargs):
     model = request.auction_from_data(data, create=False)
     if not request.check_accreditation(model.create_accreditation):
         request.errors.add(
-            'procurementMethodType',
+            'body',
             'accreditation',
             'Broker Accreditation level does not permit auction creation'
         )
@@ -59,7 +59,7 @@ def validate_auction_data(request, **kwargs):
     data = validate_data(request, model, "auction", data=data)
     if data and data.get('mode', None) is None and request.check_accreditation('t'):
         request.errors.add(
-            'procurementMethodType',
+            'body',
             'mode',
             'Broker Accreditation level does not permit auction creation'
         )
