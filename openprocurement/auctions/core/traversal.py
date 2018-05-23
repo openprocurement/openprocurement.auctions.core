@@ -32,6 +32,7 @@ class Root(object):
         (Allow, 'g:chronograph', 'edit_auction'),
         (Allow, 'g:chronograph', 'edit_tender'),
         (Allow, 'g:convoy', 'edit_auction'),
+        (Allow, 'g:concierge', 'create_auction'),
         (Allow, 'g:Administrator', 'edit_auction'),
         (Allow, 'g:Administrator', 'edit_tender'),
         (Allow, 'g:Administrator', 'edit_auction_award'),
