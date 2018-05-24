@@ -21,10 +21,10 @@ from openprocurement.auctions.core.validation import (
 
 
 @opresource(
-    name='awarding_3_0:Auction Award Complaints',
+    name='awarding_3_1:Auction Award Complaints',
     collection_path='/auctions/{auction_id}/awards/{award_id}/complaints',
     path='/auctions/{auction_id}/awards/{award_id}/complaints/{complaint_id}',
-    awardingType='awarding_3_0',
+    awardingType='awarding_3_1',
     description="Auction award complaints"
 )
 class AuctionAwardComplaintResource(APIResource):

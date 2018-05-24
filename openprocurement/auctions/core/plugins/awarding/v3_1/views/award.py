@@ -17,10 +17,10 @@ from openprocurement.auctions.core.plugins.awarding.base.interfaces import (
 
 
 @opresource(
-    name='awarding_3_0:Auction Awards',
+    name='awarding_3_1:Auction Awards',
     collection_path='/auctions/{auction_id}/awards',
     path='/auctions/{auction_id}/awards/{award_id}',
-    awardingType='awarding_3_0',
+    awardingType='awarding_3_1',
     description="Auction awards"
 )
 class AuctionAwardResource(APIResource):

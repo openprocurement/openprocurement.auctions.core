@@ -9,7 +9,7 @@ def includeme(config):
     from .interfaces import IAwardV3_1
     config.registry.registerAdapter(
         AwardManagerV3_1Adapter,
-        (IAwardV3_1,),
+        (IAwardV3_1, ),
         IAwardManagerAdapter
     )
     config.scan("openprocurement.auctions.core.plugins.awarding.v3_1.views")

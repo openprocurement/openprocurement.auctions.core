@@ -65,7 +65,7 @@ class AwardingNextCheckV3_1(AuctionAwardingNextCheckAdapter):
 
 class AwardManagerV3_1Adapter(BaseAwardManagerAdapter):
 
-    name = 'Awarding-v3_1 manager'
+    name = 'Award v-3_1 adapter'
 
     create_validators = (
         validate_award_data_post_common,

@@ -6,6 +6,7 @@ from schematics.transforms import (
 from schematics.types import StringType
 from schematics.types.compound import ModelType
 from schematics.types.serializable import serializable
+from zope.interface import implementer
 
 from openprocurement.api.models.common import Period
 from openprocurement.api.models.schematics_extender import ListType
@@ -22,16 +23,18 @@ from openprocurement.auctions.core.models import (
 from openprocurement.auctions.core.plugins.awarding.base.constants import (
     CONTRACT_SIGNING_TIME,
 )
-from openprocurement.auctions.core.plugins.awarding.v3_1.constants import (
+from openprocurement.auctions.core.validation import (
+    validate_disallow_dgfPlatformLegalDetails
+)
+from .constants import (
     VERIFY_ADMISSION_PROTOCOL_TIME,
     AWARDING_PERIODS_END_DATE_HOUR,
     VERIFY_AUCTION_PROTOCOL_TIME,
 )
-from openprocurement.auctions.core.validation import (
-    validate_disallow_dgfPlatformLegalDetails
-)
+from .interfaces import IAwardV3_1
 
 
+@implementer(IAwardV3_1)
 class Award(BaseAward):
     """
         Award model for Awarding 3.1 procedure

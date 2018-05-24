@@ -26,10 +26,10 @@ from openprocurement.auctions.core.validation import (
 
 
 @opresource(
-    name='awarding_3_0:Auction Award Documents',
+    name='awarding_3_1:Auction Award Documents',
     collection_path='/auctions/{auction_id}/awards/{award_id}/documents',
     path='/auctions/{auction_id}/awards/{award_id}/documents/{document_id}',
-    awardingType='awarding_3_0',
+    awardingType='awarding_3_1',
     description="Auction award documents"
 )
 class AuctionAwardDocumentResource(APIResource):
