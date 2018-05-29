@@ -2,10 +2,14 @@ from setuptools import setup, find_packages
 import os
 
 version = '1.0.3'
+auction_core = 'openprocurement.auctions.core.includeme:includeme'
+auction_transferring = 'openprocurement.auctions.core.plugins.transferring.includeme:includeme'
 
 entry_points = {
     'openprocurement.api.plugins': [
-        'auctions.core = openprocurement.auctions.core.includeme:includeme'
+        'auctions.core = {}'.format(auction_core),
+        'auctions.transferring = {}'.format(auction_transferring)
+
     ],
     'openprocurement.tests': [
         'auctions.core = openprocurement.auctions.core.tests.main:suite'

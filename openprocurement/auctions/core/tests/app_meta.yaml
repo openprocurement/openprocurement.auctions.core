@@ -3,6 +3,7 @@ plugins:
   api:
     plugins:
       auctions.core:
+      auctions.transferring:
 
 config:
   auth:
