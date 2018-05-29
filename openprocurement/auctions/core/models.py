@@ -25,6 +25,7 @@ from schematics.types import (
     FloatType,
     BaseType
 )
+
 from schematics.types.compound import DictType
 from schematics.types.serializable import serializable
 from schematics_flexible.schematics_flexible import FlexibleModelType
@@ -62,6 +63,7 @@ from openprocurement.api.models.common import (
     Guarantee,
     PeriodEndRequired as AuctionPeriodEndRequired,
     Revision,
+    BaseResourceItem,
     BankAccount,  # noqa forwarded import
     AuctionParameters,  # noqa forwarded import
 )
@@ -727,7 +729,14 @@ class Lot(Model):
 
 
 plain_role = (blacklist('_attachments', 'revisions', 'dateModified') + schematics_embedded_role)
-create_role = (blacklist('owner', '_attachments', 'revisions', 'date', 'dateModified', 'doc_id', 'auctionID', 'bids', 'documents', 'awards', 'questions', 'complaints', 'auctionUrl', 'status', 'auctionPeriod', 'awardPeriod', 'procurementMethod', 'awardCriteria', 'submissionMethod', 'cancellations', 'numberOfBidders', 'contracts') + auction_embedded_role)
+
+create_role = (blacklist('owner', '_attachments', 'revisions', 'date', 'dateModified',
+                         'doc_id', 'auctionID', 'bids', 'documents', 'awards',
+                         'questions', 'complaints', 'auctionUrl', 'status',
+                         'auctionPeriod', 'awardPeriod', 'procurementMethod',
+                         'awardCriteria', 'submissionMethod', 'cancellations',
+                         'numberOfBidders', 'contracts') + auction_embedded_role)
+
 draft_role = whitelist('status')
 edit_role = (blacklist('status', 'procurementMethodType', 'lots', 'owner', '_attachments', 'revisions', 'date', 'dateModified', 'doc_id', 'auctionID', 'bids', 'documents', 'awards', 'questions', 'complaints', 'auctionUrl', 'auctionPeriod', 'awardPeriod', 'procurementMethod', 'awardCriteria', 'submissionMethod', 'mode', 'cancellations', 'numberOfBidders', 'contracts') + auction_embedded_role)
 view_role = (blacklist('_attachments', 'revisions') + auction_embedded_role)
@@ -756,7 +765,7 @@ class ProcuringEntity(dgfOrganization):
     kind = StringType(choices=['general', 'special', 'defense', 'other'])
 
 
-flash_auction_roles = {
+auction_roles = {
         'plain': plain_role,
         'create': create_role,
         'edit': edit_role,
@@ -948,10 +957,10 @@ class AuctionAuctionPeriod(Period):
         return rounding_shouldStartAfter(start_after, auction).isoformat()
 
 
-class Auction(SchematicsDocument, Model):
+class Auction(BaseResourceItem):
     """Data regarding auction process - publicly inviting prospective contractors to submit bids for evaluation and selecting a winner or winners."""
     class Options:
-        roles = flash_auction_roles
+        roles = auction_roles
 
     def __local_roles__(self):
         roles = dict([('{}_{}'.format(self.owner, self.owner_token), 'auction_owner')])
@@ -1020,8 +1029,6 @@ class Auction(SchematicsDocument, Model):
 
     _attachments = DictType(DictType(BaseType), default=dict())  # couchdb attachments
     dateModified = IsoDateTimeType()
-    owner_token = StringType()
-    owner = StringType()
 
     procurementMethodType = StringType()
 
