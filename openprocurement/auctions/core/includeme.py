@@ -75,7 +75,7 @@ def includeme(config, plugin_map):
 
     # Aliases information
     LOGGER.info('Start aliases')
-    aliases = get_plugin_aliases(plugin_map.get('plugins', {}))
+    aliases = get_plugin_aliases(plugin_map)
     for alias in aliases:
         LOGGER.info(alias)
     LOGGER.info('End aliases')
