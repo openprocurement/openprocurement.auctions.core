@@ -1,12 +1,15 @@
+# -*- coding: utf-8 -*-
 from schematics.exceptions import ValidationError
 
 from openprocurement.api.utils import calculate_business_date
 
 from openprocurement.auctions.core.models import get_auction
+from openprocurement.auctions.core.utils import set_specific_hour
 from openprocurement.auctions.core.plugins.contracting.v3.constants import (
     PROLONGATION_SHORT_PERIOD,
     PROLONGATION_LONG_PERIOD,
     PROLONGATION_DATE_PUBLISHED_LIMIT_PERIOD,
+    CONTRACT_SIGNING_PERIOD_END_DATE_HOUR
 )
 
 
@@ -33,12 +36,13 @@ class ProlongationManager(object):
         prolongation_period = (
             PROLONGATION_LONG_PERIOD if applied_prolongations_count else PROLONGATION_SHORT_PERIOD
         )
-        contract.signingPeriod.endDate = calculate_business_date(
+        end_date = calculate_business_date(
             contract.signingPeriod.startDate,
             prolongation_period,
             context=auction,
             working_days=True
         )
+        contract.signingPeriod.endDate = set_specific_hour(end_date, CONTRACT_SIGNING_PERIOD_END_DATE_HOUR)
 
     def _check_documents_are_present(self):
         if len(self.prolongation.documents) == 0:

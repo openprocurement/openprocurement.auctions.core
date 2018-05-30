@@ -462,3 +462,14 @@ def rounding_shouldStartAfter_after_midnigth(start_after, auction, use_from=date
         if start_after >= midnigth:
             start_after = midnigth + timedelta(1)
     return start_after
+
+
+def set_specific_hour(date_time, hour):
+    """Reset datetime's time to {hour}:00:00, while saving timezone data
+
+    Example:
+        2018-1-1T14:12:55+02:00 -> 2018-1-1T02:00:00+02:00, for hour=2
+        2018-1-1T14:12:55+02:00 -> 2018-1-1T18:00:00+02:00, for hour=18
+    """
+
+    return datetime.combine(date_time.date(), time(hour % 24, tzinfo=date_time.tzinfo))

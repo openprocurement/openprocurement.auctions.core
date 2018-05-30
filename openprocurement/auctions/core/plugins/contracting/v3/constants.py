@@ -8,3 +8,5 @@ PROLONGATION_LONG_PERIOD = timedelta(days=132)
 # Period, that limits time period between `datePublished` of
 # Prolongation and it's actual creation time `dateCreated`
 PROLONGATION_DATE_PUBLISHED_LIMIT_PERIOD = timedelta(days=20)
+
+CONTRACT_SIGNING_PERIOD_END_DATE_HOUR = 18
