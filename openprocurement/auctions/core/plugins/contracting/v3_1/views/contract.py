@@ -9,8 +9,11 @@ from openprocurement.auctions.core.utils import (
     apply_patch,
     save_auction,
     opresource,
+    get_related_award_of_contract
 )
-from openprocurement.auctions.core.plugins.contracting.base.utils import check_auction_status
+from openprocurement.auctions.core.plugins.contracting.base.utils import (
+    check_auction_status, check_document_existence
+)
 from openprocurement.auctions.core.validation import (
     validate_contract_data,
     validate_patch_contract_data,
@@ -63,6 +66,7 @@ class AuctionAwardContractResource(APIResource):
         """
         auction = self.request.validated['auction']
         data = self.request.validated['data']
+        now = get_now()
 
         if data['value']:
             for ro_attr in ('valueAddedTaxIncluded', 'currency'):
@@ -77,10 +81,33 @@ class AuctionAwardContractResource(APIResource):
                 self.request.errors.status = 403
                 return
 
-        if self.request.context.status != 'active' and 'status' in data and data['status'] == 'active':
+        if self.request.context.status == 'pending' and 'status' in data and data['status'] == 'cancelled':
+            if not (check_document_existence(self.request.context, 'rejectionProtocol') or
+                    check_document_existence(self.request.context, 'act')):
+                self.request.errors.add(
+                    'body',
+                    'data',
+                    'Can\'t switch contract status to (cancelled) before'
+                    ' auction owner load reject protocol or act'
+                )
+                self.request.errors.status = 403
+                return
+            if check_document_existence(self.request.context, 'contractSigned'):
+                self.request.errors.add('body', 'data', 'Bidder contract for whom has already been uploaded cannot be disqualified.')
+                self.request.errors.status = 403
+                return
+            award = get_related_award_of_contract(self.request.context, auction)
+            award.signingPeriod.endDate = now
+            award.complaintPeriod.endDate = now
+            award.status = 'unsuccessful'
+            auction.awardPeriod.endDate = None
+            auction.status = 'active.qualification'
+            self.request.content_configurator.back_to_awarding()
+
+        if self.request.context.status == 'pending' and 'status' in data and data['status'] == 'active':
             award = [a for a in auction.awards if a.id == self.request.context.awardID][0]
             stand_still_end = award.complaintPeriod.endDate
-            if stand_still_end > get_now():
+            if stand_still_end > now:
                 self.request.errors.add('body', 'data', 'Can\'t sign contract before stand-still period end ({})'.format(stand_still_end.isoformat()))
                 self.request.errors.status = 403
                 return
@@ -99,14 +126,20 @@ class AuctionAwardContractResource(APIResource):
                 self.request.errors.add('body', 'data', 'Can\'t sign contract before reviewing all complaints')
                 self.request.errors.status = 403
                 return
+            if not check_document_existence(self.request.context, 'contractSigned'):
+                self.request.errors.add('body', 'data', 'Can\'t sign contract without contractSigned document')
+                self.request.errors.status = 403
+                return
+            if not self.request.context.dateSigned:
+                self.request.errors.add('body', 'data', 'Can\'t sign contract without specified dateSigned field')
+                self.request.errors.status = 403
+                return
         current_contract_status = self.request.context.status
         apply_patch(self.request, save=False, src=self.request.context.serialize())
-        if current_contract_status != self.request.context.status and (current_contract_status != 'pending' or self.request.context.status != 'active'):
+        if current_contract_status != self.request.context.status and (current_contract_status == 'cancelled' or self.request.context.status == 'pending'):
             self.request.errors.add('body', 'data', 'Can\'t update contract status')
             self.request.errors.status = 403
             return
-        if self.request.context.status == 'active' and not self.request.context.dateSigned:
-            self.request.context.dateSigned = get_now()
         check_auction_status(self.request)
         if save_auction(self.request):
             self.LOGGER.info('Updated auction contract {}'.format(self.request.context.id),
