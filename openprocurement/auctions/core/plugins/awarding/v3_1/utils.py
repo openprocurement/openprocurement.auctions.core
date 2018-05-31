@@ -43,7 +43,7 @@ def create_awards(request):
         if bid['status'] == 'invalid':
             set_award_status_unsuccessful(award, now)
         if award.status == 'pending.admission':
-            award.admissionPeriod.startDate = {'startDate': now}
+            award.admissionPeriod = {'startDate': now}
             add_award_route_url(request, auction, award, awarding_type)
         auction.awards.append(award)
     else:

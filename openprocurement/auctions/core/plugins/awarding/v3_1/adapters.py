@@ -15,6 +15,7 @@ from openprocurement.auctions.core.plugins.awarding.base.adapters import (
 )
 from openprocurement.api.utils import (
     get_now,
+    error_handler
 )
 from openprocurement.auctions.core.utils import (
     apply_patch,
@@ -99,7 +100,7 @@ class AwardManagerV3_1Adapter(BaseAwardManagerAdapter):
                 'Can\'t update award in current ({}) status'.format(current_award_status)
             )
             request.errors.status = 403
-            return
+            raise error_handler(request)
 
         apply_patch(request, save=False, src=request.context.serialize())
         new_award_status = award.status
@@ -114,7 +115,7 @@ class AwardManagerV3_1Adapter(BaseAwardManagerAdapter):
                     'Only bid owner may cancel award in current ({}) status'.format(current_award_status)
                 )
                 request.errors.status = 403
-                return
+                raise error_handler(request)
 
         elif current_award_status == 'pending.admission' and new_award_status == 'pending':
             if check_document_existence(award, 'admissionProtocol'):
@@ -128,7 +129,7 @@ class AwardManagerV3_1Adapter(BaseAwardManagerAdapter):
                     ' auction owner load admission protocol'
                 )
                 request.errors.status = 403
-                return
+                raise error_handler(request)
 
         elif current_award_status == 'pending' and new_award_status == 'active':
             if check_document_existence(award, 'auctionProtocol'):
@@ -141,7 +142,7 @@ class AwardManagerV3_1Adapter(BaseAwardManagerAdapter):
                     ' auction owner load auction protocol'
                 )
                 request.errors.status = 403
-                return
+                raise error_handler(request)
 
             award.complaintPeriod.endDate = now
             auction.contracts.append(type(auction).contracts.model_class({
@@ -170,7 +171,7 @@ class AwardManagerV3_1Adapter(BaseAwardManagerAdapter):
                     ' auction owner load reject protocol or act'
                 )
                 request.errors.status = 403
-                return
+                raise error_handler(request)
             if current_award_status == 'pending.admission':
                 award.admissionPeriod.endDate = now
             elif current_award_status == 'pending':
@@ -188,4 +189,4 @@ class AwardManagerV3_1Adapter(BaseAwardManagerAdapter):
                 )
             )
             request.errors.status = 403
-            return
+            raise error_handler(request)
