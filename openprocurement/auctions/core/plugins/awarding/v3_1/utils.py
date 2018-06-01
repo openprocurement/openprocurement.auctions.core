@@ -4,7 +4,8 @@ from barbecue import chef
 
 from openprocurement.api.constants import TZ
 from openprocurement.api.utils import (
-    get_now
+    get_now,
+    calculate_business_date
 )
 
 from openprocurement.auctions.core.plugins.awarding.base.utils import (
@@ -17,10 +18,15 @@ from openprocurement.auctions.core.plugins.awarding.base.utils import (
     get_bids_to_qualify
 )
 
+from openprocurement.auctions.core.plugins.awarding.v3_1.constants import (
+    AWARDING_PERIODS_END_DATE_HOUR,
+    VERIFY_ADMISSION_PROTOCOL_TIME
+)
 from openprocurement.auctions.core.plugins.awarding.base.predicates import (
     awarded_predicate,
     awarded_and_lots_predicate,
-    admission_overdue_predicate)
+    admission_overdue_predicate
+)
 
 
 def create_awards(request):
@@ -43,7 +49,13 @@ def create_awards(request):
         if bid['status'] == 'invalid':
             set_award_status_unsuccessful(award, now)
         if award.status == 'pending.admission':
-            award.admissionPeriod = {'startDate': now}
+            award.admissionPeriod = {
+                'startDate': now,
+                'endDate': calculate_business_date(
+                    now, VERIFY_ADMISSION_PROTOCOL_TIME, auction,
+                    True, AWARDING_PERIODS_END_DATE_HOUR
+                )
+            }
             add_award_route_url(request, auction, award, awarding_type)
         auction.awards.append(award)
     else:

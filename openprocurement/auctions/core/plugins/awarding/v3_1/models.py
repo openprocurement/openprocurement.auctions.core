@@ -25,7 +25,6 @@ from openprocurement.auctions.core.validation import (
 )
 from .constants import (
     CONTRACT_SIGNING_TIME,
-    VERIFY_ADMISSION_PROTOCOL_TIME,
     AWARDING_PERIODS_END_DATE_HOUR,
     VERIFY_AUCTION_PROTOCOL_TIME,
 )
@@ -89,17 +88,5 @@ class Award(BaseAward):
             auction = get_auction(self)
             period.endDate = calculate_business_date(
                 period.startDate, CONTRACT_SIGNING_TIME, auction, True, AWARDING_PERIODS_END_DATE_HOUR
-            )
-        return period.to_primitive()
-
-    @serializable(serialized_name="admissionPeriod", serialize_when_none=False)
-    def award_admissionPeriod(self):
-        period = self.admissionPeriod
-        if not period:
-            return
-        if not period.endDate:
-            auction = get_auction(self)
-            period.endDate = calculate_business_date(
-                period.startDate, VERIFY_ADMISSION_PROTOCOL_TIME, auction, True, AWARDING_PERIODS_END_DATE_HOUR
             )
         return period.to_primitive()
