@@ -30,3 +30,10 @@ def protocol_overdue_predicate(award, need_status, now):
         award.status == need_status
         and award['verificationPeriod']['endDate'] < now
     )
+
+
+def admission_overdue_predicate(award, need_status, now):
+    return (
+        award.status == need_status
+        and award['admissionPeriod']['endDate'] < now
+    )

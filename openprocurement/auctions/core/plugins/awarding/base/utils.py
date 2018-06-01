@@ -4,11 +4,12 @@ from openprocurement.auctions.core.plugins.awarding.base.constants import (
     NUMBER_OF_BIDS_TO_BE_QUALIFIED
 )
 
-def check_auction_protocol(award):
+
+def check_document_existence(award, document_type):
     if award.documents:
         for document in award.documents:
             if (
-                document['documentType'] == 'auctionProtocol'
+                document['documentType'] == document_type
                 and document['author'] == 'auction_owner'
             ):
                 return True
@@ -82,8 +83,8 @@ def check_lots_awarding(auction):
 
 
 def set_auction_status_unsuccessful(auction, now):
-        auction.awardPeriod.endDate = now
-        auction.status = 'unsuccessful'
+    auction.awardPeriod.endDate = now
+    auction.status = 'unsuccessful'
 
 
 def set_award_status_unsuccessful(award, now):

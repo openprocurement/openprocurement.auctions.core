@@ -34,3 +34,11 @@ def check_auction_status(request):
             extra=context_unpack(request, {'MESSAGE_ID': 'switched_auction_complete'})
         )
         auction.status = 'complete'
+
+
+def check_document_existence(contract, document_type):
+    if contract.documents:
+        for document in contract.documents:
+            if document['documentType'] == document_type:
+                return True
+    return False
