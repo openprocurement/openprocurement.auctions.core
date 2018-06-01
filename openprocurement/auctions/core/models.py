@@ -25,6 +25,7 @@ from schematics.types import (
     FloatType,
     BaseType
 )
+
 from schematics.types.compound import DictType
 from schematics.types.serializable import serializable
 from schematics_flexible.schematics_flexible import FlexibleModelType
@@ -62,6 +63,8 @@ from openprocurement.api.models.common import (
     Guarantee,
     PeriodEndRequired as AuctionPeriodEndRequired,
     Revision,
+    BaseResourceItem,
+    sensitive_embedded_role,
     BankAccount,  # noqa forwarded import
     AuctionParameters,  # noqa forwarded import
 )
@@ -88,7 +91,7 @@ from openprocurement.auctions.core.validation import (
 )
 
 view_complaint_role = (blacklist('owner_token', 'owner') + schematics_default_role)
-auction_embedded_role = (blacklist('owner_token', 'transfer_token') + schematics_embedded_role)
+auction_embedded_role = sensitive_embedded_role
 
 
 deprecated('IAuction', 'IAuction moved to interfaces.py')
@@ -727,7 +730,14 @@ class Lot(Model):
 
 
 plain_role = (blacklist('_attachments', 'revisions', 'dateModified') + schematics_embedded_role)
-create_role = (blacklist('owner', '_attachments', 'revisions', 'date', 'dateModified', 'doc_id', 'auctionID', 'bids', 'documents', 'awards', 'questions', 'complaints', 'auctionUrl', 'status', 'auctionPeriod', 'awardPeriod', 'procurementMethod', 'awardCriteria', 'submissionMethod', 'cancellations', 'numberOfBidders', 'contracts') + auction_embedded_role)
+
+create_role = (blacklist('owner', '_attachments', 'revisions', 'date', 'dateModified',
+                         'doc_id', 'auctionID', 'bids', 'documents', 'awards',
+                         'questions', 'complaints', 'auctionUrl', 'status',
+                         'auctionPeriod', 'awardPeriod', 'procurementMethod',
+                         'awardCriteria', 'submissionMethod', 'cancellations',
+                         'numberOfBidders', 'contracts') + auction_embedded_role)
+
 draft_role = whitelist('status')
 edit_role = (blacklist('status', 'procurementMethodType', 'lots', 'owner', '_attachments', 'revisions', 'date', 'dateModified', 'doc_id', 'auctionID', 'bids', 'documents', 'awards', 'questions', 'complaints', 'auctionUrl', 'auctionPeriod', 'awardPeriod', 'procurementMethod', 'awardCriteria', 'submissionMethod', 'mode', 'cancellations', 'numberOfBidders', 'contracts') + auction_embedded_role)
 view_role = (blacklist('_attachments', 'revisions') + auction_embedded_role)
@@ -756,7 +766,7 @@ class ProcuringEntity(dgfOrganization):
     kind = StringType(choices=['general', 'special', 'defense', 'other'])
 
 
-flash_auction_roles = {
+auction_roles = {
         'plain': plain_role,
         'create': create_role,
         'edit': edit_role,
@@ -948,10 +958,10 @@ class AuctionAuctionPeriod(Period):
         return rounding_shouldStartAfter(start_after, auction).isoformat()
 
 
-class Auction(SchematicsDocument, Model):
+class Auction(BaseResourceItem):
     """Data regarding auction process - publicly inviting prospective contractors to submit bids for evaluation and selecting a winner or winners."""
     class Options:
-        roles = flash_auction_roles
+        roles = auction_roles
 
     def __local_roles__(self):
         roles = dict([('{}_{}'.format(self.owner, self.owner_token), 'auction_owner')])
@@ -1002,7 +1012,6 @@ class Auction(SchematicsDocument, Model):
                     default=list())  # A list of all the companies who entered submissions for the auction.
     procuringEntity = ModelType(ProcuringEntity,
                                 required=True)  # The entity managing the procurement, which may be different from the buyer who is paying / using the items being procured.
-    revisions = ListType(ModelType(Revision), default=list())
     auctionPeriod = ModelType(AuctionAuctionPeriod, default={})
 
     minimalStep = ModelType(Value, required=True)
@@ -1011,17 +1020,11 @@ class Auction(SchematicsDocument, Model):
                  'active.awarded', 'complete', 'cancelled', 'unsuccessful'], default='active.enquiries')
     questions = ListType(ModelType(Question), default=list())
     auctionUrl = URLType()
-    mode = StringType(choices=['test'])
     features = ListType(ModelType(Feature), validators=[validate_features_uniq])
     lots = ListType(ModelType(Lot), default=list(), validators=[validate_lots_uniq])
     guarantee = ModelType(Guarantee)
     if SANDBOX_MODE:
         procurementMethodDetails = StringType()
-
-    _attachments = DictType(DictType(BaseType), default=dict())  # couchdb attachments
-    dateModified = IsoDateTimeType()
-    owner_token = StringType()
-    owner = StringType()
 
     procurementMethodType = StringType()
 

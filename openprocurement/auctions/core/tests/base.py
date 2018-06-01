@@ -166,8 +166,10 @@ class BaseWebTest(unittest.TestCase):
         self.app.app.registry.db = db
         self.db = self.app.app.registry.db
         self.db_name = self.db.name
-        self.app.authorization = ('Basic', ('token', ''))
-        #self.app.authorization = ('Basic', ('broker', ''))
+        if hasattr(self, 'initial_auth'):
+            self.app.authorization = self.initial_auth
+        else:
+            self.app.authorization = ('Basic', ('token', ''))
 
     def tearDown(self):
         self.couchdb_server.delete(self.db_name)
@@ -374,6 +376,64 @@ class BaseAuctionWebTest(BaseWebTest):
         if self.docservice:
             self.setUpDS()
 
+
+    def set_auction_mode(self, auction_id, mode):
+        current_auth = self.app.authorization
+
+        self.app.authorization = ('Basic', ('administrator', ''))
+        response = self.app.patch_json('/auctions/{}'.format(auction_id),
+                                       {'data': {'mode': mode}})
+        self.app.authorization = current_auth
+        return response
+
+    def use_transfer(self, transfer, auction_id, origin_transfer):
+        req_data = {"data": {"id": transfer['data']['id'],
+                             'transfer': origin_transfer}}
+
+        self.app.post_json('/auctions/{}/ownership'.format(auction_id), req_data)
+        response = self.app.get('/transfers/{}'.format(transfer['data']['id']))
+        return response.json
+
+    def create_transfer(self):
+        test_transfer_data = {}
+        response = self.app.post_json('/transfers', {"data": test_transfer_data})
+        return response.json
+
+    def get_auction(self, auction_id):
+        response = self.app.get('/auctions/{}'.format(auction_id))
+        return response.json
+
+    @staticmethod
+    def add_lots_to_auction(auction, need_lots=None):
+        lots = []
+        for i in need_lots:
+            lot = deepcopy(i)
+            lot['id'] = uuid4().hex
+            lots.append(lot)
+        auction['lots']  = lots
+        for i, item in enumerate(auction['items']):
+            item['relatedLot'] = lots[i % len(lots)]['id']
+
+
+    def create_auction_unit(self, auth=None, data=None, lots=None):
+        auth_switch = False
+
+        if auth:
+            current_auth = self.app.authorization
+            self.app.authorization = auth
+            auth_switch = True
+        if not data:
+            data = deepcopy(self.initial_data)
+        if lots:
+            add_lots_to_auction(data, lots)
+        elif self.initial_lots:
+            add_lots_to_auction(data, self.initial_lots)
+        response = self.app.post_json('/auctions', {'data': data})
+        auction = response.json
+        if auth_switch:
+            self.app.authorization = current_auth
+        return auction
+
     def create_auction(self):
         data = deepcopy(self.initial_data)
         if self.initial_lots:
@@ -388,6 +448,7 @@ class BaseAuctionWebTest(BaseWebTest):
         response = self.app.post_json('/auctions', {'data': data})
         auction = response.json['data']
         self.auction_token = response.json['access']['token']
+        self.auction_transfer = response.json['access']['transfer']
         self.auction_id = auction['id']
         status = auction['status']
         if self.initial_bids:
