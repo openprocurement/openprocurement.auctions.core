@@ -65,6 +65,7 @@ from openprocurement.api.models.common import (
     Revision,
     BaseResourceItem,
     sensitive_embedded_role,
+    RegistrationDetails,
     BankAccount,  # noqa forwarded import
     AuctionParameters,  # noqa forwarded import
 )
@@ -200,6 +201,10 @@ class dgfCDB2Item(flashItem):
                 non_specific_location_cpv = data['classification']['scheme'] == u'CPV' and not data['classification']['id'].startswith(CPV_NON_SPECIFIC_LOCATION_UNITS_DGF_CDB2)
                 if non_specific_location_cav or non_specific_location_cpv:
                     raise ValidationError(u'This field is required.')
+
+
+class SwiftsureItem(dgfCDB2Item):
+    registrationDetails = ModelType(RegistrationDetails)
 
 
 class flashDocument(BaseDocument):
