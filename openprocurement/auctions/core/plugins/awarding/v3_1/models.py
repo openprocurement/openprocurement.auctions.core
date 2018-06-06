@@ -16,7 +16,7 @@ from openprocurement.auctions.core.models import (
     get_auction,
     swiftsureDocument as Document,
     dgfComplaint as Complaint,
-    dgfItem as Item,
+    SwiftsureItem as Item,
     dgfOrganization as Organization,
     Award as BaseAward
 )
