@@ -7,12 +7,13 @@ auction_transferring = 'openprocurement.auctions.core.plugins.transferring.inclu
 
 entry_points = {
     'openprocurement.api.plugins': [
-        'auctions.core = {}'.format(auction_core),
-        'auctions.transferring = {}'.format(auction_transferring)
-
+        'auctions.core = {}'.format(auction_core)
     ],
     'openprocurement.tests': [
         'auctions.core = openprocurement.auctions.core.tests.main:suite'
+    ],
+    'transferring': [
+        'auctions.transferring = {}'.format(auction_transferring)
     ]
 }
 requires = [
