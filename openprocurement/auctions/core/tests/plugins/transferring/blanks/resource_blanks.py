@@ -121,12 +121,12 @@ def old_owner_cant_change(self):
                       auction['data']['id'],
                       auction['access']['transfer'])
 
-    new_access_token = transfer['access']['token']
-
     # fist_owner can`t change the auction
     desc = "make auction greate again"
     req_data = {"data": {"description": desc}}
-    req_url = '/auctions/{}?acc_token={}'.format(auction['data']['id'], new_access_token)
+    req_url = '/auctions/{}?acc_token={}'.format(
+        auction['data']['id'], auction['access']['token']
+    )
     response = self.app.patch_json(req_url, req_data, status=403)
     self.assertEqual(response.status, '403 Forbidden')
 
