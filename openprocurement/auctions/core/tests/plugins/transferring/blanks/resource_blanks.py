@@ -1,3 +1,9 @@
+# -*-coding: utf-8 -*-
+from hashlib import sha512
+
+from copy import deepcopy
+
+
 def change_resource_ownership(self):
     change_ownership_url = '/auctions/{}/ownership'
     post = self.app.post_json
@@ -184,3 +190,38 @@ def switch_mode(self):
     self.assertEqual(response.status, '200 OK')
     self.assertIn('owner', response.json['data'])
     self.assertEqual(response.json['data']['owner'], self.test_owner)
+
+
+def create_auction_by_concierge(self):
+    self.app.authorization = ('Basic', (self.concierge, ''))
+    transfer_token = sha512(self.not_used_transfer['access']['transfer']).hexdigest()
+    headers = {'X-Transfer-Token': transfer_token}
+    data = deepcopy(self.initial_data)
+
+    # passing SHA-512 hash of transfer token as a header
+    response = self.app.post_json('/auctions', {'data': data}, headers=headers)
+    self.assertEqual(response.status, '201 Created')
+    self.assertEqual(response.content_type, 'application/json')
+    self.assertNotIn('transfer', response.json['access'])
+    auction_id = response.json['data']['id']
+
+    self.app.authorization = ('Basic', (self.first_owner, ''))
+
+    transfer = self.create_transfer()
+
+    # trying to change ownership
+    self.use_transfer(transfer,
+                      auction_id,
+                      self.not_used_transfer['access']['transfer'])
+
+    # assuring that transfer is used properly
+    response = self.app.get('/transfers/{}'.format(transfer['data']['id']))
+    self.assertEqual(response.status, '200 OK')
+    self.assertEqual(response.content_type, 'application/json')
+    self.assertEqual(
+        response.json['data']['usedFor'], '/auctions/{}'.format(auction_id)
+    )
+
+    # assuring that ownership changed successfully
+    auction = self.db.get(auction_id)
+    self.assertEqual(auction['owner'], self.app.authorization[1][0])
