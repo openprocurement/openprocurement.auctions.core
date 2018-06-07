@@ -223,5 +223,7 @@ def create_auction_by_concierge(self):
     )
 
     # assuring that ownership changed successfully
-    auction = self.db.get(auction_id)
-    self.assertEqual(auction['owner'], self.app.authorization[1][0])
+    response = self.app.get('/auctions/{}'.format(auction_id))
+    self.assertEqual(response.status, '200 OK')
+    self.assertEqual(response.content_type, 'application/json')
+    self.assertEqual(response.json['data']['owner'], self.app.authorization[1][0])
