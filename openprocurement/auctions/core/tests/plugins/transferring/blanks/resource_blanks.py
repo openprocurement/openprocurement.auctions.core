@@ -195,11 +195,11 @@ def switch_mode(self):
 def create_auction_by_concierge(self):
     self.app.authorization = ('Basic', (self.concierge, ''))
     transfer_token = sha512(self.not_used_transfer['access']['transfer']).hexdigest()
-    headers = {'X-Transfer-Token': transfer_token}
     data = deepcopy(self.initial_data)
+    data['transfer_token'] = transfer_token
 
     # passing SHA-512 hash of transfer token as a header
-    response = self.app.post_json('/auctions', {'data': data}, headers=headers)
+    response = self.app.post_json('/auctions', {'data': data})
     self.assertEqual(response.status, '201 Created')
     self.assertEqual(response.content_type, 'application/json')
     self.assertNotIn('transfer', response.json['access'])
