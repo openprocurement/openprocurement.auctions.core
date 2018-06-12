@@ -4,12 +4,16 @@ from schematics.exceptions import ValidationError
 from openprocurement.api.constants import SANDBOX_MODE
 from openprocurement.auctions.core.constants import ENGLISH_AUCTION_PROCUREMENT_METHOD_TYPES
 from openprocurement.api.utils import (
-    update_logging_context, error_handler, get_now
+    error_handler,
+    get_now,
+    update_logging_context,
 )
 from openprocurement.api.validation import (
-    validate_json_data, # noqa forwarded import
+    validate_accreditations,
     validate_data, # noqa forwarded import
+    validate_json_data, # noqa forwarded import
     validate_patch_document_data,  # noqa forwarded import
+    validate_t_accreditation,
 )
 
 from openprocurement.auctions.core.constants import STATUS4ROLE
@@ -48,23 +52,9 @@ def validate_auction_data(request, **kwargs):
         return
 
     model = request.auction_from_data(data, create=False)
-    if not request.check_accreditation(model.create_accreditation):
-        request.errors.add(
-            'body',
-            'accreditation',
-            'Broker Accreditation level does not permit auction creation'
-        )
-        request.errors.status = 403
-        return
+    validate_accreditations(request, model)
     data = validate_data(request, model, "auction", data=data)
-    if data and data.get('mode', None) is None and request.check_accreditation('t'):
-        request.errors.add(
-            'body',
-            'mode',
-            'Broker Accreditation level does not permit auction creation'
-        )
-        request.errors.status = 403
-        return
+    validate_t_accreditation(request, data)
 
 
 def validate_patch_auction_data(request, **kwargs):
