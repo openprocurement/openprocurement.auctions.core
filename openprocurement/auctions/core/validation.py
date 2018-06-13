@@ -52,9 +52,9 @@ def validate_auction_data(request, **kwargs):
         return
 
     model = request.auction_from_data(data, create=False)
-    validate_accreditations(request, model)
+    validate_accreditations(request, model, 'auction')
     data = validate_data(request, model, "auction", data=data)
-    validate_t_accreditation(request, data)
+    validate_t_accreditation(request, data, 'auction')
 
 
 def validate_patch_auction_data(request, **kwargs):
