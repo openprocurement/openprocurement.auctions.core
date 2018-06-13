@@ -34,6 +34,7 @@ from openprocurement.api.utils import (
     APIResource,  # noqa forwarded import
     get_file,
     upload_file,
+    connection_mock_config,  # noqa forwarded import
     update_file_content_type,  # noqa forwarded import
     set_ownership,  # noqa forwarded import
     get_request_from_root,  # noqa forwarded import
