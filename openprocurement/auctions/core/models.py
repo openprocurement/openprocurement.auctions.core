@@ -329,6 +329,7 @@ class dgfCDB2Document(dgfDocument):
 
 
 class swiftsureDocument(dgfDocument):
+    documentOf = StringType(required=True, choices=['auction', 'item', 'lot'], default='auction')
     documentType = StringType(choices=[
         'auctionNotice', 'awardNotice', 'contractNotice',
         'notice', 'biddingDocuments', 'technicalSpecifications',
@@ -344,6 +345,14 @@ class swiftsureDocument(dgfDocument):
         'x_presentation', 'x_nda', 'x_dgfAssetFamiliarization', 'act',
         'x_dgfPlatformLegalDetails', 'admissionProtocol', 'rejectionProtocol'
     ])
+
+    def validate_relatedItem(self, data, relatedItem):
+        if not relatedItem and data.get('documentOf') in ['item', 'lot']:
+            raise ValidationError(u'This field is required.')
+        if relatedItem and isinstance(data['__parent__'], Model):
+            auction = get_auction(data['__parent__'])
+            if data.get('documentOf') == 'item' and relatedItem not in [i.id for i in auction.items]:
+                raise ValidationError(u"relatedItem should be one of items")
 
 
 class flashComplaint(Model):
