@@ -343,7 +343,8 @@ class swiftsureDocument(dgfDocument):
         'illustration', 'financialLicense', 'virtualDataRoom',
         'auctionProtocol', 'x_dgfPublicAssetCertificate',
         'x_presentation', 'x_nda', 'x_dgfAssetFamiliarization', 'act',
-        'x_dgfPlatformLegalDetails', 'admissionProtocol', 'rejectionProtocol'
+        'x_dgfPlatformLegalDetails', 'admissionProtocol', 'rejectionProtocol',
+        'cancellationDetails'
     ])
 
     def validate_relatedItem(self, data, relatedItem):
