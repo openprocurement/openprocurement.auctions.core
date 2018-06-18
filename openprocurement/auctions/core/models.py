@@ -852,6 +852,7 @@ swiftsure_auction_roles = deepcopy(dgf_auction_roles)
 swiftsure_auction_roles['edit_active.tendering'] = whitelist()
 swiftsure_auction_roles['auction_view'] = (dgf_auction_roles['auction_view'] + whitelist('minNumberOfQualifiedBids', 'registrationFee', 'bankAccount'))
 swiftsure_auction_roles['pending.activation'] = enquiries_role
+swiftsure_auction_roles['create'] = (auction_embedded_role + blacklist('owner', '_attachments', 'revisions', 'date', 'dateModified', 'doc_id', 'auctionID', 'bids', 'documents', 'awards', 'questions', 'complaints', 'auctionUrl', 'enquiryPeriod', 'tenderPeriod', 'awardPeriod', 'procurementMethod', 'eligibilityCriteria', 'eligibilityCriteria_en', 'eligibilityCriteria_ru', 'awardCriteria', 'submissionMethod', 'cancellations', 'numberOfBidders', 'contracts', 'suspended'))
 
 
 class Bid(Model):

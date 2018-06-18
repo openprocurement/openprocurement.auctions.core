@@ -1,7 +1,7 @@
 # -*-coding: utf-8 -*-
-from hashlib import sha512
-
 from copy import deepcopy
+from hashlib import sha512
+from uuid import uuid4
 
 
 def change_resource_ownership(self):
@@ -71,7 +71,6 @@ def half_applied_transfer(self):
     # simulate half-applied transfer activation process (i.e. transfer
     # is successfully applied to a auction and relation is saved in transfer,
     # but tender is not stored with new credentials)
-
 
     auth = ('Basic', (self.first_owner, ''))
     auction = self.create_auction_unit(auth=auth)
@@ -197,6 +196,8 @@ def create_auction_by_concierge(self):
     transfer_token = sha512(self.not_used_transfer['access']['transfer']).hexdigest()
     data = deepcopy(self.initial_data)
     data['transfer_token'] = transfer_token
+    data['status'] = 'pending.activation'
+    data['merchandisingObject'] = uuid4().hex
 
     # passing SHA-512 hash of transfer token as a header
     response = self.app.post_json('/auctions', {'data': data})
