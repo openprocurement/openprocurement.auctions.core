@@ -8,6 +8,7 @@ from copy import deepcopy
 from datetime import datetime, timedelta
 from requests.models import Response
 from base64 import b64encode
+from mock import patch
 from urllib import urlencode
 
 from openprocurement.api.config import DS
@@ -19,9 +20,14 @@ from openprocurement.api.tests.base import (
 )
 from openprocurement.auctions.core.utils import (
     apply_data_patch,
-    SESSION,
+    connection_mock_config,
+    SESSION
 )
 
+from openprocurement.api.tests.base import MOCK_CONFIG as BASE_MOCK_CONFIG
+from openprocurement.auctions.core.tests.fixtures.config import PARTIAL_MOCK_CONFIG
+
+from openprocurement.api.tests.base import BaseResourceWebTest, BaseWebTest as CoreWebTest
 
 now = datetime.now()
 test_organization = {
@@ -130,90 +136,23 @@ class PrefixedRequestClass(webtest.app.TestRequest):
         return webtest.app.TestRequest.blank(path, *args, **kwargs)
 
 
-class BaseWebTest(unittest.TestCase):
-
-    """Base Web Test to test openprocurement.auctions.flash.
-
-    It setups the database before each test and delete it after.
-    """
-
-    relative_to = os.path.dirname(__file__)
-
-    @classmethod
-    def setUpClass(cls):
-        if not getattr(cls, 'app', None) or getattr(cls, 'docservice', True):
-            cls.app = webtest.TestApp("config:tests.ini", relative_to=cls.relative_to)
-        cls.app.RequestClass = PrefixedRequestClass
-        if getattr(cls.app.app.registry, 'admin_couchdb_server', None):
-            cls.couchdb_server = cls.app.app.registry.admin_couchdb_server
-        else:
-            cls.couchdb_server = cls.app.app.registry.couchdb_server
-        cls.db = cls.app.app.registry.db
-        cls.db_name = cls.db.name
-
-    @classmethod
-    def tearDownClass(cls):
-        try:
-            cls.couchdb_server.delete(cls.db_name)
-        except:
-            pass
-
-    def setUp(self):
-        self.db_name += uuid4().hex
-        self.couchdb_server.create(self.db_name)
-        db = self.couchdb_server[self.db_name]
-        sync_design(db)
-        self.app.app.registry.db = db
-        self.db = self.app.app.registry.db
-        self.db_name = self.db.name
-        if hasattr(self, 'initial_auth'):
-            self.app.authorization = self.initial_auth
-        else:
-            self.app.authorization = ('Basic', ('token', ''))
-
-    def tearDown(self):
-        self.couchdb_server.delete(self.db_name)
-
-    def setUpDS(self):
-        self.app.app.registry.use_docservice = True
-        ds_config = deepcopy(test_config_data['config']['ds'])
-        docservice = DS(ds_config)
-        self.app.app.registry.docservice_url = docservice.download_url
-        self.app.app.registry.docservice_upload_url = docservice.upload_url
-        self.app.app.registry.docservice_username = docservice.user.name
-        self.app.app.registry.docservice_password = docservice.user.password
-        self.app.app.registry.docservice_key = dockey = docservice.signer
-        self.app.app.registry.keyring = docservice.init_keyring(dockey)
-
-        test = self
-        def request(method, url, **kwargs):
-            response = Response()
-            if method == 'POST' and '/upload' in url:
-                url = test.generate_docservice_url()
-                response.status_code = 200
-                response.encoding = 'application/json'
-                response._content = '{{"data":{{"url":"{url}","hash":"md5:{md5}","format":"application/msword","title":"name.doc"}},"get_url":"{url}"}}'.format(url=url, md5='0'*32)
-                response.reason = '200 OK'
-            return response
-
-        self._srequest = SESSION.request
-        SESSION.request = request
-
-    def generate_docservice_url(self):
-        uuid = uuid4().hex
-        key = self.app.app.registry.docservice_key
-        keyid = key.hex_vk()[:8]
-        signature = b64encode(key.signature("{}\0{}".format(uuid, '0' * 32)))
-        query = {'Signature': signature, 'KeyID': keyid}
-        return "http://localhost/get/{}?{}".format(uuid, urlencode(query))
 
 
-class BaseAuctionWebTest(BaseWebTest):
+MOCK_CONFIG = connection_mock_config(PARTIAL_MOCK_CONFIG, ('plugins','api', 'plugins'),
+                                     BASE_MOCK_CONFIG)
+
+class BaseWebTest(CoreWebTest):
+    mock_config = MOCK_CONFIG
+
+
+class BaseAuctionWebTest(BaseResourceWebTest):
     initial_data = None
     initial_status = None
     initial_bids = None
     initial_lots = None
     docservice = False
+    mock_config = MOCK_CONFIG
+
 
     def set_status(self, status, extra=None):
         data = {'status': status}
