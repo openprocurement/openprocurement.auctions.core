@@ -331,20 +331,10 @@ class dgfCDB2Document(dgfDocument):
 class swiftsureDocument(dgfDocument):
     documentOf = StringType(required=True, choices=['auction', 'item', 'lot'], default='auction')
     documentType = StringType(choices=[
-        'auctionNotice', 'awardNotice', 'contractNotice',
-        'notice', 'biddingDocuments', 'technicalSpecifications',
-        'evaluationCriteria', 'clarifications', 'shortlistedFirms',
-        'riskProvisions', 'billOfQuantity', 'bidders', 'conflictOfInterest',
-        'debarments', 'evaluationReports', 'winningBid', 'complaints',
-        'contractSigned', 'contractArrangements', 'contractSchedule',
-        'contractAnnexe', 'contractGuarantees', 'subContract',
-        'eligibilityCriteria', 'contractProforma', 'commercialProposal',
-        'qualificationDocuments', 'eligibilityDocuments', 'tenderNotice',
-        'illustration', 'financialLicense', 'virtualDataRoom',
-        'auctionProtocol', 'x_dgfPublicAssetCertificate',
-        'x_presentation', 'x_nda', 'x_dgfAssetFamiliarization', 'act',
-        'x_dgfPlatformLegalDetails', 'admissionProtocol', 'rejectionProtocol',
-        'cancellationDetails'
+        'notice', 'technicalSpecifications', 'evaluationCriteria', 'bidders',
+        'illustration', 'x_PublicAssetCertificate', 'x_PlatformLegalDetails',
+        'x_presentation', 'informationDetails', 'x_dgfAssetFamiliarization',
+        'x_nda', 'cancellationDetails'
     ])
 
     def validate_relatedItem(self, data, relatedItem):
@@ -354,6 +344,30 @@ class swiftsureDocument(dgfDocument):
             auction = get_auction(data['__parent__'])
             if data.get('documentOf') == 'item' and relatedItem not in [i.id for i in auction.items]:
                 raise ValidationError(u"relatedItem should be one of items")
+
+
+class swiftsureCancellationDocument(swiftsureDocument):
+    documentType = StringType(choices=['cancellationDetails'])
+
+
+class awardV3_1Document(swiftsureDocument):
+    documentType = StringType(choices=[
+        'winningBid', 'admissionProtocol', 'rejectionProtocol',
+        'act', 'auctionProtocol'
+    ])
+
+
+class contractV3_1Document(swiftsureDocument):
+    documentType = StringType(choices=[
+        'notice', 'contractSigned', 'contractAnnexe', 'rejectionProtocol', 'act'
+    ])
+
+
+class swiftsureBidDocument(swiftsureDocument):
+    documentType = StringType(choices=[
+        'commercialProposal', 'qualificationDocuments', 'eligibilityDocuments',
+        'financialLicense'
+    ])
 
 
 class flashComplaint(Model):
@@ -497,6 +511,9 @@ class flashCancellation(BaseCancellation):
 class dgfCancellation(BaseCancellation):
     documents = ListType(ModelType(dgfDocument), default=list(), validators=[validate_disallow_dgfPlatformLegalDetails])
 
+
+class swiftsureCancellation(BaseCancellation):
+    documents = ListType(ModelType(swiftsureCancellationDocument), default=list())
 
 
 class Contract(BaseContract):
