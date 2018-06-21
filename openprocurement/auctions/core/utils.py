@@ -129,6 +129,12 @@ def auction_serialize(request, auction_data, fields):
 def save_auction(request):
 
     auction = request.validated['auction']
+    if request.authenticated_role == 'Administrator':
+        can_be_changed = ['procurementMethodDetails']
+        for field in can_be_changed:
+            if field in request.json['data']:
+                auction[field] = request.json['data'][field]
+
     if auction.mode == u'test':
         set_modetest_titles(auction)
     patch = get_revision_changes(auction.serialize("plain"), request.validated['auction_src'])
@@ -153,7 +159,6 @@ def save_auction(request):
         if getattr(auction, 'modified', True):
             auction.dateModified = now
         try:
-
             auction.store(request.registry.db)
         except ModelValidationError, e:
             for i in e.message:
