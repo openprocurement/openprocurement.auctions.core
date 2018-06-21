@@ -908,10 +908,7 @@ tessel_auction_roles['create'] = (
         'eligibilityCriteria_ru', 'awardCriteria', 'submissionMethod', 'cancellations',
         'numberOfBidders', 'contracts', 'suspended')
 )
-tessel_auction_roles['edit_active.tendering'] = (
-    dgf_auction_roles['edit_active.tendering'] +
-    whitelist()
-)
+tessel_auction_roles['edit_active.tendering'] = whitelist()
 tessel_auction_roles['auction_view'] = (
     dgf_auction_roles['auction_view'] +
     whitelist('minNumberOfQualifiedBids', 'registrationFee', 'bankAccount')
