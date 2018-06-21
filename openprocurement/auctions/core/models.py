@@ -852,8 +852,27 @@ auction_roles = {
     }
 
 dgf_auction_roles = {
-    'create': (auction_embedded_role + blacklist('owner', '_attachments', 'revisions', 'date', 'dateModified', 'doc_id', 'auctionID', 'bids', 'documents', 'awards', 'questions', 'complaints', 'auctionUrl', 'status', 'enquiryPeriod', 'tenderPeriod', 'awardPeriod', 'procurementMethod', 'eligibilityCriteria', 'eligibilityCriteria_en', 'eligibilityCriteria_ru', 'awardCriteria', 'submissionMethod', 'cancellations', 'numberOfBidders', 'contracts', 'suspended')),
-    'edit_active.tendering': (edit_role + blacklist('enquiryPeriod', 'tenderPeriod', 'value', 'auction_value', 'minimalStep', 'auction_minimalStep', 'guarantee', 'auction_guarantee', 'eligibilityCriteria', 'eligibilityCriteria_en', 'eligibilityCriteria_ru', 'awardCriteriaDetails', 'awardCriteriaDetails_en', 'awardCriteriaDetails_ru', 'procurementMethodRationale', 'procurementMethodRationale_en', 'procurementMethodRationale_ru', 'submissionMethodDetails', 'submissionMethodDetails_en', 'submissionMethodDetails_ru', 'items', 'procuringEntity', 'suspended', 'auctionParameters')),
+    'create': (
+        auction_embedded_role +
+        blacklist(
+            'owner', '_attachments', 'revisions', 'date', 'dateModified', 'doc_id',
+            'auctionID', 'bids', 'documents', 'awards', 'questions', 'complaints',
+            'auctionUrl', 'status', 'enquiryPeriod', 'tenderPeriod', 'awardPeriod',
+            'procurementMethod', 'eligibilityCriteria', 'eligibilityCriteria_en',
+            'eligibilityCriteria_ru', 'awardCriteria', 'submissionMethod', 'cancellations',
+            'numberOfBidders', 'contracts', 'suspended')
+    ),
+    'edit_active.tendering': (
+        edit_role +
+        blacklist(
+            'enquiryPeriod', 'tenderPeriod', 'value', 'auction_value', 'minimalStep',
+            'auction_minimalStep', 'guarantee', 'auction_guarantee', 'eligibilityCriteria',
+            'eligibilityCriteria_en', 'eligibilityCriteria_ru', 'awardCriteriaDetails',
+            'awardCriteriaDetails_en', 'awardCriteriaDetails_ru', 'procurementMethodRationale',
+            'procurementMethodRationale_en', 'procurementMethodRationale_ru', 'submissionMethodDetails',
+            'submissionMethodDetails_en', 'submissionMethodDetails_ru', 'items', 'procuringEntity',
+            'suspended', 'auctionParameters')
+    ),
     'Administrator': (whitelist('suspended', 'awards', 'auctionParameters') + Administrator_role),
     'pending.verification': enquiries_role,
     'invalid': view_role,
@@ -866,11 +885,36 @@ dgf_auction_roles = {
 view_bid_role = (blacklist('owner_token', 'transfer_token') + schematics_default_role)
 Administrator_bid_role = whitelist('tenderers')
 
+# Swiftsure auction
 swiftsure_auction_roles = deepcopy(dgf_auction_roles)
 swiftsure_auction_roles['edit_active.tendering'] = whitelist()
-swiftsure_auction_roles['auction_view'] = (dgf_auction_roles['auction_view'] + whitelist('minNumberOfQualifiedBids', 'registrationFee', 'bankAccount'))
+
+swiftsure_auction_roles['auction_view'] = (
+    dgf_auction_roles['auction_view'] +
+    whitelist('minNumberOfQualifiedBids', 'registrationFee', 'bankAccount')
+)
 swiftsure_auction_roles['pending.activation'] = enquiries_role
 swiftsure_auction_roles['create'] = (auction_embedded_role + blacklist('owner', '_attachments', 'revisions', 'date', 'dateModified', 'doc_id', 'auctionID', 'bids', 'documents', 'awards', 'questions', 'complaints', 'auctionUrl', 'enquiryPeriod', 'tenderPeriod', 'awardPeriod', 'procurementMethod', 'eligibilityCriteria', 'eligibilityCriteria_en', 'eligibilityCriteria_ru', 'awardCriteria', 'submissionMethod', 'cancellations', 'numberOfBidders', 'contracts', 'suspended'))
+
+# Tessel auction
+tessel_auction_roles = deepcopy(dgf_auction_roles)
+tessel_auction_roles['create'] = (
+    auction_embedded_role +
+    blacklist(
+        'owner', '_attachments', 'revisions', 'date', 'dateModified', 'doc_id',
+        'auctionID', 'bids', 'awards', 'questions', 'complaints',
+        'auctionUrl', 'status', 'enquiryPeriod', 'tenderPeriod', 'awardPeriod',
+        'procurementMethod', 'eligibilityCriteria', 'eligibilityCriteria_en',
+        'eligibilityCriteria_ru', 'awardCriteria', 'submissionMethod', 'cancellations',
+        'numberOfBidders', 'contracts', 'suspended')
+)
+tessel_auction_roles['edit_active.tendering'] = whitelist()
+tessel_auction_roles['auction_view'] = (
+    dgf_auction_roles['auction_view'] +
+    whitelist('minNumberOfQualifiedBids', 'registrationFee', 'bankAccount')
+)
+tessel_auction_roles['pending.activation'] = enquiries_role
+tessel_auction_roles['convoy'] = whitelist('status', 'items', 'documents')
 
 
 class Bid(Model):

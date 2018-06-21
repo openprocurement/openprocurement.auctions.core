@@ -18,6 +18,9 @@ from openprocurement.api.tests.base import (
     JSON_RENDERER_ERROR,  # noqa forwarded import
     test_config_data
 )
+from openprocurement.api.tests.blanks.json_data import (
+    test_document_data  # noqa forwarded import
+)
 from openprocurement.auctions.core.utils import (
     apply_data_patch,
     connection_mock_config,
