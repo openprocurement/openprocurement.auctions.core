@@ -1,22 +1,13 @@
 # -*- coding: utf-8 -*-
-import os
-import unittest
 import webtest
 from types import FunctionType
 from uuid import uuid4
 from copy import deepcopy
 from datetime import datetime, timedelta
-from requests.models import Response
-from base64 import b64encode
-from mock import patch
-from urllib import urlencode
 
-from openprocurement.api.config import DS
 from openprocurement.api.constants import VERSION
-from openprocurement.api.design import sync_design
 from openprocurement.api.tests.base import (
     JSON_RENDERER_ERROR,  # noqa forwarded import
-    test_config_data
 )
 from openprocurement.api.tests.blanks.json_data import (
     test_document_data  # noqa forwarded import
