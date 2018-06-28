@@ -817,6 +817,10 @@ class ProcuringEntity(dgfOrganization):
     kind = StringType(choices=['general', 'special', 'defense', 'other'])
 
 
+class SwiftsureProcuringEntity(ProcuringEntity):
+    additionalContactPoints = ListType(ModelType(ContactPoint), default=list())
+
+
 auction_roles = {
         'plain': plain_role,
         'create': create_role,
