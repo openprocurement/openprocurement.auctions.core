@@ -100,7 +100,9 @@ deprecated('IAuction', 'IAuction moved to interfaces.py')
 
 def get_auction(model):
     while not IAuction.providedBy(model):
-        model = model.__parent__
+        model = getattr(model, '__parent__', None)
+        if model is None:
+            return None
     return model
 
 
@@ -162,12 +164,23 @@ class dgfCDB2CPVCAVClassification(Classification):
 
     def validate_id(self, data, code):
         auction = get_auction(data['__parent__'])
+        need_precise_classification = True  # default value
+        if auction:
+            need_precise_classification = get_auction_creation_date(auction) > DGF_CDB2_CLASSIFICATION_PRECISELY_FROM
+
         if data.get('scheme') == u'CPV' and code not in CPV_CODES:
             raise ValidationError(BaseType.MESSAGES['choices'].format(unicode(CPV_CODES)))
         elif data.get('scheme') == u'CAV-PS' and code not in CAVPS_CODES_DGF_CDB2:
             raise ValidationError(BaseType.MESSAGES['choices'].format(unicode(CAVPS_CODES_DGF_CDB2)))
-        if code.find("00000-") > 0 and get_auction_creation_date(auction) > DGF_CDB2_CLASSIFICATION_PRECISELY_FROM:
-            raise ValidationError('At least {} classification class (XXXX0000-Y) should be specified more precisely'.format(data.get('scheme')))
+        if (
+            code.find("00000-") > 0 and
+            need_precise_classification
+        ):
+            raise ValidationError(
+                'At least {} classification class (XXXX0000-Y) should be specified more precisely'.format(
+                    data.get('scheme')
+                )
+            )
 
 
 class dgfCDB2AdditionalClassification(Classification):
