@@ -40,3 +40,20 @@ class AuctionsResource(APIResource):
             )
 
             return {'data': self.request.context.serialize('view')}
+
+
+
+@opresource(
+    name='Auction credentials',
+    path='/auctions/{auction_id}/extract_credentials',
+    description="Auctions Extract Credentials"
+)
+class AuctionResource(APIResource):
+
+    @json_view(permission='extract_credentials')
+    def get(self):
+        self.LOGGER.info('Extract credentials for auction {}'.format(self.context.id))
+        auction = self.request.validated['auction']
+        data = auction.serialize('extract_credentials') or {}
+        data['transfer_token'] = auction.transfer_token
+        return {'data': data}

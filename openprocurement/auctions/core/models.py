@@ -865,6 +865,7 @@ auction_roles = {
         'Administrator': Administrator_role,
         'default': schematics_default_role,
         'contracting': whitelist('doc_id', 'owner'),
+        'extract_credentials': whitelist('owner', 'id')
     }
 
 dgf_auction_roles = {
