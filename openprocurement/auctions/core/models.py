@@ -934,6 +934,10 @@ tessel_auction_roles['pending.activation'] = enquiries_role
 tessel_auction_roles['convoy'] = whitelist('status', 'items', 'documents')
 
 
+class ContractTerms(Model):
+    type = StringType(required=True)
+
+
 class Bid(Model):
     class Options:
         roles = {
@@ -1355,3 +1359,8 @@ def calc_auction_end_time(bids, start):
 def validate_not_available(items, *args):
     if items:
         raise ValidationError(u"Option not available in this procurementMethodType")
+
+
+def validate_contract_type(contractTerms, choices=list()):
+    if contractTerms.type not in choices:
+        raise ValidationError(u'type must be one of {}'.format(choices))
