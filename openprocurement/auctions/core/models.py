@@ -919,7 +919,7 @@ tessel_auction_roles['create'] = (
     blacklist(
         'owner', '_attachments', 'revisions', 'date', 'dateModified', 'doc_id',
         'auctionID', 'bids', 'awards', 'questions', 'complaints',
-        'auctionUrl', 'status', 'enquiryPeriod', 'tenderPeriod', 'awardPeriod',
+        'auctionUrl', 'enquiryPeriod', 'tenderPeriod', 'awardPeriod',
         'procurementMethod', 'eligibilityCriteria', 'eligibilityCriteria_en',
         'eligibilityCriteria_ru', 'awardCriteria', 'submissionMethod', 'cancellations',
         'numberOfBidders', 'contracts', 'suspended')
