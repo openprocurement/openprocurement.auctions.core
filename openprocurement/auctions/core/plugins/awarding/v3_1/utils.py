@@ -91,15 +91,9 @@ def switch_to_next_award(request):
 
 def next_check_awarding(auction):
     checks = []
-    if awarded_predicate(auction):
-        for contract in auction.contracts:
-            if contract.status == 'pending':
-                checks.append(contract.signingPeriod.endDate.astimezone(TZ))
-    elif not auction.lots and auction.status == 'active.qualification':
+    if not auction.lots and auction.status == 'active.qualification':
         for award in auction.awards:
-            if award.status == 'pending':
-                checks.append(award.verificationPeriod.endDate.astimezone(TZ))
-            elif award.status == 'pending.admission':
+            if award.status == 'pending.admission':
                 checks.append(award.admissionPeriod.endDate.astimezone(TZ))
     elif awarded_and_lots_predicate(auction):
         checks = check_lots_awarding(auction)
