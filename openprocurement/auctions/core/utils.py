@@ -357,7 +357,7 @@ def check_auction_status(request):
             auction.status = 'complete'
     else:
         if auction.contracts and auction.contracts[-1].status == 'active':
-            LOGGER.info('Switched auction %s to %s', auction.id, 'unsuccessful',
+            LOGGER.info('Switched auction %s to %s', auction.id, 'complete',
                         extra=context_unpack(request, {'MESSAGE_ID': 'switched_auction_complete'}))
             auction.status = 'complete'
 
