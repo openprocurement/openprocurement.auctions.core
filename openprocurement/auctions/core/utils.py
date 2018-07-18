@@ -356,30 +356,8 @@ def check_auction_status(request):
                         extra=context_unpack(request, {'MESSAGE_ID': 'switched_lot_complete'}, {'LOT_ID': lot.id}))
             auction.status = 'complete'
     else:
-        pending_complaints = any([
-            i.status in auction.block_complaint_status
-            for i in auction.complaints
-        ])
-        pending_awards_complaints = any([
-            i.status in auction.block_complaint_status
-            for a in auction.awards
-            for i in a.complaints
-        ])
-        stand_still_ends = [
-            a.complaintPeriod.endDate
-            for a in auction.awards
-            if a.complaintPeriod.endDate
-        ]
-        stand_still_end = max(stand_still_ends) if stand_still_ends else now
-        stand_still_time_expired = stand_still_end < now
-        last_award_status = auction.awards[-1].status if auction.awards else ''
-        if not pending_complaints and not pending_awards_complaints and stand_still_time_expired \
-                and last_award_status == 'unsuccessful':
-            LOGGER.info('Switched auction %s to %s', auction.id, 'unsuccessful',
-                        extra=context_unpack(request, {'MESSAGE_ID': 'switched_auction_unsuccessful'}))
-            auction.status = 'unsuccessful'
         if auction.contracts and auction.contracts[-1].status == 'active':
-            LOGGER.info('Switched auction %s to %s', auction.id, 'unsuccessful',
+            LOGGER.info('Switched auction %s to %s', auction.id, 'complete',
                         extra=context_unpack(request, {'MESSAGE_ID': 'switched_auction_complete'}))
             auction.status = 'complete'
 
