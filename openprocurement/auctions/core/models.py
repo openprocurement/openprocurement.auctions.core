@@ -75,6 +75,7 @@ from openprocurement.api.validation import validate_items_uniq  # noqa forwarded
 from openprocurement.auctions.core.constants import (
     DOCUMENT_TYPE_OFFLINE,
     DOCUMENT_TYPE_URL_ONLY,
+    INFORMATION_DOCUMENT_TYPES,
     CAV_CODES_DGF,
     CAV_CODES_FLASH,
     ORA_CODES,
@@ -356,6 +357,65 @@ class swiftsureDocument(dgfDocument):
             auction = get_auction(data['__parent__'])
             if data.get('documentOf') == 'item' and relatedItem not in [i.id for i in auction.items]:
                 raise ValidationError(u"relatedItem should be one of items")
+
+    @serializable(serialized_name="url", serialize_when_none=False)
+    def download_url(self):
+        url = self.url
+        if not url or '?download=' not in url or url in INFORMATION_DOCUMENT_TYPES:
+            return url
+        doc_id = parse_qs(urlparse(url).query)['download'][-1]
+        root = self.__parent__
+        parents = []
+        while root.__parent__ is not None:
+            parents[0:0] = [root]
+            root = root.__parent__
+        request = root.request
+        if not request.registry.use_docservice:
+            return url
+        if 'status' in parents[0] and parents[0].status in type(parents[0])._options.roles:
+            role = parents[0].status
+            for index, obj in enumerate(parents):
+                if obj.id != url.split('/')[(index - len(parents)) * 2 - 1]:
+                    break
+                field = url.split('/')[(index - len(parents)) * 2]
+                if "_" in field:
+                    field = field[0] + field.title().replace("_", "")[1:]
+                roles = type(obj)._options.roles
+                if roles[role if role in roles else 'default'](field, []):
+                    return url
+        from openprocurement.api.utils import generate_docservice_url
+        if not self.hash:
+            path = [i for i in urlparse(url).path.split('/') if len(i) == 32 and not set(i).difference(hexdigits)]
+            return generate_docservice_url(request, doc_id, False, '{}/{}'.format(path[0], path[-1]))
+        return generate_docservice_url(request, doc_id, False)
+
+    def validate_hash(self, data, hash_):
+        doc_type = data.get('documentType')
+        if doc_type in INFORMATION_DOCUMENT_TYPES:
+            return
+        if doc_type in (DOCUMENT_TYPE_URL_ONLY + DOCUMENT_TYPE_OFFLINE) and hash_:
+            raise ValidationError(u'This field is not required.')
+
+    def validate_format(self, data, format_):
+        doc_type = data.get('documentType')
+        if doc_type in INFORMATION_DOCUMENT_TYPES:
+            return
+        if doc_type not in (DOCUMENT_TYPE_URL_ONLY + DOCUMENT_TYPE_OFFLINE) and not format_:
+            raise ValidationError(u'This field is required.')
+        if doc_type in DOCUMENT_TYPE_URL_ONLY and format_:
+            raise ValidationError(u'This field is not required.')
+
+    def validate_url(self, data, url):
+        doc_type = data.get('documentType')
+        if doc_type in INFORMATION_DOCUMENT_TYPES:
+            URLType().validate(url)
+            return
+        if doc_type in DOCUMENT_TYPE_URL_ONLY:
+            URLType().validate(url)
+        if doc_type in DOCUMENT_TYPE_OFFLINE and url:
+            raise ValidationError(u'This field is not required.')
+        if doc_type not in DOCUMENT_TYPE_OFFLINE and not url:
+            raise ValidationError(u'This field is required.')
 
 
 class swiftsureCancellationDocument(swiftsureDocument):
