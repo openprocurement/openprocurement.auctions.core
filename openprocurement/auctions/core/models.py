@@ -71,12 +71,13 @@ from openprocurement.api.models.common import (
     ContactPoint,  # noqa forwarded import
 )
 from openprocurement.api.models.schematics_extender import DecimalType
-from openprocurement.api.utils import get_now, get_request_from_root
+from openprocurement.api.utils import get_now, get_request_from_root, serialize_document_url
 from openprocurement.api.validation import validate_items_uniq  # noqa forwarded import
 
 from openprocurement.auctions.core.constants import (
     DOCUMENT_TYPE_OFFLINE,
     DOCUMENT_TYPE_URL_ONLY,
+    INFORMATION_DOCUMENT_TYPES,
     CAV_CODES_DGF,
     CAV_CODES_FLASH,
     ORA_CODES,
@@ -344,6 +345,40 @@ class swiftsureDocument(dgfDocument):
             auction = get_auction(data['__parent__'])
             if data.get('documentOf') == 'item' and relatedItem not in [i.id for i in auction.items]:
                 raise ValidationError(u"relatedItem should be one of items")
+
+    @serializable(serialized_name="url", serialize_when_none=False)
+    def download_url(self):
+        if self.documentType in INFORMATION_DOCUMENT_TYPES:
+            return self.url
+        return serialize_document_url(self)
+
+    def validate_hash(self, data, hash_):
+        doc_type = data.get('documentType')
+        if doc_type in INFORMATION_DOCUMENT_TYPES:
+            return
+        if doc_type in (DOCUMENT_TYPE_URL_ONLY + DOCUMENT_TYPE_OFFLINE) and hash_:
+            raise ValidationError(u'This field is not required.')
+
+    def validate_format(self, data, format_):
+        doc_type = data.get('documentType')
+        if doc_type in INFORMATION_DOCUMENT_TYPES:
+            return
+        if doc_type not in (DOCUMENT_TYPE_URL_ONLY + DOCUMENT_TYPE_OFFLINE) and not format_:
+            raise ValidationError(u'This field is required.')
+        if doc_type in DOCUMENT_TYPE_URL_ONLY and format_:
+            raise ValidationError(u'This field is not required.')
+
+    def validate_url(self, data, url):
+        doc_type = data.get('documentType')
+        if doc_type in INFORMATION_DOCUMENT_TYPES:
+            URLType().validate(url)
+            return
+        if doc_type in DOCUMENT_TYPE_URL_ONLY:
+            URLType().validate(url)
+        if doc_type in DOCUMENT_TYPE_OFFLINE and url:
+            raise ValidationError(u'This field is not required.')
+        if doc_type not in DOCUMENT_TYPE_OFFLINE and not url:
+            raise ValidationError(u'This field is required.')
 
 
 class swiftsureCancellationDocument(swiftsureDocument):
