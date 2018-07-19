@@ -360,7 +360,7 @@ class swiftsureDocument(dgfDocument):
 
     @serializable(serialized_name="url", serialize_when_none=False)
     def download_url(self):
-        if self.url in INFORMATION_DOCUMENT_TYPES:
+        if self.documentType in INFORMATION_DOCUMENT_TYPES:
             return self.url
         return serialize_document_url(self)
 
