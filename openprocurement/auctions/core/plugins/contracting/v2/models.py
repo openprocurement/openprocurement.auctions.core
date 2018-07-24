@@ -1,4 +1,6 @@
+# -*- coding: utf-8 -*-
 from schematics.types.compound import ModelType
+from zope.interface import implementer
 
 from openprocurement.api.models.auction_models import (
     ListType,
@@ -14,8 +16,10 @@ from openprocurement.auctions.core.models import (
 from openprocurement.auctions.core.validation import (
     validate_disallow_dgfPlatformLegalDetails
 )
+from .interfaces import IContractV2
 
 
+@implementer(IContractV2)
 class Contract(BaseContract):
     """
         Contract model for Contracting 2.0 procedure

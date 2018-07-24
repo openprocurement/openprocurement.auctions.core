@@ -8,6 +8,7 @@ from schematics.transforms import (
 )
 from schematics.types import StringType, MD5Type
 from schematics.types.compound import ModelType
+from zope.interface import implementer
 
 from openprocurement.api.models.common import Period
 from openprocurement.api.models.schematics_extender import (
@@ -30,6 +31,7 @@ from openprocurement.auctions.core.plugins.contracting.v3.constants import (
 from openprocurement.auctions.core.validation import (
     validate_disallow_dgfPlatformLegalDetails
 )
+from .interfaces import IContractV3
 
 
 class Document(BaseDocument):
@@ -87,6 +89,7 @@ class Prolongation(Model):
             )
 
 
+@implementer(IContractV3)
 class Contract(BaseContract):
     """
         Contract for Contracting 3.0 procedure
