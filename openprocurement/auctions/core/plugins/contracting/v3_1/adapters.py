@@ -30,7 +30,7 @@ class ContractManagerV3_1Adapter(BaseContractManagerAdapter):
     name = 'Contract v-3_1 adapter'
 
     create_validators = (
-        validate_contract_create
+        validate_contract_create,
     )
 
     change_validators = (
