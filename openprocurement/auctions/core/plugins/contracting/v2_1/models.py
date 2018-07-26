@@ -1,8 +1,10 @@
 from schematics.types.compound import ModelType
+from zope.interface import implementer
 
 from openprocurement.api.models.schematics_extender import (
     ListType,
 )
+
 from openprocurement.auctions.core.models import (
     dgfOrganization as Organization,
     dgfCDB2Item as Item,
@@ -13,8 +15,10 @@ from openprocurement.auctions.core.models import (
 from openprocurement.auctions.core.models import (
     Contract as BaseContract
 )
+from .interfaces import IContractV2_1
 
 
+@implementer(IContractV2_1)
 class Contract(BaseContract):
     items = ListType(ModelType(Item))
     suppliers = ListType(ModelType(Organization), min_size=1, max_size=1)

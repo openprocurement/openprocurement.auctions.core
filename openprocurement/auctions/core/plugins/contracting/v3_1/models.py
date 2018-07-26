@@ -1,4 +1,6 @@
+# -*- coding: utf-8 -*-
 from schematics.types.compound import ModelType
+from zope.interface import implementer
 
 from openprocurement.api.models.common import Period
 from openprocurement.api.models.schematics_extender import (
@@ -14,8 +16,10 @@ from openprocurement.auctions.core.models import (
 from openprocurement.auctions.core.models import (
     Contract as BaseContract
 )
+from .interfaces import IContractV3_1
 
 
+@implementer(IContractV3_1)
 class Contract(BaseContract):
     items = ListType(ModelType(Item))
     suppliers = ListType(ModelType(Organization), min_size=1, max_size=1)
