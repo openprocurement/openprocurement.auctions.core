@@ -12,4 +12,3 @@ def includeme(config):
         (IContractV1,),
         IContractManagerAdapter
     )
-    config.scan("openprocurement.auctions.core.plugins.contracting.v1.views")

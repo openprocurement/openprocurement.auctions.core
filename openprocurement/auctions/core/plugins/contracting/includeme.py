@@ -7,6 +7,7 @@ from openprocurement.auctions.core.plugins.contracting.v3_1 import includeme as 
 
 
 def includeme(config):
+    config.scan("openprocurement.auctions.core.plugins.contracting.base.views")
     v1.includeme(config)
     v2.includeme(config)
     v2_1.includeme(config)

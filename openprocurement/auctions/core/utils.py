@@ -89,6 +89,8 @@ class awardingTypePredicate(object):
                 return False
 
             desirable_awarding_version = request.content_configurator.awarding_type
+            print request.current_route_url()
+            print (desirable_awarding_version, self.val, desirable_awarding_version == self.val)
             return desirable_awarding_version == self.val
 
         return False

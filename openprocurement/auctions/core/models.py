@@ -1212,6 +1212,7 @@ class Auction(BaseResourceItem):
             (Allow, '{}_{}'.format(self.owner, self.owner_token), 'edit_auction'),
             (Allow, '{}_{}'.format(self.owner, self.owner_token), 'upload_auction_documents'),
             (Allow, '{}_{}'.format(self.owner, self.owner_token), 'edit_complaint'),
+            (Allow, '{}_{}'.format(self.owner, self.owner_token), 'edit_auction_award'),
         ])
         return acl
 

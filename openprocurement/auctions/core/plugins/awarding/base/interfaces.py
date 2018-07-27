@@ -4,6 +4,7 @@ from zope.interface import (
     Interface,
 )
 
+
 class IAwardManagerAdapter(Interface):
     name = Attribute('Award name')
 
@@ -12,3 +13,12 @@ class IAwardManagerAdapter(Interface):
 
     def change_award(self, request, **kwargs):
         raise NotImplementedError
+
+    def create_award_complaint(self, request, **kwargs):
+        request.errors.add(
+            'body',
+            'data',
+            'Can\'t create complaint'
+        )
+        request.errors.status = 403
+        raise error_handler(request)

@@ -7,6 +7,7 @@ from openprocurement.auctions.core.plugins.awarding.v3_1 import includeme as v3_
 
 
 def includeme(config):
+    config.scan("openprocurement.auctions.core.plugins.awarding.base.views")
     v1.includeme(config)
     v2.includeme(config)
     v2_1.includeme(config)

@@ -17,10 +17,9 @@ from openprocurement.auctions.core.validation import (
 )
 
 
-@opresource(name='awarding_1_0:Auction Contracts',
+@opresource(name='Auction Contracts',
             collection_path=ENDPOINTS['contracts'],
             path=ENDPOINTS['contract'],
-            awardingType='awarding_1_0',
             description="Auction contracts")
 class BaseAuctionAwardContractResource(APIResource):
 

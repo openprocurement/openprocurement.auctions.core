@@ -14,6 +14,7 @@ from openprocurement.api.validation import (
 from openprocurement.auctions.core.plugins.contracting.base.validators import (
     validate_contract_document
 )
+
 from openprocurement.auctions.core.utils import (
     save_auction,
     apply_patch,
@@ -25,14 +26,11 @@ from openprocurement.auctions.core.validation import (
 )
 
 
-@opresource(
-    name='awarding_3_1:Auction Contract Documents',
-    collection_path='/auctions/{auction_id}/contracts/{contract_id}/documents',
-    path='/auctions/{auction_id}/contracts/{contract_id}/documents/{document_id}',
-    awardingType='awarding_3_1',
-    description="Auction contract documents"
-)
-class AuctionAwardContractDocumentResource(APIResource):
+@opresource(name='Auction Contract Documents',
+            collection_path='/auctions/{auction_id}/contracts/{contract_id}/documents',
+            path='/auctions/{auction_id}/contracts/{contract_id}/documents/{document_id}',
+            description="Auction contract documents")
+class BaseAuctionAwardContractDocumentResource(APIResource):
 
     @json_view(permission='view_auction')
     def collection_get(self):

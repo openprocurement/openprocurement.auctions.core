@@ -156,3 +156,6 @@ class AwardManagerV1Adapter(BaseAwardManagerAdapter):
             request.errors.add('body', 'data', 'Can\'t update award in current ({}) status'.format(award_status))
             request.errors.status = 403
             raise error_handler(request)
+
+    def create_award_complaint(self, request, **kwargs):
+        return

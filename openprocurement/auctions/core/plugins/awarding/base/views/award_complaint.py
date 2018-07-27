@@ -13,28 +13,34 @@ from openprocurement.auctions.core.utils import (
     opresource,
 )
 from openprocurement.auctions.core.validation import (
-    validate_complaint_data,
     validate_patch_complaint_data,
+    validate_complaint_data,
     validate_complaint_data_post_common,
     validate_patch_complaint_data_patch_common
+)
+from openprocurement.auctions.core.plugins.awarding.base.interfaces import (
+    IAwardManagerAdapter,
 )
 
 
 @opresource(
-    name='awarding_2_0:Auction Award Complaints',
+    name='Auction Award Complaints',
     collection_path='/auctions/{auction_id}/awards/{award_id}/complaints',
     path='/auctions/{auction_id}/awards/{award_id}/complaints/{complaint_id}',
-    awardingType='awarding_2_0',
     description="Auction award complaints"
 )
 class AuctionAwardComplaintResource(APIResource):
 
-    @json_view(content_type="application/json", permission='nobody',
+    @json_view(content_type="application/json", permission='create_award_complaint',
                validators=(validate_complaint_data,
                            validate_complaint_data_post_common))
     def collection_post(self):
         """Post a complaint for award
         """
+        award = self.request.validated['award']
+        manager = self.request.registry.getAdapter(award, IAwardManagerAdapter)
+        manager.create_award_complaint(self.request)
+
         auction = self.request.validated['auction']
         complaint = self.request.validated['complaint']
         complaint.date = get_now()

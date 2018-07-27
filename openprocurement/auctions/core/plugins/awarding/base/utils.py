@@ -104,8 +104,12 @@ def set_unsuccessful_award(request, auction, award, now):
 
 
 def add_award_route_url(request, auction, award, awarding_type):
-    route = '{}:Auction Awards'.format(awarding_type)
-    route_url = request.route_url(route, auction_id=auction.id, award_id=award['id'])
+    default_route_name = 'Auction Awards'
+    try:
+        custom_route_name = '{}:{}'.format(awarding_type, default_route_name)
+        route_url = request.route_url(custom_route_name, auction_id=auction.id, award_id=award['id'])
+    except KeyError:
+        route_url = request.route_url(default_route_name, auction_id=auction.id, award_id=award['id'])
     request.response.headers['Location'] = route_url
     return True
 

@@ -12,4 +12,3 @@ def includeme(config):
         (IAwardV3_1, ),
         IAwardManagerAdapter
     )
-    config.scan("openprocurement.auctions.core.plugins.awarding.v3_1.views")

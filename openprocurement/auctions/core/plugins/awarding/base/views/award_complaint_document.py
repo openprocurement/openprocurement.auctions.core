@@ -26,10 +26,9 @@ from openprocurement.auctions.core.validation import (
 
 
 @opresource(
-    name='awarding_1_0:Auction Award Complaint Documents',
+    name='Auction Award Complaint Documents',
     collection_path='/auctions/{auction_id}/awards/{award_id}/complaints/{complaint_id}/documents',
     path='/auctions/{auction_id}/awards/{award_id}/complaints/{complaint_id}/documents/{document_id}',
-    awardingType='awarding_1_0',
     description="Auction award complaint documents"
 )
 class AuctionAwardComplaintDocumentResource(APIResource):
