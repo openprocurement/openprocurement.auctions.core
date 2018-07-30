@@ -7,9 +7,9 @@ from openprocurement.auctions.core.plugins.contracting.base.interfaces import (
 def includeme(config):
     from .adapters import ContractManagerV3Adapter
     from .interfaces import IContractV3
+    config.scan("openprocurement.auctions.core.plugins.contracting.v3.views")
     config.registry.registerAdapter(
         ContractManagerV3Adapter,
         (IContractV3,),
         IContractManagerAdapter
     )
-    config.scan("openprocurement.auctions.core.plugins.contracting.v3.views")
