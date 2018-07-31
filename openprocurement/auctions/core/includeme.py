@@ -8,10 +8,6 @@ from openprocurement.api.interfaces import (
     IContentConfigurator,
     IAwardingNextCheck
 )
-from openprocurement.api.utils import (
-    get_content_configurator,
-    get_plugin_aliases
-)
 
 from openprocurement.auctions.core.adapters import (
     AuctionConfigurator,
@@ -29,9 +25,11 @@ from openprocurement.auctions.core.utils import (
     auction_from_data,
     init_plugins,
     awardingTypePredicate,
-    SubscribersPicker
+    SubscribersPicker,
+    get_content_configurator,
+    get_plugin_aliases,
+    get_evenly_plugins,
 )
-from openprocurement.api.app import get_evenly_plugins
 
 LOGGER = logging.getLogger(__name__)
 
