@@ -224,16 +224,36 @@ class SwiftsureItem(dgfCDB2Item):
 class flashDocument(BaseDocument):
 
     documentType = StringType(choices=[
-        'auctionNotice', 'awardNotice', 'contractNotice',
-        'notice', 'biddingDocuments', 'technicalSpecifications',
-        'evaluationCriteria', 'clarifications', 'shortlistedFirms',
-        'riskProvisions', 'billOfQuantity', 'bidders', 'conflictOfInterest',
-        'debarments', 'evaluationReports', 'winningBid', 'complaints',
-        'contractSigned', 'contractArrangements', 'contractSchedule',
-        'contractAnnexe', 'contractGuarantees', 'subContract',
-        'eligibilityCriteria', 'contractProforma', 'commercialProposal',
-        'qualificationDocuments', 'eligibilityDocuments', 'tenderNotice',
-    ])
+        'auctionNotice',
+        'awardNotice',
+        'bidders',
+        'biddingDocuments',
+        'billOfQuantity',
+        'clarifications',
+        'commercialProposal',
+        'complaints',
+        'conflictOfInterest',
+        'contractAnnexe',
+        'contractArrangements',
+        'contractGuarantees',
+        'contractNotice',
+        'contractProforma',
+        'contractSchedule',
+        'contractSigned',
+        'debarments',
+        'eligibilityCriteria',
+        'eligibilityDocuments',
+        'evaluationCriteria',
+        'evaluationReports',
+        'notice',
+        'qualificationDocuments',
+        'riskProvisions',
+        'shortlistedFirms',
+        'subContract',
+        'technicalSpecifications',
+        'tenderNotice',
+        'winningBid',
+        ])
     documentOf = StringType(required=True, choices=['tender', 'item', 'lot'], default='tender')
 
     def validate_relatedItem(self, data, relatedItem):
@@ -253,20 +273,45 @@ class dgfDocument(flashDocument):
     index = IntType()
     accessDetails = StringType()
     documentType = StringType(choices=[
-        'auctionNotice', 'awardNotice', 'contractNotice',
-        'notice', 'biddingDocuments', 'technicalSpecifications',
-        'evaluationCriteria', 'clarifications', 'shortlistedFirms',
-        'riskProvisions', 'billOfQuantity', 'bidders', 'conflictOfInterest',
-        'debarments', 'evaluationReports', 'winningBid', 'complaints',
-        'contractSigned', 'contractArrangements', 'contractSchedule',
-        'contractAnnexe', 'contractGuarantees', 'subContract',
-        'eligibilityCriteria', 'contractProforma', 'commercialProposal',
-        'qualificationDocuments', 'eligibilityDocuments', 'tenderNotice',
-        'illustration', 'financialLicense', 'virtualDataRoom',
-        'auctionProtocol', 'x_dgfPublicAssetCertificate',
-        'x_presentation', 'x_nda', 'x_dgfAssetFamiliarization',
+        'auctionNotice',
+        'auctionProtocol',
+        'awardNotice',
+        'bidders',
+        'biddingDocuments',
+        'billOfQuantity',
+        'clarifications',
+        'commercialProposal',
+        'complaints',
+        'conflictOfInterest',
+        'contractAnnexe',
+        'contractArrangements',
+        'contractGuarantees',
+        'contractNotice',
+        'contractProforma',
+        'contractSchedule',
+        'contractSigned',
+        'debarments',
+        'eligibilityCriteria',
+        'eligibilityDocuments',
+        'evaluationCriteria',
+        'evaluationReports',
+        'financialLicense',
+        'illustration',
+        'notice',
+        'qualificationDocuments',
+        'riskProvisions',
+        'shortlistedFirms',
+        'subContract',
+        'technicalSpecifications',
+        'tenderNotice',
+        'virtualDataRoom',
+        'winningBid',
+        'x_dgfAssetFamiliarization',
         'x_dgfPlatformLegalDetails',
-    ])
+        'x_dgfPublicAssetCertificate',
+        'x_nda',
+        'x_presentation',
+        ])
 
     @serializable(serialized_name="url", serialize_when_none=False)
     def download_url(self):
@@ -327,27 +372,58 @@ class dgfDocument(flashDocument):
 
 class dgfCDB2Document(dgfDocument):
     documentType = StringType(choices=[
-        'auctionNotice', 'awardNotice', 'contractNotice',
-        'notice', 'biddingDocuments', 'technicalSpecifications',
-        'evaluationCriteria', 'clarifications', 'shortlistedFirms',
-        'riskProvisions', 'billOfQuantity', 'bidders', 'conflictOfInterest',
-        'debarments', 'evaluationReports', 'winningBid', 'complaints',
-        'contractSigned', 'contractArrangements', 'contractSchedule',
-        'contractAnnexe', 'contractGuarantees', 'subContract',
-        'eligibilityCriteria', 'contractProforma', 'commercialProposal',
-        'qualificationDocuments', 'eligibilityDocuments', 'tenderNotice',
-        'illustration', 'auctionProtocol', 'x_dgfAssetFamiliarization',
-        'x_presentation', 'x_nda'
+        'auctionNotice',
+        'auctionProtocol',
+        'awardNotice',
+        'bidders',
+        'biddingDocuments',
+        'billOfQuantity',
+        'clarifications',
+        'commercialProposal',
+        'complaints',
+        'conflictOfInterest',
+        'contractAnnexe',
+        'contractArrangements',
+        'contractGuarantees',
+        'contractNotice',
+        'contractProforma',
+        'contractSchedule',
+        'contractSigned',
+        'debarments',
+        'eligibilityCriteria',
+        'eligibilityDocuments',
+        'evaluationCriteria',
+        'evaluationReports',
+        'illustration',
+        'notice',
+        'qualificationDocuments',
+        'riskProvisions',
+        'shortlistedFirms',
+        'subContract',
+        'technicalSpecifications',
+        'tenderNotice',
+        'winningBid',
+        'x_dgfAssetFamiliarization',
+        'x_nda',
+        'x_presentation',
     ])
 
 
 class swiftsureDocument(dgfDocument):
     documentOf = StringType(required=True, choices=['auction', 'item', 'lot'], default='auction')
     documentType = StringType(choices=[
-        'notice', 'technicalSpecifications', 'evaluationCriteria', 'bidders',
-        'illustration', 'x_PublicAssetCertificate', 'x_PlatformLegalDetails',
-        'x_presentation', 'informationDetails', 'x_dgfAssetFamiliarization',
-        'x_nda', 'cancellationDetails'
+        'bidders',
+        'cancellationDetails',
+        'evaluationCriteria',
+        'illustration',
+        'informationDetails',
+        'notice',
+        'technicalSpecifications',
+        'x_PlatformLegalDetails',
+        'x_PublicAssetCertificate',
+        'x_dgfAssetFamiliarization',
+        'x_nda',
+        'x_presentation',
     ])
 
     def validate_relatedItem(self, data, relatedItem):
@@ -399,8 +475,11 @@ class swiftsureCancellationDocument(swiftsureDocument):
 
 class awardV3_1Document(swiftsureDocument):
     documentType = StringType(choices=[
-        'winningBid', 'admissionProtocol', 'rejectionProtocol',
-        'act', 'auctionProtocol'
+        'act',
+        'admissionProtocol',
+        'auctionProtocol',
+        'rejectionProtocol',
+        'winningBid',
     ])
 
 
@@ -829,25 +908,98 @@ class Lot(Model):
 
 plain_role = (blacklist('_attachments', 'revisions', 'dateModified') + schematics_embedded_role)
 
-create_role = (blacklist('owner', '_attachments', 'revisions', 'date', 'dateModified',
-                         'doc_id', 'auctionID', 'bids', 'documents', 'awards',
-                         'questions', 'complaints', 'auctionUrl', 'status',
-                         'auctionPeriod', 'awardPeriod', 'procurementMethod',
-                         'awardCriteria', 'submissionMethod', 'cancellations',
-                         'numberOfBidders', 'contracts') + auction_embedded_role)
+create_role = (
+    blacklist(
+        '_attachments',
+        'auctionID',
+        'auctionPeriod',
+        'auctionUrl',
+        'awardCriteria',
+        'awardPeriod',
+        'awards',
+        'bids',
+        'cancellations',
+        'complaints',
+        'contracts',
+        'date',
+        'dateModified',
+        'doc_id',
+        'documents',
+        'numberOfBidders',
+        'owner',
+        'procurementMethod',
+        'questions',
+        'revisions',
+        'status',
+        'submissionMethod',
+    ) + auction_embedded_role
+)
 
 draft_role = whitelist('status')
-edit_role = (blacklist('status', 'procurementMethodType', 'lots', 'owner', '_attachments', 'revisions', 'date', 'dateModified', 'doc_id', 'auctionID', 'bids', 'documents', 'awards', 'questions', 'complaints', 'auctionUrl', 'auctionPeriod', 'awardPeriod', 'procurementMethod', 'awardCriteria', 'submissionMethod', 'mode', 'cancellations', 'numberOfBidders', 'contracts') + auction_embedded_role)
+edit_role = (
+    blacklist(
+        '_attachments',
+        'auctionID',
+        'auctionPeriod',
+        'auctionUrl',
+        'awardCriteria',
+        'awardPeriod',
+        'awards',
+        'bids',
+        'cancellations',
+        'complaints',
+        'contracts',
+        'date',
+        'dateModified',
+        'doc_id',
+        'documents',
+        'lots',
+        'mode',
+        'numberOfBidders',
+        'owner',
+        'procurementMethod',
+        'procurementMethodType',
+        'questions',
+        'revisions',
+        'status',
+        'submissionMethod',
+    ) + auction_embedded_role
+)
 view_role = (blacklist('_attachments', 'revisions') + auction_embedded_role)
 listing_role = whitelist('dateModified', 'doc_id')
-auction_view_role = whitelist('auctionID', 'dateModified', 'bids', 'auctionPeriod', 'minimalStep', 'auctionUrl', 'features', 'lots', 'items', 'procurementMethodType')
+auction_view_role = whitelist(
+    'auctionID',
+    'auctionPeriod',
+    'auctionUrl',
+    'bids',
+    'dateModified',
+    'features',
+    'items',
+    'lots',
+    'minimalStep',
+    'procurementMethodType',
+)
 auction_post_role = whitelist('bids')
 auction_patch_role = whitelist('auctionUrl', 'bids', 'lots')
 enquiries_role = (blacklist('_attachments', 'revisions', 'bids', 'numberOfBids') + auction_embedded_role)
 auction_role = (blacklist('_attachments', 'revisions', 'bids', 'numberOfBids') + auction_embedded_role)
 #chronograph_role = whitelist('status', 'enquiryPeriod', 'tenderPeriod', 'auctionPeriod', 'awardPeriod', 'lots')
 chronograph_role = whitelist('auctionPeriod', 'lots', 'next_check')
-chronograph_view_role = whitelist('status', 'enquiryPeriod', 'tenderPeriod', 'auctionPeriod', 'awardPeriod', 'awards', 'lots', 'doc_id', 'submissionMethodDetails', 'mode', 'numberOfBids', 'complaints', 'procurementMethodType')
+chronograph_view_role = whitelist(
+    'auctionPeriod',
+    'awardPeriod',
+    'awards',
+    'complaints',
+    'doc_id',
+    'enquiryPeriod',
+    'lots',
+    'mode',
+    'numberOfBids',
+    'procurementMethodType',
+    'status',
+    'submissionMethodDetails',
+    'tenderPeriod',
+)
 Administrator_role = whitelist('status', 'mode', 'procuringEntity', 'auctionPeriod', 'lots', 'suspended')
 
 
@@ -907,23 +1059,63 @@ dgf_auction_roles = {
     'create': (
         auction_embedded_role +
         blacklist(
-            'owner', '_attachments', 'revisions', 'date', 'dateModified', 'doc_id',
-            'auctionID', 'bids', 'documents', 'awards', 'questions', 'complaints',
-            'auctionUrl', 'status', 'enquiryPeriod', 'tenderPeriod', 'awardPeriod',
-            'procurementMethod', 'eligibilityCriteria', 'eligibilityCriteria_en',
-            'eligibilityCriteria_ru', 'awardCriteria', 'submissionMethod', 'cancellations',
-            'numberOfBidders', 'contracts', 'suspended')
+            '_attachments',
+            'auctionID',
+            'auctionUrl',
+            'awardCriteria',
+            'awardPeriod',
+            'awards',
+            'bids',
+            'cancellations',
+            'complaints',
+            'contracts',
+            'date',
+            'dateModified',
+            'doc_id',
+            'documents',
+            'eligibilityCriteria',
+            'eligibilityCriteria_en',
+            'eligibilityCriteria_ru',
+            'enquiryPeriod',
+            'numberOfBidders',
+            'owner',
+            'procurementMethod',
+            'questions',
+            'revisions',
+            'status',
+            'submissionMethod',
+            'suspended',
+            'tenderPeriod',
+        )
     ),
     'edit_active.tendering': (
         edit_role +
         blacklist(
-            'enquiryPeriod', 'tenderPeriod', 'value', 'auction_value', 'minimalStep',
-            'auction_minimalStep', 'guarantee', 'auction_guarantee', 'eligibilityCriteria',
-            'eligibilityCriteria_en', 'eligibilityCriteria_ru', 'awardCriteriaDetails',
-            'awardCriteriaDetails_en', 'awardCriteriaDetails_ru', 'procurementMethodRationale',
-            'procurementMethodRationale_en', 'procurementMethodRationale_ru', 'submissionMethodDetails',
-            'submissionMethodDetails_en', 'submissionMethodDetails_ru', 'items', 'procuringEntity',
-            'suspended', 'auctionParameters')
+            'auctionParameters',
+            'auction_guarantee',
+            'auction_minimalStep',
+            'auction_value',
+            'awardCriteriaDetails',
+            'awardCriteriaDetails_en',
+            'awardCriteriaDetails_ru',
+            'eligibilityCriteria',
+            'eligibilityCriteria_en',
+            'eligibilityCriteria_ru',
+            'enquiryPeriod',
+            'guarantee',
+            'items',
+            'minimalStep',
+            'procurementMethodRationale',
+            'procurementMethodRationale_en',
+            'procurementMethodRationale_ru',
+            'procuringEntity',
+            'submissionMethodDetails',
+            'submissionMethodDetails_en',
+            'submissionMethodDetails_ru',
+            'suspended',
+            'tenderPeriod',
+            'value',
+        )
     ),
     'Administrator': (whitelist('suspended', 'awards', 'auctionParameters') + Administrator_role),
     'pending.verification': enquiries_role,
@@ -946,19 +1138,68 @@ swiftsure_auction_roles['auction_view'] = (
     whitelist('minNumberOfQualifiedBids', 'registrationFee', 'bankAccount')
 )
 swiftsure_auction_roles['pending.activation'] = enquiries_role
-swiftsure_auction_roles['create'] = (auction_embedded_role + blacklist('owner', '_attachments', 'revisions', 'date', 'dateModified', 'doc_id', 'auctionID', 'bids', 'documents', 'awards', 'questions', 'complaints', 'auctionUrl', 'enquiryPeriod', 'tenderPeriod', 'awardPeriod', 'procurementMethod', 'eligibilityCriteria', 'eligibilityCriteria_en', 'eligibilityCriteria_ru', 'awardCriteria', 'submissionMethod', 'cancellations', 'numberOfBidders', 'contracts', 'suspended'))
+swiftsure_auction_roles['create'] = (
+        auction_embedded_role + blacklist(
+            '_attachments',
+            'auctionID',
+            'auctionUrl',
+            'awardCriteria',
+            'awardPeriod',
+            'awards',
+            'bids',
+            'cancellations',
+            'complaints',
+            'contracts',
+            'date',
+            'dateModified',
+            'doc_id',
+            'documents',
+            'eligibilityCriteria',
+            'eligibilityCriteria_en',
+            'eligibilityCriteria_ru',
+            'enquiryPeriod',
+            'numberOfBidders',
+            'owner',
+            'procurementMethod',
+            'questions',
+            'revisions',
+            'submissionMethod',
+            'suspended',
+            'tenderPeriod',
+        )
+    )
 
 # Tessel auction
 tessel_auction_roles = deepcopy(dgf_auction_roles)
 tessel_auction_roles['create'] = (
     auction_embedded_role +
     blacklist(
-        'owner', '_attachments', 'revisions', 'date', 'dateModified', 'doc_id',
-        'auctionID', 'bids', 'awards', 'questions', 'complaints',
-        'auctionUrl', 'enquiryPeriod', 'tenderPeriod', 'awardPeriod',
-        'procurementMethod', 'eligibilityCriteria', 'eligibilityCriteria_en',
-        'eligibilityCriteria_ru', 'awardCriteria', 'submissionMethod', 'cancellations',
-        'numberOfBidders', 'contracts', 'suspended')
+        '_attachments',
+        'auctionID',
+        'auctionUrl',
+        'awardCriteria',
+        'awardPeriod',
+        'awards',
+        'bids',
+        'cancellations',
+        'complaints',
+        'contracts',
+        'date',
+        'dateModified',
+        'doc_id',
+        'eligibilityCriteria',
+        'eligibilityCriteria_en',
+        'eligibilityCriteria_ru',
+        'enquiryPeriod',
+        'numberOfBidders',
+        'owner',
+        'procurementMethod',
+        'questions',
+        'revisions',
+        'submissionMethod',
+        'suspended',
+        'tenderPeriod',
+    )
 )
 tessel_auction_roles['edit_active.tendering'] = whitelist()
 tessel_auction_roles['auction_view'] = (
@@ -1169,8 +1410,18 @@ class Auction(BaseResourceItem):
 
     minimalStep = ModelType(Value, required=True)
     status = StringType(
-        choices=['draft', 'active.enquiries', 'active.tendering', 'active.auction', 'active.qualification',
-                 'active.awarded', 'complete', 'cancelled', 'unsuccessful'], default='active.enquiries')
+        choices=[
+            'active.auction',
+            'active.awarded',
+            'active.enquiries',
+            'active.qualification',
+            'active.tendering',
+            'cancelled',
+            'complete',
+            'draft',
+            'unsuccessful',
+        ],
+        default='active.enquiries')
     questions = ListType(ModelType(Question), default=list())
     auctionUrl = URLType()
     features = ListType(ModelType(Feature), validators=[validate_features_uniq])
