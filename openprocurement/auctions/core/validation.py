@@ -1,8 +1,11 @@
 # -*- coding: utf-8 -*-
 from schematics.exceptions import ValidationError
-
+from schematics.types import BaseType
 from openprocurement.api.constants import SANDBOX_MODE
-from openprocurement.auctions.core.constants import ENGLISH_AUCTION_PROCUREMENT_METHOD_TYPES
+from openprocurement.auctions.core.constants import (
+    ENGLISH_AUCTION_PROCUREMENT_METHOD_TYPES,
+    CPVS_CODES_DGF_CDB2
+)
 from openprocurement.api.utils import (
     error_handler,
     get_now,
@@ -456,3 +459,12 @@ def validate_patch_lot_data(request, **kwargs):
 def validate_disallow_dgfPlatformLegalDetails(docs, *args):
     if any([i.documentType == 'x_dgfPlatformLegalDetails' for i in docs]):
         raise ValidationError(u"Disallow documents with x_dgfPlatformLegalDetails documentType")
+
+
+
+# additional_classification_validators__________________________________________
+
+def cpvs_validator(data, code):
+    if data.get('scheme') == u'CPVS' and code not in CPVS_CODES_DGF_CDB2:
+        raise ValidationError(BaseType.MESSAGES['choices'].format(unicode(CPVS_CODES_DGF_CDB2)))
+    return True

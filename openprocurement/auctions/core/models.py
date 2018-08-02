@@ -30,7 +30,6 @@ from schematics_flexible.schematics_flexible import FlexibleModelType
 from openprocurement.schemas.dgf.schemas_store import SchemaStore
 
 from barbecue import vnmax
-
 from openprocurement.api.constants import TZ, SANDBOX_MODE, AUCTIONS_COMPLAINT_STAND_STILL_TIME
 from openprocurement.api.interfaces import IAwardingNextCheck
 from openprocurement.api.models.auction_models import (
@@ -70,7 +69,10 @@ from openprocurement.api.models.common import (
 )
 from openprocurement.api.models.schematics_extender import DecimalType
 from openprocurement.api.utils import get_now, get_request_from_root, serialize_document_url
-from openprocurement.api.validation import validate_items_uniq  # noqa forwarded import
+from openprocurement.api.validation import (
+    validate_items_uniq,  # noqa forwarded import
+    koatuu_validator
+)
 
 from openprocurement.auctions.core.constants import (
     DOCUMENT_TYPE_OFFLINE,
@@ -88,7 +90,8 @@ from openprocurement.auctions.core.constants import (
 )
 from openprocurement.auctions.core.utils import get_auction_creation_date
 from openprocurement.auctions.core.validation import (
-    validate_disallow_dgfPlatformLegalDetails
+    validate_disallow_dgfPlatformLegalDetails,
+    cpvs_validator
 )
 
 view_complaint_role = (blacklist('owner_token', 'owner') + schematics_default_role)
@@ -135,6 +138,11 @@ class flashItem(BaseItem):
             raise ValidationError(u"relatedLot should be one of lots")
 
 
+class DgfAdditionalClassification(Classification):
+    id_validators = Classification.id_validators + (koatuu_validator,)
+
+
+
 class dgfItem(flashItem):
     """A good, service, or work to be contracted."""
     class Options:
@@ -143,7 +151,7 @@ class dgfItem(flashItem):
             'edit_active.tendering': blacklist('deliveryLocation', 'deliveryAddress', 'deliveryDate'),
         }
     classification = ModelType(dgfCAVClassification, required=True)
-    additionalClassifications = ListType(ModelType(Classification), default=list())
+    additionalClassifications = ListType(ModelType(DgfAdditionalClassification), default=list())
     address = ModelType(Address)
     location = ModelType(Location)
     schema_properties = FlexibleModelType(SchemaStore())
@@ -182,11 +190,8 @@ class dgfCDB2CPVCAVClassification(Classification):
                 )
             )
 
-
-class dgfCDB2AdditionalClassification(Classification):
-    def validate_id(self, data, code):
-        if data.get('scheme') == u'CPVS' and code not in CPVS_CODES_DGF_CDB2:
-            raise ValidationError(BaseType.MESSAGES['choices'].format(unicode(CPVS_CODES_DGF_CDB2)))
+class DgfCDB2AdditionalClassification(Classification):
+    id_validators = Classification.id_validators + (cpvs_validator,)
 
 
 class dgfCDB2Item(flashItem):
@@ -197,7 +202,7 @@ class dgfCDB2Item(flashItem):
             'edit_active.tendering': blacklist('deliveryLocation', 'deliveryAddress'),
         }
     classification = ModelType(dgfCDB2CPVCAVClassification, required=True)
-    additionalClassifications = ListType(ModelType(dgfCDB2AdditionalClassification), default=list())
+    additionalClassifications = ListType(ModelType(DgfCDB2AdditionalClassification), default=list())
     address = ModelType(Address)
     location = ModelType(Location)
     contractPeriod = ModelType(Period)

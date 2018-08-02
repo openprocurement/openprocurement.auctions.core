@@ -348,7 +348,7 @@ class BaseAuctionWebTest(BaseResourceWebTest):
             item['relatedLot'] = lots[i % len(lots)]['id']
 
 
-    def create_auction_unit(self, auth=None, data=None, lots=None):
+    def create_auction_unit(self, auth=None, data=None, lots=None, status=None):
         auth_switch = False
 
         if auth:
@@ -358,10 +358,13 @@ class BaseAuctionWebTest(BaseResourceWebTest):
         if not data:
             data = deepcopy(self.initial_data)
         if lots:
-            add_lots_to_auction(data, lots)
+            self.add_lots_to_auction(data, lots)
         elif self.initial_lots:
-            add_lots_to_auction(data, self.initial_lots)
-        response = self.app.post_json('/auctions', {'data': data})
+            self.add_lots_to_auction(data, self.initial_lots)
+        if status:
+            response = self.app.post_json('/auctions', {'data': data}, status=status)
+        else:
+            response = self.app.post_json('/auctions', {'data': data})
         auction = response.json
         if auth_switch:
             self.app.authorization = current_auth
