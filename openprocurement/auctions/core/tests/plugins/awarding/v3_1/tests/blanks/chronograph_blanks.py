@@ -36,8 +36,9 @@ def not_switch_active_to_unsuccessful(self):
     self.assertEqual(response.content_type, 'application/json')
     self.assertEqual(response.json["data"]["documentType"], 'auctionProtocol')
 
-    response = self.app.patch_json('/auctions/{}/awards/{}'.format(self.auction_id, self.award_id),
-                                   {"data": {"status": "active"}})
+    response = self.app.patch_json('/auctions/{}/awards/{}?acc_token={}'.format(
+        self.auction_id, self.award_id, self.auction_token
+    ), {"data": {"status": "active"}})
     self.assertEqual(response.status, '200 OK')
     self.assertEqual(response.content_type, 'application/json')
     self.assertEqual(response.json['data']["status"], "active")

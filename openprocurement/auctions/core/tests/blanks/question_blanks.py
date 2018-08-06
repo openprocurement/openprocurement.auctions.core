@@ -183,8 +183,9 @@ def patch_auction_question(self):
     self.assertEqual(response.content_type, 'application/json')
     question = response.json['data']
 
-    response = self.app.patch_json('/auctions/{}/questions/{}'.format(self.auction_id, question['id']),
-                                   {"data": {"answer": "answer"}})
+    response = self.app.patch_json('/auctions/{}/questions/{}?acc_token={}'.format(
+        self.auction_id, question['id'], self.auction_token
+    ), {"data": {"answer": "answer"}})
     self.assertEqual(response.status, '200 OK')
     self.assertEqual(response.content_type, 'application/json')
     self.assertEqual(response.json['data']["answer"], "answer")
@@ -215,8 +216,9 @@ def patch_auction_question(self):
 
     self.set_status('active.auction')
 
-    response = self.app.patch_json('/auctions/{}/questions/{}'.format(self.auction_id, question['id']),
-                                   {"data": {"answer": "answer"}}, status=403)
+    response = self.app.patch_json('/auctions/{}/questions/{}?acc_token={}'.format(
+        self.auction_id, question['id'], self.auction_token
+    ), {"data": {"answer": "answer"}}, status=403)
     self.assertEqual(response.status, '403 Forbidden')
     self.assertEqual(response.content_type, 'application/json')
     self.assertEqual(response.json['errors'][0]["description"],
@@ -295,7 +297,9 @@ def get_auction_questions(self):
 
 
 def create_auction_question_lot(self):
-    response = self.app.post_json('/auctions/{}/cancellations'.format(self.auction_id), {'data': {
+    response = self.app.post_json('/auctions/{}/cancellations?acc_token={}'.format(
+        self.auction_id, self.auction_token
+    ), {'data': {
         'reason': 'cancellation reason',
         'status': 'active',
         "cancellationOf": "lot",
@@ -303,7 +307,9 @@ def create_auction_question_lot(self):
     }})
     self.assertEqual(response.status, '201 Created')
 
-    response = self.app.post_json('/auctions/{}/questions'.format(self.auction_id), {'data': {
+    response = self.app.post_json('/auctions/{}/questions?acc_token={}'.format(
+        self.auction_id, self.auction_token
+    ), {'data': {
         'title': 'question title',
         'description': 'question description',
         "questionOf": "lot",
@@ -314,7 +320,9 @@ def create_auction_question_lot(self):
     self.assertEqual(response.content_type, 'application/json')
     self.assertEqual(response.json['errors'][0]["description"], "Can add question only in active lot status")
 
-    response = self.app.post_json('/auctions/{}/questions'.format(self.auction_id), {'data': {
+    response = self.app.post_json('/auctions/{}/questions?acc_token={}'.format(
+        self.auction_id, self.auction_token
+    ), {'data': {
         'title': 'question title',
         'description': 'question description',
         "questionOf": "lot",
@@ -341,7 +349,9 @@ def patch_auction_question_lot(self):
     self.assertEqual(response.content_type, 'application/json')
     question = response.json['data']
 
-    response = self.app.post_json('/auctions/{}/cancellations'.format(self.auction_id), {'data': {
+    response = self.app.post_json('/auctions/{}/cancellations?acc_token={}'.format(
+        self.auction_id, self.auction_token
+    ), {'data': {
         'reason': 'cancellation reason',
         'status': 'active',
         "cancellationOf": "lot",
@@ -349,13 +359,16 @@ def patch_auction_question_lot(self):
     }})
     self.assertEqual(response.status, '201 Created')
 
-    response = self.app.patch_json('/auctions/{}/questions/{}'.format(self.auction_id, question['id']),
-                                   {"data": {"answer": "answer"}}, status=403)
+    response = self.app.patch_json('/auctions/{}/questions/{}?acc_token={}'.format(
+        self.auction_id, question['id'], self.auction_token
+    ), {"data": {"answer": "answer"}}, status=403)
     self.assertEqual(response.status, '403 Forbidden')
     self.assertEqual(response.content_type, 'application/json')
     self.assertEqual(response.json['errors'][0]["description"], "Can update question only in active lot status")
 
-    response = self.app.post_json('/auctions/{}/questions'.format(self.auction_id), {'data': {
+    response = self.app.post_json('/auctions/{}/questions?acc_token={}'.format(
+        self.auction_id, self.auction_token
+    ), {'data': {
         'title': 'question title',
         'description': 'question description',
         "questionOf": "lot",
@@ -366,8 +379,9 @@ def patch_auction_question_lot(self):
     self.assertEqual(response.content_type, 'application/json')
     question = response.json['data']
 
-    response = self.app.patch_json('/auctions/{}/questions/{}'.format(self.auction_id, question['id']),
-                                   {"data": {"answer": "answer"}})
+    response = self.app.patch_json('/auctions/{}/questions/{}?acc_token={}'.format(
+        self.auction_id, question['id'], self.auction_token
+    ), {"data": {"answer": "answer"}})
     self.assertEqual(response.status, '200 OK')
     self.assertEqual(response.content_type, 'application/json')
     self.assertEqual(response.json['data']["answer"], "answer")

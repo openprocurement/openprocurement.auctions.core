@@ -151,11 +151,11 @@ def validate_auction_auction_data(request, **kwargs):
 
 def validate_bid_data(request, **kwargs):
     if not request.check_accreditation(request.auction.edit_accreditation):
-        request.errors.add('procurementMethodType', 'accreditation', 'Broker Accreditation level does not permit bid creation')
+        request.errors.add('body', 'accreditation', 'Broker Accreditation level does not permit bid creation')
         request.errors.status = 403
         return
     if request.auction.get('mode', None) is None and request.check_accreditation('t'):
-        request.errors.add('procurementMethodType', 'mode', 'Broker Accreditation level does not permit bid creation')
+        request.errors.add('body', 'mode', 'Broker Accreditation level does not permit bid creation')
         request.errors.status = 403
         return
     update_logging_context(request, {'bid_id': '__new__'})

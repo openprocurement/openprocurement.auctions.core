@@ -68,17 +68,11 @@ def create_auction_contract_in_complete_status(self):
 
 
 def get_auction_contract(self):
-    response = self.app.post_json('/auctions/{}/contracts'.format(
-        self.auction_id),
-        {'data': {'title': 'contract title', 'description': 'contract description', 'awardID': self.award_id}})
-    self.assertEqual(response.status, '201 Created')
-    self.assertEqual(response.content_type, 'application/json')
-    contract = response.json['data']
 
-    response = self.app.get('/auctions/{}/contracts/{}'.format(self.auction_id, contract['id']))
+    response = self.app.get('/auctions/{}/contracts/{}'.format(self.auction_id, self.contract_id))
     self.assertEqual(response.status, '200 OK')
     self.assertEqual(response.content_type, 'application/json')
-    self.assertEqual(response.json['data'], contract)
+    self.assertEqual(response.json['data'], self.contract)
 
     response = self.app.get('/auctions/{}/contracts/some_id'.format(self.auction_id), status=404)
     self.assertEqual(response.status, '404 Not Found')

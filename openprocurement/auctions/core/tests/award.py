@@ -36,7 +36,9 @@ from openprocurement.auctions.core.tests.blanks.award_blanks import (
 
 
 class AuctionLotAwardResourceTestMixin(object):
-    test_create_auction_award_lot = snitch(create_auction_award_lot)
+    test_create_auction_award_lot = unittest.skip('option not available')(
+        snitch(create_auction_award_lot)
+    )
     test_patch_auction_award_lot = snitch(patch_auction_award_lot)
     test_patch_auction_award_unsuccessful_lot = snitch(patch_auction_award_unsuccessful_lot)
 

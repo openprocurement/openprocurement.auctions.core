@@ -58,6 +58,7 @@ def get_auction_auction_not_found(self):
 
 
 def get_auction_auction(self):
+    self.app.authorization = ('Basic', ('auction', ''))
     response = self.app.get('/auctions/{}/auction'.format(self.auction_id), status=403)
     self.assertEqual(response.status, '403 Forbidden')
     self.assertEqual(response.content_type, 'application/json')
@@ -271,6 +272,7 @@ def post_auction_auction_reversed(self):
 
 
 def get_auction_auction_lot(self):
+        self.app.authorization = ('Basic', ('auction', ''))
         response = self.app.get('/auctions/{}/auction'.format(self.auction_id), status=403)
         self.assertEqual(response.status, '403 Forbidden')
         self.assertEqual(response.content_type, 'application/json')
@@ -681,8 +683,9 @@ def patch_auction_auction_2_lots(self):
                      patch_data["bids"][0]['lotValues'][0]['participationUrl'])
     self.assertEqual(auction["lots"][0]['auctionUrl'], patch_data["lots"][0]['auctionUrl'])
 
-    self.app.authorization = ('Basic', ('token', ''))
-    response = self.app.post_json('/auctions/{}/cancellations'.format(self.auction_id), {'data': {
+    response = self.app.post_json('/auctions/{}/cancellations?acc_token={}'.format(
+        self.auction_id, self.auction_token
+    ), {'data': {
         'reason': 'cancellation reason',
         'status': 'active',
         "cancellationOf": "lot",
@@ -778,6 +781,7 @@ def post_auction_auction_document_2_lots(self):
 
 
 def get_auction_features_auction(self):
+    self.app.authorization = ('Basic', ('auction', ''))
     response = self.app.get('/auctions/{}/auction'.format(self.auction_id))
     self.assertEqual(response.status, '200 OK')
     self.assertEqual(response.content_type, 'application/json')

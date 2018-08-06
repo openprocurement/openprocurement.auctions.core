@@ -84,16 +84,20 @@ def patch_signing_period(self):
     response = self.app.get('/auctions/{}/contracts'.format(self.auction_id))
     contract = response.json['data'][0]
 
-    response = self.app.post('/auctions/{}/contracts/{}/documents'.format(
-        self.auction_id, contract['id']), upload_files=[('file', 'name.doc', 'content')])
+    response = self.app.post('/auctions/{}/contracts/{}/documents?acc_token={}'.format(
+        self.auction_id, contract['id'], self.auction_token
+    ), upload_files=[('file', 'name.doc', 'content')])
     self.assertEqual(response.status, '201 Created')
     self.assertEqual(response.content_type, 'application/json')
 
     # check that signingPeriod can't be patched
-    pre_patch_contract_response = self.app.get('/auctions/{0}/contracts/{1}' \
-        .format(self.auction_id, contract['id']))
+    pre_patch_contract_response = self.app.get('/auctions/{0}/contracts/{1}'.format(
+        self.auction_id, contract['id']
+    ))
     self.app.patch_json(
-        '/auctions/{0}/contracts/{1}'.format(self.auction_id, contract['id']),
+        '/auctions/{0}/contracts/{1}?acc_token={2}'.format(
+            self.auction_id, contract['id'], self.auction_token
+        ),
         {'data': {
             'signingPeriod': {
                 'startDate': '2010-02-02T12:04:15+02:00',
@@ -116,8 +120,9 @@ def patch_date_paid(self):
     response = self.app.get('/auctions/{}/contracts'.format(self.auction_id))
     contract = response.json['data'][0]
 
-    response = self.app.post('/auctions/{}/contracts/{}/documents'.format(
-        self.auction_id, contract['id']), upload_files=[('file', 'name.doc', 'content')])
+    response = self.app.post('/auctions/{}/contracts/{}/documents?acc_token={}'.format(
+        self.auction_id, contract['id'], self.auction_token
+    ), upload_files=[('file', 'name.doc', 'content')])
     self.assertEqual(response.status, '201 Created')
     self.assertEqual(response.content_type, 'application/json')
 
@@ -128,13 +133,17 @@ def patch_date_paid(self):
     self.assertIsNone(pre_patch_contract_response.json['data'].get('datePaid'))
 
     self.app.patch_json(
-        '/auctions/{0}/contracts/{1}'.format(self.auction_id, contract['id']),
+        '/auctions/{0}/contracts/{1}?acc_token={2}'.format(
+            self.auction_id, contract['id'], self.auction_token
+        ),
         {'data': {'datePaid': date_paid_iso_str}},
         status=200
     )
 
     after_patch_contract_response = self.app.get(
-        '/auctions/{0}/contracts/{1}'.format(self.auction_id, contract['id'])
+        '/auctions/{0}/contracts/{1}?acc_token={2}'.format(
+            self.auction_id, contract['id'], self.auction_token
+        )
     )
     # check if datePaid has appeared
     self.assertEqual(

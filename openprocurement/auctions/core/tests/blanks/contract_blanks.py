@@ -30,52 +30,6 @@ def create_auction_contract_invalid(self):
          u'name': u'Content-Type'}
     ])
 
-    response = self.app.post(
-        request_path, 'data', content_type='application/json', status=422)
-    self.assertEqual(response.status, '422 Unprocessable Entity')
-    self.assertEqual(response.content_type, 'application/json')
-    self.assertEqual(response.json['status'], 'error')
-    self.assertEqual(response.json['errors'], [
-        JSON_RENDERER_ERROR
-    ])
-
-    response = self.app.post_json(request_path, 'data', status=422)
-    self.assertEqual(response.status, '422 Unprocessable Entity')
-    self.assertEqual(response.content_type, 'application/json')
-    self.assertEqual(response.json['status'], 'error')
-    self.assertEqual(response.json['errors'], [
-        {u'description': u'Data not available',
-         u'location': u'body', u'name': u'data'}
-    ])
-
-    response = self.app.post_json(
-        request_path, {'not_data': {}}, status=422)
-    self.assertEqual(response.status, '422 Unprocessable Entity')
-    self.assertEqual(response.content_type, 'application/json')
-    self.assertEqual(response.json['status'], 'error')
-    self.assertEqual(response.json['errors'], [
-        {u'description': u'Data not available',
-         u'location': u'body', u'name': u'data'}
-    ])
-
-    response = self.app.post_json(request_path, {'data': {
-        'invalid_field': 'invalid_value'}}, status=422)
-    self.assertEqual(response.status, '422 Unprocessable Entity')
-    self.assertEqual(response.content_type, 'application/json')
-    self.assertEqual(response.json['status'], 'error')
-    self.assertEqual(response.json['errors'], [
-        {u'description': u'Rogue field', u'location':
-            u'body', u'name': u'invalid_field'}
-    ])
-
-    response = self.app.post_json(request_path, {'data': {'awardID': 'invalid_value'}}, status=422)
-    self.assertEqual(response.status, '422 Unprocessable Entity')
-    self.assertEqual(response.content_type, 'application/json')
-    self.assertEqual(response.json['status'], 'error')
-    self.assertEqual(response.json['errors'], [
-        {u'description': [u'awardID should be one of awards'], u'location': u'body', u'name': u'awardID'}
-    ])
-
 
 def get_auction_contracts(self):
     response = self.app.get('/auctions/{}/contracts'.format(self.auction_id))
@@ -96,13 +50,11 @@ def get_auction_contracts(self):
 
 
 def patch_auction_contract_2_lots(self):
-    from openprocurement.auctions.core.plugins.contracting.v1.tests.fixtures import create_contract
-
-    contract = create_contract(self, self.auction_id, self.award_id)
     response = self.app.patch_json(
-        '/auctions/{}/contracts/{}'.format(
+        '/auctions/{}/contracts/{}?acc_token={}'.format(
             self.auction_id,
-            contract.id
+            self.contract_id,
+            self.auction_token
         ),
         {"data": {"status": "active"}},
         status=403
@@ -113,7 +65,9 @@ def patch_auction_contract_2_lots(self):
 
     self.set_status('complete', {'status': 'active.awarded'})
 
-    response = self.app.post_json('/auctions/{}/cancellations'.format(self.auction_id), {'data': {
+    response = self.app.post_json('/auctions/{}/cancellations?acc_token={}'.format(
+        self.auction_id, self.auction_token
+    ), {'data': {
         'reason': 'cancellation reason',
         'status': 'active',
         "cancellationOf": "lot",
@@ -121,9 +75,10 @@ def patch_auction_contract_2_lots(self):
     }})
 
     response = self.app.patch_json(
-        '/auctions/{}/contracts/{}'.format(
+        '/auctions/{}/contracts/{}?acc_token={}'.format(
             self.auction_id,
-            contract.id,
+            self.contract_id,
+            self.auction_token
         ),
         {"data": {"status": "active"}},
         status=403
@@ -158,8 +113,9 @@ def not_found(self):
             u'url', u'name': u'contract_id'}
     ])
 
-    response = self.app.post('/auctions/{}/contracts/{}/documents'.format(self.auction_id, self.contract_id), status=404, upload_files=[
-                             ('invalid_value', 'name.doc', 'content')])
+    response = self.app.post('/auctions/{}/contracts/{}/documents?acc_token={}'.format(
+        self.auction_id, self.contract_id, self.auction_token
+    ), status=404, upload_files=[('invalid_value', 'name.doc', 'content')])
     self.assertEqual(response.status, '404 Not Found')
     self.assertEqual(response.content_type, 'application/json')
     self.assertEqual(response.json['status'], 'error')
@@ -244,8 +200,9 @@ def not_found(self):
 
 
 def create_auction_contract_document(self):
-    response = self.app.post('/auctions/{}/contracts/{}/documents'.format(
-        self.auction_id, self.contract_id), upload_files=[('file', 'name.doc', 'content')])
+    response = self.app.post('/auctions/{}/contracts/{}/documents?acc_token={}'.format(
+        self.auction_id, self.contract_id, self.auction_token
+    ), upload_files=[('file', 'name.doc', 'content')])
     self.assertEqual(response.status, '201 Created')
     self.assertEqual(response.content_type, 'application/json')
     doc_id = response.json["data"]['id']
@@ -290,32 +247,35 @@ def create_auction_contract_document(self):
     auction['contracts'][-1]["status"] = "cancelled"
     self.db.save(auction)
 
-    response = self.app.post('/auctions/{}/contracts/{}/documents'.format(
-        self.auction_id, self.contract_id), upload_files=[('file', 'name.doc', 'content')], status=403)
+    response = self.app.post('/auctions/{}/contracts/{}/documents?acc_token={}'.format(
+        self.auction_id, self.contract_id, self.auction_token
+    ), upload_files=[('file', 'name.doc', 'content')], status=403)
     self.assertEqual(response.status, '403 Forbidden')
     self.assertEqual(response.content_type, 'application/json')
     self.assertEqual(response.json['errors'][0]["description"], "Can't add document in current contract status")
 
     self.set_status('unsuccessful')
 
-    response = self.app.post('/auctions/{}/contracts/{}/documents'.format(
-        self.auction_id, self.contract_id), upload_files=[('file', 'name.doc', 'content')], status=403)
+    response = self.app.post('/auctions/{}/contracts/{}/documents?acc_token={}'.format(
+        self.auction_id, self.contract_id, self.auction_token
+    ), upload_files=[('file', 'name.doc', 'content')], status=403)
     self.assertEqual(response.status, '403 Forbidden')
     self.assertEqual(response.content_type, 'application/json')
     self.assertEqual(response.json['errors'][0]["description"], "Can't add document in current (unsuccessful) auction status")
 
 
 def put_auction_contract_document(self):
-    response = self.app.post('/auctions/{}/contracts/{}/documents'.format(
-        self.auction_id, self.contract_id), upload_files=[('file', 'name.doc', 'content')])
+    response = self.app.post('/auctions/{}/contracts/{}/documents?acc_token={}'.format(
+        self.auction_id, self.contract_id, self.auction_token
+    ), upload_files=[('file', 'name.doc', 'content')])
     self.assertEqual(response.status, '201 Created')
     self.assertEqual(response.content_type, 'application/json')
     doc_id = response.json["data"]['id']
     self.assertIn(doc_id, response.headers['Location'])
 
-    response = self.app.put('/auctions/{}/contracts/{}/documents/{}'.format(self.auction_id, self.contract_id, doc_id),
-                            status=404,
-                            upload_files=[('invalid_name', 'name.doc', 'content')])
+    response = self.app.put('/auctions/{}/contracts/{}/documents/{}?acc_token={}'.format(
+        self.auction_id, self.contract_id, doc_id, self.auction_token
+    ), status=404, upload_files=[('invalid_name', 'name.doc', 'content')])
     self.assertEqual(response.status, '404 Not Found')
     self.assertEqual(response.content_type, 'application/json')
     self.assertEqual(response.json['status'], 'error')
@@ -324,8 +284,9 @@ def put_auction_contract_document(self):
             u'body', u'name': u'file'}
     ])
 
-    response = self.app.put('/auctions/{}/contracts/{}/documents/{}'.format(
-        self.auction_id, self.contract_id, doc_id), upload_files=[('file', 'name.doc', 'content2')])
+    response = self.app.put('/auctions/{}/contracts/{}/documents/{}?acc_token={}'.format(
+        self.auction_id, self.contract_id, doc_id, self.auction_token
+    ), upload_files=[('file', 'name.doc', 'content2')])
     self.assertEqual(response.status, '200 OK')
     self.assertEqual(response.content_type, 'application/json')
     self.assertEqual(doc_id, response.json["data"]["id"])
@@ -343,8 +304,9 @@ def put_auction_contract_document(self):
     self.assertEqual(doc_id, response.json["data"]["id"])
     self.assertEqual('name.doc', response.json["data"]["title"])
 
-    response = self.app.put('/auctions/{}/contracts/{}/documents/{}'.format(
-        self.auction_id, self.contract_id, doc_id), 'content3', content_type='application/msword')
+    response = self.app.put('/auctions/{}/contracts/{}/documents/{}?acc_token={}'.format(
+        self.auction_id, self.contract_id, doc_id, self.auction_token
+    ), 'content3', content_type='application/msword')
     self.assertEqual(response.status, '200 OK')
     self.assertEqual(response.content_type, 'application/json')
     self.assertEqual(doc_id, response.json["data"]["id"])
@@ -359,34 +321,38 @@ def put_auction_contract_document(self):
     auction['contracts'][-1]["status"] = "cancelled"
     self.db.save(auction)
 
-    response = self.app.put('/auctions/{}/contracts/{}/documents/{}'.format(
-        self.auction_id, self.contract_id, doc_id), upload_files=[('file', 'name.doc', 'content3')], status=403)
+    response = self.app.put('/auctions/{}/contracts/{}/documents/{}?acc_token={}'.format(
+        self.auction_id, self.contract_id, doc_id, self.auction_token
+    ), upload_files=[('file', 'name.doc', 'content3')], status=403)
     self.assertEqual(response.status, '403 Forbidden')
     self.assertEqual(response.content_type, 'application/json')
     self.assertEqual(response.json['errors'][0]["description"], "Can't update document in current contract status")
 
     self.set_status('unsuccessful')
 
-    response = self.app.put('/auctions/{}/contracts/{}/documents/{}'.format(
-        self.auction_id, self.contract_id, doc_id), upload_files=[('file', 'name.doc', 'content3')], status=403)
+    response = self.app.put('/auctions/{}/contracts/{}/documents/{}?acc_token={}'.format(
+        self.auction_id, self.contract_id, doc_id, self.auction_token
+    ), upload_files=[('file', 'name.doc', 'content3')], status=403)
     self.assertEqual(response.status, '403 Forbidden')
     self.assertEqual(response.content_type, 'application/json')
     self.assertEqual(response.json['errors'][0]["description"], "Can't update document in current (unsuccessful) auction status")
 
 
 def patch_auction_contract_document(self):
-    response = self.app.post('/auctions/{}/contracts/{}/documents'.format(
-        self.auction_id, self.contract_id), upload_files=[('file', 'name.doc', 'content')])
+    response = self.app.post('/auctions/{}/contracts/{}/documents?acc_token={}'.format(
+        self.auction_id, self.contract_id, self.auction_token
+    ), upload_files=[('file', 'name.doc', 'content')])
     self.assertEqual(response.status, '201 Created')
     self.assertEqual(response.content_type, 'application/json')
     doc_id = response.json["data"]['id']
     self.assertIn(doc_id, response.headers['Location'])
 
     response = self.app.patch_json(
-        '/auctions/{}/contracts/{}/documents/{}'.format(
+        '/auctions/{}/contracts/{}/documents/{}?acc_token={}'.format(
             self.auction_id,
             self.contract_id,
-            doc_id
+            doc_id,
+            self.auction_token
         ),
         {
             "data": {
@@ -410,14 +376,18 @@ def patch_auction_contract_document(self):
     auction['contracts'][-1]["status"] = "cancelled"
     self.db.save(auction)
 
-    response = self.app.patch_json('/auctions/{}/contracts/{}/documents/{}'.format(self.auction_id, self.contract_id, doc_id), {"data": {"description": "document description"}}, status=403)
+    response = self.app.patch_json('/auctions/{}/contracts/{}/documents/{}?acc_token={}'.format(
+        self.auction_id, self.contract_id, doc_id, self.auction_token
+    ), {"data": {"description": "document description"}}, status=403)
     self.assertEqual(response.status, '403 Forbidden')
     self.assertEqual(response.content_type, 'application/json')
     self.assertEqual(response.json['errors'][0]["description"], "Can't update document in current contract status")
 
     self.set_status('unsuccessful')
 
-    response = self.app.patch_json('/auctions/{}/contracts/{}/documents/{}'.format(self.auction_id, self.contract_id, doc_id), {"data": {"description": "document description"}}, status=403)
+    response = self.app.patch_json('/auctions/{}/contracts/{}/documents/{}?acc_token={}'.format(
+        self.auction_id, self.contract_id, doc_id, self.auction_token
+    ), {"data": {"description": "document description"}}, status=403)
     self.assertEqual(response.status, '403 Forbidden')
     self.assertEqual(response.content_type, 'application/json')
     self.assertEqual(response.json['errors'][0]["description"], "Can't update document in current (unsuccessful) auction status")
@@ -426,39 +396,44 @@ def patch_auction_contract_document(self):
 
 
 def create_auction_2_lot_contract_document(self):
-    response = self.app.post('/auctions/{}/contracts/{}/documents'.format(
-        self.auction_id, self.contract_id), upload_files=[('file', 'name.doc', 'content')])
+    response = self.app.post('/auctions/{}/contracts/{}/documents?acc_token={}'.format(
+        self.auction_id, self.contract_id, self.auction_token
+    ), upload_files=[('file', 'name.doc', 'content')])
     self.assertEqual(response.status, '201 Created')
     self.assertEqual(response.content_type, 'application/json')
     doc_id = response.json["data"]['id']
     self.assertIn(doc_id, response.headers['Location'])
     self.assertEqual('name.doc', response.json["data"]["title"])
 
-    response = self.app.post_json('/auctions/{}/cancellations'.format(self.auction_id), {'data': {
+    response = self.app.post_json('/auctions/{}/cancellations?acc_token={}'.format(
+        self.auction_id, self.auction_token
+    ), {'data': {
         'reason': 'cancellation reason',
         'status': 'active',
         "cancellationOf": "lot",
         "relatedLot": self.initial_lots[0]['id']
     }})
 
-    response = self.app.post('/auctions/{}/contracts/{}/documents'.format(
-        self.auction_id, self.contract_id), upload_files=[('file', 'name.doc', 'content')], status=403)
+    response = self.app.post('/auctions/{}/contracts/{}/documents?acc_token={}'.format(
+        self.auction_id, self.contract_id, self.auction_token
+    ), upload_files=[('file', 'name.doc', 'content')], status=403)
     self.assertEqual(response.status, '403 Forbidden')
     self.assertEqual(response.content_type, 'application/json')
     self.assertEqual(response.json['errors'][0]["description"], "Can add document only in active lot status")
 
 
 def put_auction_2_lot_contract_document(self):
-    response = self.app.post('/auctions/{}/contracts/{}/documents'.format(
-        self.auction_id, self.contract_id), upload_files=[('file', 'name.doc', 'content')])
+    response = self.app.post('/auctions/{}/contracts/{}/documents?acc_token={}'.format(
+        self.auction_id, self.contract_id, self.auction_token
+    ), upload_files=[('file', 'name.doc', 'content')])
     self.assertEqual(response.status, '201 Created')
     self.assertEqual(response.content_type, 'application/json')
     doc_id = response.json["data"]['id']
     self.assertIn(doc_id, response.headers['Location'])
 
-    response = self.app.put('/auctions/{}/contracts/{}/documents/{}'.format(self.auction_id, self.contract_id, doc_id),
-                            status=404,
-                            upload_files=[('invalid_name', 'name.doc', 'content')])
+    response = self.app.put('/auctions/{}/contracts/{}/documents/{}?acc_token={}'.format(
+        self.auction_id, self.contract_id, doc_id, self.auction_token
+    ), status=404, upload_files=[('invalid_name', 'name.doc', 'content')])
     self.assertEqual(response.status, '404 Not Found')
     self.assertEqual(response.content_type, 'application/json')
     self.assertEqual(response.json['status'], 'error')
@@ -467,42 +442,51 @@ def put_auction_2_lot_contract_document(self):
             u'body', u'name': u'file'}
     ])
 
-    response = self.app.put('/auctions/{}/contracts/{}/documents/{}'.format(
-        self.auction_id, self.contract_id, doc_id), upload_files=[('file', 'name.doc', 'content2')])
+    response = self.app.put('/auctions/{}/contracts/{}/documents/{}?acc_token={}'.format(
+        self.auction_id, self.contract_id, doc_id, self.auction_token
+    ), upload_files=[('file', 'name.doc', 'content2')])
     self.assertEqual(response.status, '200 OK')
     self.assertEqual(response.content_type, 'application/json')
     self.assertEqual(doc_id, response.json["data"]["id"])
 
-    response = self.app.post_json('/auctions/{}/cancellations'.format(self.auction_id), {'data': {
+    response = self.app.post_json('/auctions/{}/cancellations?acc_token={}'.format(
+        self.auction_id, self.auction_token
+    ), {'data': {
         'reason': 'cancellation reason',
         'status': 'active',
         "cancellationOf": "lot",
         "relatedLot": self.initial_lots[0]['id']
     }})
 
-    response = self.app.put('/auctions/{}/contracts/{}/documents/{}'.format(
-        self.auction_id, self.contract_id, doc_id), upload_files=[('file', 'name.doc', 'content3')], status=403)
+    response = self.app.put('/auctions/{}/contracts/{}/documents/{}?acc_token={}'.format(
+        self.auction_id, self.contract_id, doc_id, self.auction_token
+    ), upload_files=[('file', 'name.doc', 'content3')], status=403)
     self.assertEqual(response.status, '403 Forbidden')
     self.assertEqual(response.content_type, 'application/json')
     self.assertEqual(response.json['errors'][0]["description"], "Can update document only in active lot status")
 
 
 def patch_auction_2_lot_contract_document(self):
-    response = self.app.post('/auctions/{}/contracts/{}/documents'.format(
-        self.auction_id, self.contract_id), upload_files=[('file', 'name.doc', 'content')])
+    response = self.app.post('/auctions/{}/contracts/{}/documents?acc_token={}'.format(
+        self.auction_id, self.contract_id, self.auction_token
+    ), upload_files=[('file', 'name.doc', 'content')])
     self.assertEqual(response.status, '201 Created')
     self.assertEqual(response.content_type, 'application/json')
     doc_id = response.json["data"]['id']
     self.assertIn(doc_id, response.headers['Location'])
 
     response = self.app.patch_json(
-        '/auctions/{}/contracts/{}/documents/{}'.format(self.auction_id, self.contract_id, doc_id),
+        '/auctions/{}/contracts/{}/documents/{}?acc_token={}'.format(
+            self.auction_id, self.contract_id, doc_id, self.auction_token
+        ),
         {"data": {"description": "document description"}})
     self.assertEqual(response.status, '200 OK')
     self.assertEqual(response.content_type, 'application/json')
     self.assertEqual(doc_id, response.json["data"]["id"])
 
-    response = self.app.post_json('/auctions/{}/cancellations'.format(self.auction_id), {'data': {
+    response = self.app.post_json('/auctions/{}/cancellations?acc_token={}'.format(
+        self.auction_id, self.auction_token
+    ), {'data': {
         'reason': 'cancellation reason',
         'status': 'active',
         "cancellationOf": "lot",
@@ -510,11 +494,14 @@ def patch_auction_2_lot_contract_document(self):
     }})
 
     response = self.app.patch_json(
-        '/auctions/{}/contracts/{}/documents/{}'.format(self.auction_id, self.contract_id, doc_id),
+        '/auctions/{}/contracts/{}/documents/{}?acc_token={}'.format(
+            self.auction_id, self.contract_id, doc_id, self.auction_token
+        ),
         {"data": {"description": "new document description"}}, status=403)
     self.assertEqual(response.status, '403 Forbidden')
     self.assertEqual(response.content_type, 'application/json')
     self.assertEqual(response.json['errors'][0]["description"], "Can update document only in active lot status")
+
 
 def patch_auction_contract(self):
     response = self.app.get('/auctions/{}/contracts'.format(self.auction_id))
