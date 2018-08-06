@@ -1181,8 +1181,6 @@ class Auction(BaseResourceItem):
 
     procurementMethodType = StringType()
 
-    create_accreditation = 1
-    edit_accreditation = 2
     procuring_entity_kinds = ['general', 'special', 'defense', 'other', '']
     block_complaint_status = ['claim', 'answered', 'pending']
 

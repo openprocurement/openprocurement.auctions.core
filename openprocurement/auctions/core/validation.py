@@ -7,6 +7,7 @@ from openprocurement.api.utils import (
     error_handler,
     get_now,
     update_logging_context,
+    get_resource_accreditations
 )
 from openprocurement.api.validation import (
     validate_accreditations,
@@ -150,7 +151,8 @@ def validate_auction_auction_data(request, **kwargs):
 
 
 def validate_bid_data(request, **kwargs):
-    if not request.check_accreditation(request.auction.edit_accreditation):
+    accreditations = get_resource_accreditations(request, 'auction')
+    if not request.check_accreditation(accreditations['edit']):
         request.errors.add('procurementMethodType', 'accreditation', 'Broker Accreditation level does not permit bid creation')
         request.errors.status = 403
         return
@@ -335,7 +337,8 @@ def validate_patch_complaint_data_patch_common(request, **kwargs):
 
 
 def validate_question_data(request, **kwargs):
-    if not request.check_accreditation(request.auction.edit_accreditation):
+    accreditations = get_resource_accreditations(request, 'auction')
+    if not request.check_accreditation(accreditations['edit']):
         request.errors.add('procurementMethodType', 'accreditation', 'Broker Accreditation level does not permit question creation')
         request.errors.status = 403
         return
@@ -354,7 +357,8 @@ def validate_patch_question_data(request, **kwargs):
 
 
 def validate_complaint_data(request, **kwargs):
-    if not request.check_accreditation(request.auction.edit_accreditation):
+    accreditations = get_resource_accreditations(request, 'auction', context=request.auction)
+    if not request.check_accreditation(accreditations['edit']):
         request.errors.add('procurementMethodType', 'accreditation', 'Broker Accreditation level does not permit complaint creation')
         request.errors.status = 403
         return

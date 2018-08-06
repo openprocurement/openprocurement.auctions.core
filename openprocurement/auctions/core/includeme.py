@@ -38,6 +38,10 @@ def includeme(config, plugin_map):
     add_design()
     config.add_subscriber(set_logging_context, ContextFound)
 
+    # add accreditation
+    config.registry.accreditations = {'auction': {}}
+
+
     # auction procurementMethodType plugins support
     config.registry.auction_procurementMethodTypes = {}
     config.registry.pmtConfigurator = {}
