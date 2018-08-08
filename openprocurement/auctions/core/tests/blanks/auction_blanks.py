@@ -7,10 +7,8 @@ def submission_method_details_no_auction(self):
     self.initial_data['submissionMethodDetails'] = u'quick(mode:no-auction)'
     self.create_auction()
     self.app.authorization = ('Basic', ('auction', ''))
-    auction = self.app.post_json(
-        '/auctions/{}/auction'.format(self.auction_id),
-        {'data': {'bids': self.initial_bids}}
-    ).json['data']
+    auction = self.app.post_json('/auctions/{}/auction'.format(self.auction_id),
+                                {'data': {'bids': self.initial_bids}}).json['data']
     self.assertEqual(auction['auctionPeriod']['startDate'],
                      auction['auctionPeriod']['endDate'])
     self.assertEqual(auction['status'], "active.qualification")
@@ -20,10 +18,8 @@ def submission_method_details_fast_forward(self):
     self.initial_data['submissionMethodDetails'] = u'quick(mode:fast-forward)'
     self.create_auction()
     self.app.authorization = ('Basic', ('auction', ''))
-    auction = self.app.post_json(
-        '/auctions/{}/auction'.format(self.auction_id),
-        {'data': {'bids': self.initial_bids}}
-    ).json['data']
+    auction = self.app.post_json('/auctions/{}/auction'.format(self.auction_id),
+                                {'data': {'bids': self.initial_bids}}).json['data']
     self.assertEqual(auction['auctionPeriod']['startDate'],
                      auction['auctionPeriod']['endDate'])
     self.assertEqual(auction['status'], "active.qualification")
@@ -795,47 +791,3 @@ def get_auction_features_auction(self):
     self.assertEqual(auction["bids"][1]['value']['amount'], self.initial_bids[1]['value']['amount'])
     self.assertIn('features', auction)
     self.assertIn('parameters', auction["bids"][0])
-
-
-def patch_auction_in_rectificationPeriod(test_case):
-    # test_case.app.authorization = ('Basic', ('broker', ''))
-    pre_patch_title = test_case.app.get("/auctions/{0}".format(test_case.auction_id)).json['data']['title']
-    test_case.app.patch_json(
-        "/auctions/{0}?acc_token={1}".format(
-            test_case.auction_id,
-            test_case.auction_token,
-        ),
-        {'data': {'title': 'lol'}}
-    )
-    after_patch_title = test_case.app.get(
-        "/auctions/{0}".format(test_case.auction_id),
-    ).json['data']['title']
-    assert pre_patch_title != after_patch_title
-    assert after_patch_title == 'lol'
-
-
-def patch_auction_after_rectificationPeriod(test_case):
-    # test_case.app.authorization = ('Basic', ('broker', ''))
-    pre_patch_title = test_case.app.get("/auctions/{0}".format(test_case.auction_id)).json['data']['title']
-    # let's forge rectificationPeriod
-    auc_doc = test_case.db[test_case.auction_id]
-    rectification_period = {
-        'rectificationPeriod': {
-            'startDate': (get_now() - timedelta(days=7)).isoformat(),
-            'endDate': (get_now() - timedelta(days=5)).isoformat(),
-        }
-    }
-    auc_doc.update(rectification_period)
-    test_case.db[test_case.auction_id] = auc_doc
-    # forged
-    test_case.app.patch_json(
-        "/auctions/{0}?acc_token={1}".format(
-            test_case.auction_id,
-            test_case.auction_token,
-        ),
-        {'data': {'title': 'lol'}}
-    )
-    after_patch_title = test_case.app.get(
-        "/auctions/{0}".format(test_case.auction_id),
-    ).json['data']['title']
-    assert pre_patch_title == after_patch_title

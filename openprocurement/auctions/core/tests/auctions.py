@@ -17,8 +17,6 @@ from openprocurement.auctions.core.tests.blanks.auction_blanks import (
     get_auction_auction_2_lots,
     patch_auction_auction_2_lots,
     post_auction_auction_document_2_lots,
-    patch_auction_in_rectificationPeriod,
-    patch_auction_after_rectificationPeriod,
 )
 
 
@@ -48,11 +46,6 @@ class AuctionMultipleLotAuctionResourceTestMixin(object):
     test_get_auction_auction_multiple_lot = snitch(get_auction_auction_2_lots)
     test_patch_auction_auction_multiple_lot = snitch(patch_auction_auction_2_lots)
     test_post_auction_auction_document_multiple_lot = snitch(post_auction_auction_document_2_lots)
-
-
-class AuctionRectificationPeriodTestMixin(object):
-    test_patch_auction_in_rectificationPeriod = snitch(patch_auction_in_rectificationPeriod)
-    test_patch_auction_after_rectificationPeriod = snitch(patch_auction_after_rectificationPeriod)
 
 
 def suite():
