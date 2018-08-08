@@ -139,7 +139,7 @@ class flashItem(BaseItem):
 
 
 class DgfAdditionalClassification(Classification):
-    id_validators = Classification.id_validators + (koatuu_validator,)
+    _id_field_validators = Classification._id_field_validators + (koatuu_validator,)
 
 
 
@@ -191,7 +191,7 @@ class dgfCDB2CPVCAVClassification(Classification):
             )
 
 class DgfCDB2AdditionalClassification(Classification):
-    id_validators = Classification.id_validators + (cpvs_validator,)
+    _id_field_validators = Classification._id_field_validators + (cpvs_validator,)
 
 
 class dgfCDB2Item(flashItem):
