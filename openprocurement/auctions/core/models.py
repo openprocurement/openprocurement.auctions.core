@@ -221,6 +221,10 @@ class SwiftsureItem(dgfCDB2Item):
     registrationDetails = ModelType(RegistrationDetails)
 
 
+class RectificationPeriod(Period):
+    invalidationDate = IsoDateTimeType()
+
+
 class flashDocument(BaseDocument):
 
     documentType = StringType(choices=[
@@ -903,27 +907,117 @@ auction_roles = {
         'extract_credentials': whitelist('owner', 'id')
     }
 
+dgf_blacklist_if_not_in_rectificationPeriod = blacklist(
+    'description',
+    'description_en',
+    'description_ru',
+    'dgfDecisionDate',
+    'dgfDecisionID',
+    'dgfID',
+    'guarantee',
+    'items',
+    'minimalStep',
+    'tenderAttepmts',
+    'title',
+    'title_en',
+    'title_ru',
+)
+
 dgf_auction_roles = {
     'create': (
         auction_embedded_role +
         blacklist(
-            'owner', '_attachments', 'revisions', 'date', 'dateModified', 'doc_id',
-            'auctionID', 'bids', 'documents', 'awards', 'questions', 'complaints',
-            'auctionUrl', 'status', 'enquiryPeriod', 'tenderPeriod', 'awardPeriod',
-            'procurementMethod', 'eligibilityCriteria', 'eligibilityCriteria_en',
-            'eligibilityCriteria_ru', 'awardCriteria', 'submissionMethod', 'cancellations',
-            'numberOfBidders', 'contracts', 'suspended')
+            '_attachments',
+            'auctionID',
+            'auctionUrl',
+            'awardCriteria',
+            'awardPeriod',
+            'awards',
+            'bids',
+            'cancellations',
+            'complaints',
+            'contracts',
+            'date',
+            'dateModified',
+            'doc_id',
+            'documents',
+            'eligibilityCriteria',
+            'eligibilityCriteria_en',
+            'eligibilityCriteria_ru',
+            'enquiryPeriod',
+            'numberOfBidders',
+            'owner',
+            'procurementMethod',
+            'questions',
+            'rectificationPeriod',
+            'revisions',
+            'status',
+            'submissionMethod',
+            'suspended',
+            'tenderPeriod',
+        )
     ),
-    'edit_active.tendering': (
+    'edit_active.tendering_during_rectificationPeriod': (
         edit_role +
         blacklist(
-            'enquiryPeriod', 'tenderPeriod', 'value', 'auction_value', 'minimalStep',
-            'auction_minimalStep', 'guarantee', 'auction_guarantee', 'eligibilityCriteria',
-            'eligibilityCriteria_en', 'eligibilityCriteria_ru', 'awardCriteriaDetails',
-            'awardCriteriaDetails_en', 'awardCriteriaDetails_ru', 'procurementMethodRationale',
-            'procurementMethodRationale_en', 'procurementMethodRationale_ru', 'submissionMethodDetails',
-            'submissionMethodDetails_en', 'submissionMethodDetails_ru', 'items', 'procuringEntity',
-            'suspended', 'auctionParameters')
+            'auctionParameters',
+            'auction_guarantee',
+            'auction_minimalStep',
+            'auction_value',
+            'awardCriteriaDetails',
+            'awardCriteriaDetails_en',
+            'awardCriteriaDetails_ru',
+            'eligibilityCriteria',
+            'eligibilityCriteria_en',
+            'eligibilityCriteria_ru',
+            'enquiryPeriod',
+            # 'guarantee',  allowed to edit during rectificationPeriod
+            # 'items',  allowed to edit during rectificationPeriod
+            # 'minimalStep',  allowed to edit during rectificationPeriod
+            'merchandisingObject',
+            'procurementMethodRationale',
+            'procurementMethodRationale_en',
+            'procurementMethodRationale_ru',
+            'procuringEntity',
+            'rectificationPeriod',
+            'submissionMethodDetails',
+            'submissionMethodDetails_en',
+            'submissionMethodDetails_ru',
+            'suspended',
+            'tenderPeriod',
+            'value',
+        )
+    ),
+    'edit_active.tendering_after_rectificationPeriod': (
+        edit_role +
+        dgf_blacklist_if_not_in_rectificationPeriod +
+        blacklist(
+            'auctionParameters',
+            'auction_guarantee',
+            'auction_minimalStep',
+            'auction_value',
+            'awardCriteriaDetails',
+            'awardCriteriaDetails_en',
+            'awardCriteriaDetails_ru',
+            'eligibilityCriteria',
+            'eligibilityCriteria_en',
+            'eligibilityCriteria_ru',
+            'enquiryPeriod',
+            'guarantee',
+            'items',
+            'minimalStep',
+            'procurementMethodRationale',
+            'procurementMethodRationale_en',
+            'procurementMethodRationale_ru',
+            'procuringEntity',
+            'rectificationPeriod',
+            'submissionMethodDetails',
+            'submissionMethodDetails_en',
+            'submissionMethodDetails_ru',
+            'suspended',
+            'tenderPeriod',
+            'value',
+        )
     ),
     'Administrator': (whitelist('suspended', 'awards', 'auctionParameters') + Administrator_role),
     'pending.verification': enquiries_role,
