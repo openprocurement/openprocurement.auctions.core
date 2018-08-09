@@ -15,6 +15,7 @@ from openprocurement.api.models.common import (
 
 
 view_complaint_role = (blacklist('owner_token', 'owner') + schematics_default_role)
+
 auction_embedded_role = sensitive_embedded_role
 
 enquiries_role = (
@@ -23,18 +24,23 @@ enquiries_role = (
         'revisions',
         'bids',
         'numberOfBids') +
-    auction_embedded_role)
+    auction_embedded_role
+)
 
 draft_role = whitelist('status')
+
 auction_post_role = whitelist('bids')
+
 auction_patch_role = whitelist('auctionUrl', 'bids', 'lots')
+
 auction_role = (
     blacklist(
         '_attachments',
         'revisions',
         'bids',
         'numberOfBids') +
-    auction_embedded_role)
+    auction_embedded_role
+)
 
 create_role = (
     blacklist(
@@ -60,14 +66,16 @@ create_role = (
         'cancellations',
         'numberOfBidders',
         'contracts') +
-    auction_embedded_role)
+    auction_embedded_role
+)
 
 plain_role = (
     blacklist(
         '_attachments',
         'revisions',
         'dateModified') +
-    schematics_embedded_role)
+    schematics_embedded_role
+)
 
 edit_role = (
     blacklist(
@@ -96,15 +104,20 @@ edit_role = (
         'cancellations',
         'numberOfBidders',
         'contracts') +
-    auction_embedded_role)
+    auction_embedded_role
+)
 
 default_lot_role = (blacklist('numberOfBids') + schematics_default_role)
+
 embedded_lot_role = (blacklist('numberOfBids') + schematics_embedded_role)
+
 view_bid_role = (
     blacklist(
         'owner_token',
         'transfer_token') +
-    schematics_default_role)
+    schematics_default_role
+)
+
 flash_bid_roles = {
     'embedded': view_bid_role,
     'view': view_bid_role,
@@ -122,8 +135,11 @@ flash_bid_roles = {
     'unsuccessful': view_bid_role,
     'cancelled': view_bid_role,
 }
+
 Administrator_bid_role = whitelist('tenderers')
+
 chronograph_role = whitelist('auctionPeriod', 'lots', 'next_check')
+
 chronograph_view_role = whitelist(
     'status',
     'enquiryPeriod',
@@ -137,16 +153,22 @@ chronograph_view_role = whitelist(
     'mode',
     'numberOfBids',
     'complaints',
-    'procurementMethodType')
+    'procurementMethodType'
+)
+
 Administrator_role = whitelist(
     'status',
     'mode',
     'procuringEntity',
     'auctionPeriod',
     'lots',
-    'suspended')
+    'suspended'
+)
+
 view_role = (blacklist('_attachments', 'revisions') + auction_embedded_role)
+
 listing_role = whitelist('dateModified', 'doc_id')
+
 auction_view_role = whitelist(
     'auctionID',
     'dateModified',
@@ -157,7 +179,8 @@ auction_view_role = whitelist(
     'features',
     'lots',
     'items',
-    'procurementMethodType')
+    'procurementMethodType'
+)
 auction_roles = {
     'plain': plain_role,
     'create': create_role,
@@ -193,7 +216,6 @@ auction_roles = {
     'extract_credentials': whitelist('owner', 'id')
 }
 
-
 dgf_auction_roles = {
     'create': (
         auction_embedded_role +
@@ -224,7 +246,9 @@ dgf_auction_roles = {
             'cancellations',
             'numberOfBidders',
             'contracts',
-            'suspended')),
+            'suspended'
+        )
+    ),
     'edit_active.tendering': (
         edit_role +
         blacklist(
@@ -251,13 +275,16 @@ dgf_auction_roles = {
             'items',
             'procuringEntity',
             'suspended',
-            'auctionParameters')),
+            'auctionParameters'
+        )
+    ),
     'Administrator': (
         whitelist(
             'suspended',
             'awards',
             'auctionParameters') +
-        Administrator_role),
+        Administrator_role
+    ),
     'pending.verification': enquiries_role,
     'invalid': view_role,
     'edit_pending.verification': whitelist(),
@@ -266,21 +293,23 @@ dgf_auction_roles = {
         'status',
         'items',
         'documents',
-        'dgfID'),
-    'auction_view': (
-        auction_view_role +
-        whitelist('auctionParameters')),
+        'dgfID'
+    ),
+    'auction_view': (auction_view_role + whitelist('auctionParameters')),
 }
 
 # Swiftsure auction
 swiftsure_auction_roles = deepcopy(dgf_auction_roles)
+
 swiftsure_auction_roles['edit_active.tendering'] = whitelist()
 
 swiftsure_auction_roles['auction_view'] = (
     dgf_auction_roles['auction_view'] +
     whitelist('minNumberOfQualifiedBids', 'registrationFee', 'bankAccount')
 )
+
 swiftsure_auction_roles['pending.activation'] = enquiries_role
+
 swiftsure_auction_roles['create'] = (
     auction_embedded_role +
     blacklist(
@@ -309,10 +338,13 @@ swiftsure_auction_roles['create'] = (
         'cancellations',
         'numberOfBidders',
         'contracts',
-        'suspended'))
+        'suspended'
+    )
+)
 
 # Tessel auction
 tessel_auction_roles = deepcopy(dgf_auction_roles)
+
 tessel_auction_roles['create'] = (
     auction_embedded_role +
     blacklist(
@@ -340,11 +372,17 @@ tessel_auction_roles['create'] = (
         'cancellations',
         'numberOfBidders',
         'contracts',
-        'suspended'))
+        'suspended'
+    )
+)
+
 tessel_auction_roles['edit_active.tendering'] = whitelist()
+
 tessel_auction_roles['auction_view'] = (
     dgf_auction_roles['auction_view'] +
     whitelist('minNumberOfQualifiedBids', 'registrationFee', 'bankAccount')
 )
+
 tessel_auction_roles['pending.activation'] = enquiries_role
+
 tessel_auction_roles['convoy'] = whitelist('status', 'items', 'documents')
