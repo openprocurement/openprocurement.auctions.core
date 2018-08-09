@@ -1509,11 +1509,11 @@ class Auction(BaseResourceItem):
     def auction_value(self):
         return Value(
             dict(
-                amount=sum(
-                    [
-                        i.value.amount for i in self.lots]),
+                amount=sum([i.value.amount for i in self.lots]),
                 currency=self.value.currency,
-                valueAddedTaxIncluded=self.value.valueAddedTaxIncluded)) if self.lots else self.value
+                valueAddedTaxIncluded=self.value.valueAddedTaxIncluded
+            )
+        ) if self.lots else self.value
 
     @serializable(
         serialized_name="guarantee",
@@ -1539,9 +1539,7 @@ class Auction(BaseResourceItem):
     def auction_minimalStep(self):
         return Value(
             dict(
-                amount=min(
-                    [
-                        i.minimalStep.amount for i in self.lots]),
+                amount=min([i.minimalStep.amount for i in self.lots]),
                 currency=self.minimalStep.currency,
                 valueAddedTaxIncluded=self.minimalStep.valueAddedTaxIncluded)) if self.lots else self.minimalStep
 
