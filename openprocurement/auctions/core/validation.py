@@ -462,7 +462,7 @@ def validate_disallow_dgfPlatformLegalDetails(docs, *args):
 
 
 
-# additional_classification_validators__________________________________________
+# additional_classification_validators
 
 def cpvs_validator(data, code):
     if data.get('scheme') == u'CPVS' and code not in CPVS_CODES_DGF_CDB2:
