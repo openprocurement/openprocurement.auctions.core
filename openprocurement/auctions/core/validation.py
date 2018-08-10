@@ -140,7 +140,7 @@ def validate_auction_auction_data(request, **kwargs):
         if SANDBOX_MODE \
         and auction.submissionMethodDetails \
         and auction.submissionMethodDetails in [u'quick(mode:no-auction)', u'quick(mode:fast-forward)'] \
-        and auction._procedure_type in ENGLISH_AUCTION_PROCUREMENT_METHOD_TYPES:
+        and auction._internal_type in ENGLISH_AUCTION_PROCUREMENT_METHOD_TYPES:
             if auction.lots:
                 data['lots'] = [{'auctionPeriod': {'startDate': now, 'endDate': now}} if i.id == lot_id else {} for i in auction.lots]
             else:
@@ -154,7 +154,7 @@ def validate_auction_auction_data(request, **kwargs):
 
 
 def validate_bid_data(request, **kwargs):
-    accreditations = get_resource_accreditations(request, 'auction')
+    accreditations = get_resource_accreditations(request, 'auction', request.context)
     if not request.check_accreditation(accreditations['edit']):
         request.errors.add('procurementMethodType', 'accreditation', 'Broker Accreditation level does not permit bid creation')
         request.errors.status = 403
@@ -340,7 +340,7 @@ def validate_patch_complaint_data_patch_common(request, **kwargs):
 
 
 def validate_question_data(request, **kwargs):
-    accreditations = get_resource_accreditations(request, 'auction')
+    accreditations = get_resource_accreditations(request, 'auction', request.context)
     if not request.check_accreditation(accreditations['edit']):
         request.errors.add('procurementMethodType', 'accreditation', 'Broker Accreditation level does not permit question creation')
         request.errors.status = 403
@@ -360,7 +360,7 @@ def validate_patch_question_data(request, **kwargs):
 
 
 def validate_complaint_data(request, **kwargs):
-    accreditations = get_resource_accreditations(request, 'auction', context=request.auction)
+    accreditations = get_resource_accreditations(request, 'auction', request.auction)
     if not request.check_accreditation(accreditations['edit']):
         request.errors.add('procurementMethodType', 'accreditation', 'Broker Accreditation level does not permit complaint creation')
         request.errors.status = 403

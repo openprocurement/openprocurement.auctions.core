@@ -7,18 +7,18 @@ from openprocurement.api.utils import (
 )
 
 
-def validate_auction_accreditation_level(request, **kwargs): #pylint: disable=unused-argument
-    levels = get_resource_accreditations(request, 'auction')['create']
+def validate_auction_accreditation_level(request, **kwargs):    # pylint: disable=unused-argument
+    levels = get_resource_accreditations(request, 'auction', request.context)['create']
     validate_accreditation_level(request, request.validated['auction'], levels)
 
 
 def validate_bid_accreditation_level(request):
-    levels = get_resource_accreditations(request, 'auction')['edit']
+    levels = get_resource_accreditations(request, 'auction', request.context)['edit']
     validate_accreditation_level(request, request.validated['auction'], levels)
 
 
 def validate_contract_accreditation_level(request):
-    levels = get_resource_accreditations(request, 'auction')['create']
+    levels = get_resource_accreditations(request, 'auction', request.context)['create']
     validate_accreditation_level(request, request.validated['contract'], levels)
 
 
