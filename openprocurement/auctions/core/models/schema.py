@@ -414,7 +414,7 @@ class swiftsureDocument(dgfDocument):
         'notice', 'technicalSpecifications', 'evaluationCriteria', 'bidders',
         'illustration', 'x_PublicAssetCertificate', 'x_PlatformLegalDetails',
         'x_presentation', 'informationDetails', 'x_dgfAssetFamiliarization',
-        'x_nda', 'cancellationDetails'
+        'x_nda', 'cancellationDetails', 'clarifications'
     ])
 
     def validate_relatedItem(self, data, relatedItem):
