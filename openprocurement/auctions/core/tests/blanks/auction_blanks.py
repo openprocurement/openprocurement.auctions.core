@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from copy import deepcopy
 from datetime import timedelta
 from openprocurement.api.utils import get_now
 
@@ -8,7 +9,7 @@ def submission_method_details_no_auction(self):
     self.create_auction()
     self.app.authorization = ('Basic', ('auction', ''))
     auction = self.app.post_json('/auctions/{}/auction'.format(self.auction_id),
-                                {'data': {'bids': self.initial_bids}}).json['data']
+                                 {'data': {'bids': self.initial_bids}}).json['data']
     self.assertEqual(auction['auctionPeriod']['startDate'],
                      auction['auctionPeriod']['endDate'])
     self.assertEqual(auction['status'], "active.qualification")
@@ -19,7 +20,7 @@ def submission_method_details_fast_forward(self):
     self.create_auction()
     self.app.authorization = ('Basic', ('auction', ''))
     auction = self.app.post_json('/auctions/{}/auction'.format(self.auction_id),
-                                {'data': {'bids': self.initial_bids}}).json['data']
+                                 {'data': {'bids': self.initial_bids}}).json['data']
     self.assertEqual(auction['auctionPeriod']['startDate'],
                      auction['auctionPeriod']['endDate'])
     self.assertEqual(auction['status'], "active.qualification")
@@ -791,3 +792,29 @@ def get_auction_features_auction(self):
     self.assertEqual(auction["bids"][1]['value']['amount'], self.initial_bids[1]['value']['amount'])
     self.assertIn('features', auction)
     self.assertIn('parameters', auction["bids"][0])
+
+
+def koatuu_additional_classification(self):
+    input_classification = [{"scheme": "koatuu",
+                             "id": "0110136600",
+                             "description": "test"}]
+
+    initial_data = deepcopy(self.initial_data)
+    initial_data['items'][0]['additionalClassifications'] = input_classification
+
+    auction = self.create_auction_unit(data=initial_data)
+
+    output_classification = auction['data']['items'][0]['additionalClassifications']
+
+    self.assertEqual(input_classification, output_classification)
+
+    input_classification[0]['id'] = '01101366000'
+    response = self.create_auction_unit(data=initial_data, status=201)
+
+    input_classification[0]['id'] = '1110136600'
+    response = self.create_auction_unit(data=initial_data, status=422)
+    self.assertEqual(response['status'], 'error')
+
+    input_classification[0]['id'] = '7510136600'
+    response = self.create_auction_unit(data=initial_data, status=422)
+    self.assertEqual(response['status'], 'error')
