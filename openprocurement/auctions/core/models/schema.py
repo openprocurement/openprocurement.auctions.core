@@ -264,6 +264,7 @@ class dgfCDB2Item(flashItem):
 
 class SwiftsureItem(dgfCDB2Item):
     registrationDetails = ModelType(RegistrationDetails)
+    quantity = DecimalType(precision=-4)
 
 
 class flashDocument(BaseDocument):
