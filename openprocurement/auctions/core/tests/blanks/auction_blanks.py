@@ -808,7 +808,7 @@ def koatuu_additional_classification(self):
 
     self.assertEqual(input_classification, output_classification)
 
-    input_classification[0]['id'] = '01101366000'
+    input_classification[0]['id'] = '1421580802'
     response = self.create_auction_unit(data=initial_data, status=201)
 
     input_classification[0]['id'] = '1110136600'
