@@ -3,15 +3,13 @@ from schematics.transforms import (
     blacklist,
     whitelist
 )
-from couchdb_schematics.document import SchematicsDocument
 from openprocurement.api.models.auction_models import (
     schematics_default_role,
     schematics_embedded_role,
 )
-
-sensitive_fields = ('__parent__', 'owner_token', 'transfer_token')
-
-sensitive_embedded_role = SchematicsDocument.Options.roles['embedded'] + sensitive_fields
+from openprocurement.api.models.common import (
+    sensitive_embedded_role,
+)
 
 view_complaint_role = (blacklist('owner_token', 'owner') + schematics_default_role)
 
