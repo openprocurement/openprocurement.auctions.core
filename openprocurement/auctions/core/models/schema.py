@@ -64,7 +64,6 @@ from openprocurement.api.models.common import (  # noqa: F401
     PeriodEndRequired as AuctionPeriodEndRequired,
     RegistrationDetails,
     Revision,
-    sensitive_embedded_role,
 )
 from openprocurement.api.models.schematics_extender import DecimalType
 from openprocurement.api.utils import get_now, get_request_from_root, serialize_document_url
@@ -97,6 +96,7 @@ from openprocurement.auctions.core.models.roles import (
     auction_roles,
     default_lot_role,
     embedded_lot_role,
+    sensitive_embedded_role,
     view_bid_role,
     view_complaint_role,
 )
