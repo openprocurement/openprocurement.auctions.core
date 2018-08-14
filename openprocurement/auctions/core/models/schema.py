@@ -113,6 +113,10 @@ def get_auction(model):
     return model
 
 
+class RectificationPeriod(Period):
+    invalidationDate = IsoDateTimeType()
+
+
 class dgfCAVClassification(Classification):
     scheme = StringType(required=True, default=u'CAV', choices=[u'CAV'])
     id = StringType(required=True, choices=CAV_CODES_DGF)
