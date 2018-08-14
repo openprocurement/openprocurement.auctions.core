@@ -220,6 +220,23 @@ auction_roles = {
     'extract_credentials': whitelist('owner', 'id')
 }
 
+dgf_blacklist_if_not_in_rectificationPeriod = blacklist(
+    'description',
+    'description_en',
+    'description_ru',
+    'dgfDecisionDate',
+    'dgfDecisionID',
+    'dgfID',
+    'guarantee',
+    'items',
+    'minimalStep',
+    'tenderAttepmts',
+    'title',
+    'title_en',
+    'title_ru',
+)
+
+
 dgf_auction_roles = {
     'create': (
         auction_embedded_role +
@@ -253,8 +270,40 @@ dgf_auction_roles = {
             'tenderPeriod',
         )
     ),
-    'edit_active.tendering': (
+    'edit_active.tendering_during_rectificationPeriod': (
         edit_role +
+        blacklist(
+            'auctionParameters',
+            'auction_guarantee',
+            'auction_minimalStep',
+            'auction_value',
+            'awardCriteriaDetails',
+            'awardCriteriaDetails_en',
+            'awardCriteriaDetails_ru',
+            'eligibilityCriteria',
+            'eligibilityCriteria_en',
+            'eligibilityCriteria_ru',
+            'enquiryPeriod',
+            # 'guarantee',  allowed to edit during rectificationPeriod
+            # 'items',  allowed to edit during rectificationPeriod
+            # 'minimalStep',  allowed to edit during rectificationPeriod
+            'merchandisingObject',
+            'procurementMethodRationale',
+            'procurementMethodRationale_en',
+            'procurementMethodRationale_ru',
+            'procuringEntity',
+            'rectificationPeriod',
+            'submissionMethodDetails',
+            'submissionMethodDetails_en',
+            'submissionMethodDetails_ru',
+            'suspended',
+            'tenderPeriod',
+            'value',
+        )
+    ),
+    'edit_active.tendering_after_rectificationPeriod': (
+        edit_role +
+        dgf_blacklist_if_not_in_rectificationPeriod +
         blacklist(
             'auctionParameters',
             'auction_guarantee',
@@ -274,6 +323,7 @@ dgf_auction_roles = {
             'procurementMethodRationale_en',
             'procurementMethodRationale_ru',
             'procuringEntity',
+            'rectificationPeriod',
             'submissionMethodDetails',
             'submissionMethodDetails_en',
             'submissionMethodDetails_ru',
@@ -281,7 +331,7 @@ dgf_auction_roles = {
             'tenderPeriod',
             'value',
         )
-    ),
+     ),
     'Administrator': (
         Administrator_role +
         whitelist(
