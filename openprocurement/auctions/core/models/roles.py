@@ -263,6 +263,7 @@ dgf_auction_roles = {
             'owner',
             'procurementMethod',
             'questions',
+            'rectificationPeriod',
             'revisions',
             'status',
             'submissionMethod',
