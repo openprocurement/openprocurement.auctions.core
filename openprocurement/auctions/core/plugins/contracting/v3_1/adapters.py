@@ -114,7 +114,7 @@ class ContractManagerV3_1Adapter(BaseContractManagerAdapter):
                 request.errors.add('body', 'data', 'Can\'t sign contract without contractSigned document')
                 request.errors.status = 403
                 raise error_handler(request)
-            if not request.context.dateSigned:
+            if not request.context.dateSigned and not data.get('dateSigned'):
                 request.errors.add('body', 'data', 'Can\'t sign contract without specified dateSigned field')
                 request.errors.status = 403
                 raise error_handler(request)
