@@ -7,6 +7,7 @@ from openprocurement.auctions.core.tests.plugins.contracting.v3_1.tests.blanks.c
     patch_auction_contract_blacklisted_fields,
     patch_auction_contract_value,
     patch_auction_contract_to_active,
+    patch_auction_contract_to_active_date_signed_burst,
     patch_auction_contract_in_auction_complete_status,
     patch_auction_contract_to_cancelled_invalid_no_rejection_or_act,
     patch_auction_contract_to_cancelled_invalid_signed,
@@ -23,6 +24,7 @@ class AuctionContractV3_1ResourceTestCaseMixin(object):
     test_patch_auction_contract_blacklisted_fields = snitch(patch_auction_contract_blacklisted_fields)
     test_patch_auction_contract_value = snitch(patch_auction_contract_value)
     test_patch_auction_contract_to_active = snitch(patch_auction_contract_to_active)
+    test_patch_auction_contract_to_active_date_signed_burst = snitch(patch_auction_contract_to_active_date_signed_burst)
     test_patch_auction_contract_in_auction_complete_status = snitch(patch_auction_contract_in_auction_complete_status)
     test_patch_auction_contract_to_cancelled_invalid_no_rejection_or_act = snitch(
         patch_auction_contract_to_cancelled_invalid_no_rejection_or_act
