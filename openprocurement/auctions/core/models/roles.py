@@ -285,6 +285,7 @@ dgf_auction_roles = {
             'eligibilityCriteria_en',
             'eligibilityCriteria_ru',
             'enquiryPeriod',
+            # COMMENTS BELOW ARE FOR CLARITY: PRELASE, DON'T DELETE THEM
             # 'guarantee',  allowed to edit during rectificationPeriod
             # 'items',  allowed to edit during rectificationPeriod
             # 'minimalStep',  allowed to edit during rectificationPeriod
@@ -341,7 +342,10 @@ dgf_auction_roles = {
             'suspended',
         )
     ),
-    'pending.verification': enquiries_role,
+    'pending.verification': (
+        enquiries_role +
+        blacklist('rectificationPeriod')
+    ),
     'invalid': view_role,
     'edit_pending.verification': whitelist(),
     'edit_invalid': whitelist(),
