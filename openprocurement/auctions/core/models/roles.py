@@ -340,6 +340,7 @@ dgf_auction_roles = {
             'auctionParameters',
             'awards',
             'suspended',
+            'rectificationPeriod',
         )
     ),
     'pending.verification': (
