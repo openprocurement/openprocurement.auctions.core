@@ -549,8 +549,9 @@ def not_found(self):
             u'url', u'name': u'complaint_id'}
     ])
 
-    response = self.app.post('/auctions/{}/complaints/{}/documents'.format(self.auction_id, self.complaint_id), status=404, upload_files=[
-                             ('invalid_value', 'name.doc', 'content')])
+    response = self.app.post('/auctions/{}/complaints/{}/documents?acc_token={}'.format(
+        self.auction_id, self.complaint_id, self.auction_token
+    ), status=404, upload_files=[('invalid_value', 'name.doc', 'content')])
     self.assertEqual(response.status, '404 Not Found')
     self.assertEqual(response.content_type, 'application/json')
     self.assertEqual(response.json['status'], 'error')
@@ -635,8 +636,9 @@ def not_found(self):
 
 
 def create_auction_complaint_document(self):
-    response = self.app.post('/auctions/{}/complaints/{}/documents'.format(
-        self.auction_id, self.complaint_id), upload_files=[('file', 'name.doc', 'content')], status=403)
+    response = self.app.post('/auctions/{}/complaints/{}/documents?acc_token={}'.format(
+        self.auction_id, self.complaint_id, self.auction_token
+    ), upload_files=[('file', 'name.doc', 'content')], status=403)
     self.assertEqual(response.status, '403 Forbidden')
     self.assertEqual(response.content_type, 'application/json')
     self.assertEqual(response.json['errors'][0]["description"],
@@ -688,8 +690,9 @@ def create_auction_complaint_document(self):
 
     self.set_status('complete')
 
-    response = self.app.post('/auctions/{}/complaints/{}/documents'.format(
-        self.auction_id, self.complaint_id), upload_files=[('file', 'name.doc', 'content')], status=403)
+    response = self.app.post('/auctions/{}/complaints/{}/documents?acc_token={}'.format(
+        self.auction_id, self.complaint_id, self.auction_token
+    ), upload_files=[('file', 'name.doc', 'content')], status=403)
     self.assertEqual(response.status, '403 Forbidden')
     self.assertEqual(response.content_type, 'application/json')
     self.assertEqual(response.json['errors'][0]["description"],
@@ -705,9 +708,9 @@ def put_auction_complaint_document(self):
     self.assertIn(doc_id, response.headers['Location'])
 
     response = self.app.put(
-        '/auctions/{}/complaints/{}/documents/{}'.format(self.auction_id, self.complaint_id, doc_id),
-        status=404,
-        upload_files=[('invalid_name', 'name.doc', 'content')])
+        '/auctions/{}/complaints/{}/documents/{}?acc_token={}'.format(
+            self.auction_id, self.complaint_id, doc_id, self.auction_token
+        ), status=404, upload_files=[('invalid_name', 'name.doc', 'content')])
     self.assertEqual(response.status, '404 Not Found')
     self.assertEqual(response.content_type, 'application/json')
     self.assertEqual(response.json['status'], 'error')
@@ -716,8 +719,9 @@ def put_auction_complaint_document(self):
             u'body', u'name': u'file'}
     ])
 
-    response = self.app.put('/auctions/{}/complaints/{}/documents/{}'.format(
-        self.auction_id, self.complaint_id, doc_id), upload_files=[('file', 'name.doc', 'content2')], status=403)
+    response = self.app.put('/auctions/{}/complaints/{}/documents/{}?acc_token={}'.format(
+        self.auction_id, self.complaint_id, doc_id, self.auction_token
+    ), upload_files=[('file', 'name.doc', 'content2')], status=403)
     self.assertEqual(response.status, '403 Forbidden')
     self.assertEqual(response.content_type, 'application/json')
     self.assertEqual(response.json['errors'][0]["description"], "Can update document only author")
@@ -796,8 +800,9 @@ def patch_auction_complaint_document(self):
     self.assertIn(doc_id, response.headers['Location'])
 
     response = self.app.patch_json(
-        '/auctions/{}/complaints/{}/documents/{}'.format(self.auction_id, self.complaint_id, doc_id),
-        {"data": {"description": "document description"}}, status=403)
+        '/auctions/{}/complaints/{}/documents/{}?acc_token={}'.format(
+            self.auction_id, self.complaint_id, doc_id, self.auction_token
+        ), {"data": {"description": "document description"}}, status=403)
     self.assertEqual(response.status, '403 Forbidden')
     self.assertEqual(response.content_type, 'application/json')
     self.assertEqual(response.json['errors'][0]["description"], "Can update document only author")

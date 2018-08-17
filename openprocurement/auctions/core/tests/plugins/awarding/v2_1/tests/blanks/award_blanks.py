@@ -157,8 +157,8 @@ def invalid_patch_auction_award(self):
     # assume that first_award status is 'pending.verification'
     self.check_award_status(self.auction_id, self.first_award_id, 'pending.verification')
     response = self.app.patch_json(
-        '/auctions/{}/awards/{}'.format(
-            self.auction_id, self.first_award_id
+        '/auctions/{}/awards/{}?acc_token={}'.format(
+            self.auction_id, self.first_award_id, self.auction_token
         ),
         {"data": {"status": "pending.payment"}},
         status=403
@@ -206,7 +206,9 @@ def invalid_patch_auction_award(self):
     self.assertIn('Location', response.headers)
     self.assertIn(self.second_award_id, response.headers['Location'])
 
-    response = self.app.patch_json('/auctions/{}/awards/{}'.format(self.auction_id, self.first_award_id), {"data": {"status": "active"}}, status=403)
+    response = self.app.patch_json('/auctions/{}/awards/{}?acc_token={}'.format(
+        self.auction_id, self.first_award_id, self.auction_token
+    ), {"data": {"status": "active"}}, status=403)
     self.assertEqual(response.status, '403 Forbidden')
     self.assertEqual(response.content_type, 'application/json')
     self.assertEqual(response.json['errors'][0]["description"], "Can't update award in current (unsuccessful) status")
@@ -217,6 +219,7 @@ def invalid_patch_auction_award(self):
         self.patch_award(self.second_award_id, i)
 
     self.set_status('complete')
+
 
 def patch_auction_award(self):
     request_path = '/auctions/{}/awards'.format(self.auction_id)
@@ -244,7 +247,9 @@ def patch_auction_award(self):
             u'url', u'name': u'auction_id'}
     ])
 
-    response = self.app.patch_json('/auctions/{}/awards/{}'.format(self.auction_id, self.first_award_id), {"data": {"awardStatus": "unsuccessful"}}, status=422)
+    response = self.app.patch_json('/auctions/{}/awards/{}?acc_token={}'.format(
+        self.auction_id, self.first_award_id, self.auction_token
+    ), {"data": {"awardStatus": "unsuccessful"}}, status=422)
     self.assertEqual(response.status, '422 Unprocessable Entity')
     self.assertEqual(response.content_type, 'application/json')
     self.assertEqual(response.json['errors'], [
@@ -258,7 +263,9 @@ def patch_auction_award(self):
     new_award_location = response.headers['Location']
     self.assertIn(self.second_award_id, new_award_location)
 
-    response = self.app.patch_json('/auctions/{}/awards/{}'.format(self.auction_id, self.first_award_id), {"data": {"status": "active"}}, status=403)
+    response = self.app.patch_json('/auctions/{}/awards/{}?acc_token={}'.format(
+        self.auction_id, self.first_award_id, self.auction_token
+    ), {"data": {"status": "active"}}, status=403)
     self.assertEqual(response.status, '403 Forbidden')
     self.assertEqual(response.content_type, 'application/json')
     self.assertEqual(response.json['errors'][0]["description"], "Can't update award in current (unsuccessful) status")
@@ -269,8 +276,9 @@ def patch_auction_award(self):
     self.assertEqual(len(response.json['data']), 2)
     self.assertIn(response.json['data'][1]['id'], new_award_location)
 
-    response = self.app.patch_json('/auctions/{}/awards/{}?acc_token={}'.format(self.auction_id, self.second_award_id, self.auction_token),
-                                   {"data": {"title": "title", "description": "description"}})
+    response = self.app.patch_json('/auctions/{}/awards/{}?acc_token={}'.format(
+        self.auction_id, self.second_award_id, self.auction_token
+    ), {"data": {"title": "title", "description": "description"}})
     self.assertEqual(response.status, '200 OK')
     self.assertEqual(response.content_type, 'application/json')
     self.assertEqual(response.json['data']['title'], 'title')
@@ -289,10 +297,13 @@ def patch_auction_award(self):
     self.assertEqual(response.content_type, 'application/json')
     self.assertEqual(response.json['data']["value"]["amount"], 469)
 
-    response = self.app.patch_json('/auctions/{}/awards/{}'.format(self.auction_id, self.second_award_id), {"data": {"status": "unsuccessful"}}, status=403)
+    response = self.app.patch_json('/auctions/{}/awards/{}?acc_token={}'.format(
+        self.auction_id, self.second_award_id, self.auction_token
+    ), {"data": {"status": "unsuccessful"}}, status=403)
     self.assertEqual(response.status, '403 Forbidden')
     self.assertEqual(response.content_type, 'application/json')
     self.assertEqual(response.json['errors'][0]["description"], "Can't update award in current (complete) auction status")
+
 
 def patch_auction_award_admin(self):
     request_path = '/auctions/{}/awards'.format(self.auction_id)
@@ -446,8 +457,11 @@ def successful_second_auction_award(self):
     self.assertEqual(response.content_type, 'application/json')
     self.assertEqual(response.json['data']["value"]["amount"], 469)
 
+
 def unsuccessful_auction1(self):
-    response = self.app.patch_json('/auctions/{}/awards/{}?acc_token=1'.format(self.auction_id, self.second_award_id), {"data": {"status": "cancelled"}}, status=403)
+    response = self.app.patch_json('/auctions/{}/awards/{}?acc_token={}'.format(
+        self.auction_id, self.second_award_id, self.auction_token
+    ), {"data": {"status": "cancelled"}}, status=403)
     self.assertEqual(response.status, '403 Forbidden')
     self.assertEqual(response.content_type, 'application/json')
     self.assertEqual(response.json['status'], 'error')
@@ -456,7 +470,7 @@ def unsuccessful_auction1(self):
             u'body', u'name': u'data'}
     ])
 
-    bid_token = self.initial_bids_tokens[self.first_award['bid_id']]
+    bid_token = self.initial_bids_tokens[self.second_award['bid_id']]
     self.patch_award(self.second_award_id, "cancelled", bid_token=bid_token)
 
     self.upload_auction_protocol(self.first_award)
@@ -470,7 +484,7 @@ def unsuccessful_auction1(self):
     self.assertEqual(response.json['data']['status'], 'unsuccessful')
 
 def unsuccessful_auction2(self):
-    bid_token = self.initial_bids_tokens[self.first_award['bid_id']]
+    bid_token = self.initial_bids_tokens[self.second_award['bid_id']]
     self.patch_award(self.second_award_id, "cancelled", bid_token=bid_token)
 
     self.upload_auction_protocol(self.first_award)
@@ -486,7 +500,7 @@ def unsuccessful_auction2(self):
     self.assertEqual(response.json['data']['status'], 'unsuccessful')
 
 def unsuccessful_auction3(self):
-    bid_token = self.initial_bids_tokens[self.first_award['bid_id']]
+    bid_token = self.initial_bids_tokens[self.second_award['bid_id']]
     self.patch_award(self.second_award_id, "cancelled", bid_token=bid_token)
 
     self.upload_auction_protocol(self.first_award)
@@ -508,7 +522,7 @@ def unsuccessful_auction4(self):
 
     self.patch_award(self.first_award_id, "pending.payment")
 
-    bid_token = self.initial_bids_tokens[self.first_award['bid_id']]
+    bid_token = self.initial_bids_tokens[self.second_award['bid_id']]
     self.patch_award(self.second_award_id, "cancelled", bid_token=bid_token)
 
     self.patch_award(self.first_award_id, "active")
@@ -527,7 +541,7 @@ def unsuccessful_auction5(self):
 
     self.patch_award(self.first_award_id, "active")
 
-    bid_token = self.initial_bids_tokens[self.first_award['bid_id']]
+    bid_token = self.initial_bids_tokens[self.second_award['bid_id']]
     self.patch_award(self.second_award_id, "cancelled", bid_token=bid_token)
 
     self.patch_award(self.first_award_id, "unsuccessful")
@@ -575,18 +589,17 @@ def get_auction_awards(self):
     ])
 
 def patch_auction_award_Administrator_change(self):
-    response = self.app.post_json('/auctions/{}/awards'.format(
-        self.auction_id), {'data': {'suppliers': [self.initial_organization], 'bid_id': self.initial_bids[0]['id']}})
-    self.assertEqual(response.status, '201 Created')
-    self.assertEqual(response.content_type, 'application/json')
-    award = response.json['data']
-    verificationPeriod = award['verificationPeriod'][u'startDate']
+    verificationPeriod = self.first_award['verificationPeriod'][u'startDate']
     self.app.authorization = ('Basic', ('administrator', ''))
-    response = self.app.patch_json('/auctions/{}/awards/{}'.format(self.auction_id, award['id']), {"data": {"verificationPeriod": {"endDate": award['verificationPeriod'][u'startDate']}}})
+    response = self.app.patch_json('/auctions/{}/awards/{}'.format(
+        self.auction_id, self.first_award_id
+    ), {"data": {"verificationPeriod": {
+        "endDate": self.first_award['verificationPeriod'][u'startDate']}}
+    })
 
     self.assertEqual(response.status, '200 OK')
     self.assertEqual(response.content_type, 'application/json')
-    self.assertIn("endDate", response.json['data']['complaintPeriod'])
+    self.assertIn("endDate", response.json['data']['verificationPeriod'])
     self.assertEqual(response.json['data']['verificationPeriod']["endDate"], verificationPeriod)
 
 
@@ -2084,8 +2097,9 @@ def not_found_award_document(self):
             u'url', u'name': u'award_id'}
     ])
 
-    response = self.app.post('/auctions/{}/awards/{}/documents'.format(self.auction_id, self.first_award_id), status=404, upload_files=[
-                             ('invalid_value', 'name.doc', 'content')])
+    response = self.app.post('/auctions/{}/awards/{}/documents?acc_token={}'.format(
+        self.auction_id, self.first_award_id, self.auction_token
+    ), status=404, upload_files=[ ('invalid_value', 'name.doc', 'content')])
     self.assertEqual(response.status, '404 Not Found')
     self.assertEqual(response.content_type, 'application/json')
     self.assertEqual(response.json['status'], 'error')
@@ -2168,9 +2182,11 @@ def not_found_award_document(self):
         {u'description': u'Not Found', u'location': u'url', u'name': u'document_id'}
     ])
 
+
 def create_auction_award_document(self):
-    response = self.app.post('/auctions/{}/awards/{}/documents'.format(
-        self.auction_id, self.first_award_id), upload_files=[('file', 'name.doc', 'content')])
+    response = self.app.post('/auctions/{}/awards/{}/documents?acc_token={}'.format(
+        self.auction_id, self.first_award_id, self.auction_token
+    ), upload_files=[('file', 'name.doc', 'content')])
     self.assertEqual(response.status, '201 Created')
     self.assertEqual(response.content_type, 'application/json')
     doc_id = response.json["data"]['id']
@@ -2215,23 +2231,26 @@ def create_auction_award_document(self):
 
     self.set_status('complete')
 
-    response = self.app.post('/auctions/{}/awards/{}/documents'.format(
-        self.auction_id, self.first_award_id), upload_files=[('file', 'name.doc', 'content')], status=403)
+    response = self.app.post('/auctions/{}/awards/{}/documents?acc_token={}'.format(
+        self.auction_id, self.first_award_id, self.auction_token
+    ), upload_files=[('file', 'name.doc', 'content')], status=403)
     self.assertEqual(response.status, '403 Forbidden')
     self.assertEqual(response.content_type, 'application/json')
     self.assertEqual(response.json['errors'][0]["description"], "Can't add document in current (complete) auction status")
 
+
 def put_auction_award_document(self):
-    response = self.app.post('/auctions/{}/awards/{}/documents'.format(
-        self.auction_id, self.first_award_id), upload_files=[('file', 'name.doc', 'content')])
+    response = self.app.post('/auctions/{}/awards/{}/documents?acc_token={}'.format(
+        self.auction_id, self.first_award_id, self.auction_token
+    ), upload_files=[('file', 'name.doc', 'content')])
     self.assertEqual(response.status, '201 Created')
     self.assertEqual(response.content_type, 'application/json')
     doc_id = response.json["data"]['id']
     self.assertIn(doc_id, response.headers['Location'])
 
-    response = self.app.put('/auctions/{}/awards/{}/documents/{}'.format(self.auction_id, self.first_award_id, doc_id),
-                            status=404,
-                            upload_files=[('invalid_name', 'name.doc', 'content')])
+    response = self.app.put('/auctions/{}/awards/{}/documents/{}?acc_token={}'.format(
+        self.auction_id, self.first_award_id, doc_id, self.auction_token
+    ), status=404, upload_files=[('invalid_name', 'name.doc', 'content')])
     self.assertEqual(response.status, '404 Not Found')
     self.assertEqual(response.content_type, 'application/json')
     self.assertEqual(response.json['status'], 'error')
@@ -2240,8 +2259,9 @@ def put_auction_award_document(self):
             u'body', u'name': u'file'}
     ])
 
-    response = self.app.put('/auctions/{}/awards/{}/documents/{}'.format(
-        self.auction_id, self.first_award_id, doc_id), upload_files=[('file', 'name.doc', 'content2')])
+    response = self.app.put('/auctions/{}/awards/{}/documents/{}?acc_token={}'.format(
+        self.auction_id, self.first_award_id, doc_id, self.auction_token
+    ), upload_files=[('file', 'name.doc', 'content2')])
     self.assertEqual(response.status, '200 OK')
     self.assertEqual(response.content_type, 'application/json')
     self.assertEqual(doc_id, response.json["data"]["id"])
@@ -2261,8 +2281,9 @@ def put_auction_award_document(self):
     self.assertEqual(doc_id, response.json["data"]["id"])
     self.assertEqual('name.doc', response.json["data"]["title"])
 
-    response = self.app.put('/auctions/{}/awards/{}/documents/{}'.format(
-        self.auction_id, self.first_award_id, doc_id), 'content3', content_type='application/msword')
+    response = self.app.put('/auctions/{}/awards/{}/documents/{}?acc_token={}'.format(
+        self.auction_id, self.first_award_id, doc_id, self.auction_token
+    ), 'content3', content_type='application/msword')
     self.assertEqual(response.status, '200 OK')
     self.assertEqual(response.content_type, 'application/json')
     self.assertEqual(doc_id, response.json["data"]["id"])
@@ -2277,21 +2298,26 @@ def put_auction_award_document(self):
 
     self.set_status('complete')
 
-    response = self.app.put('/auctions/{}/awards/{}/documents/{}'.format(
-        self.auction_id, self.first_award_id, doc_id), upload_files=[('file', 'name.doc', 'content3')], status=403)
+    response = self.app.put('/auctions/{}/awards/{}/documents/{}?acc_token={}'.format(
+        self.auction_id, self.first_award_id, doc_id, self.auction_token
+    ), upload_files=[('file', 'name.doc', 'content3')], status=403)
     self.assertEqual(response.status, '403 Forbidden')
     self.assertEqual(response.content_type, 'application/json')
     self.assertEqual(response.json['errors'][0]["description"], "Can't update document in current (complete) auction status")
 
+
 def patch_auction_award_document(self):
-    response = self.app.post('/auctions/{}/awards/{}/documents'.format(
-        self.auction_id, self.first_award_id), upload_files=[('file', 'name.doc', 'content')])
+    response = self.app.post('/auctions/{}/awards/{}/documents?acc_token={}'.format(
+        self.auction_id, self.first_award_id, self.auction_token
+    ), upload_files=[('file', 'name.doc', 'content')])
     self.assertEqual(response.status, '201 Created')
     self.assertEqual(response.content_type, 'application/json')
     doc_id = response.json["data"]['id']
     self.assertIn(doc_id, response.headers['Location'])
 
-    response = self.app.patch_json('/auctions/{}/awards/{}/documents/{}'.format(self.auction_id, self.first_award_id, doc_id), {"data": {"description": "document description"}})
+    response = self.app.patch_json('/auctions/{}/awards/{}/documents/{}?acc_token={}'.format(
+        self.auction_id, self.first_award_id, doc_id, self.auction_token
+    ), {"data": {"description": "document description"}})
     self.assertEqual(response.status, '200 OK')
     self.assertEqual(response.content_type, 'application/json')
     self.assertEqual(doc_id, response.json["data"]["id"])
@@ -2305,7 +2331,9 @@ def patch_auction_award_document(self):
 
     self.set_status('complete')
 
-    response = self.app.patch_json('/auctions/{}/awards/{}/documents/{}'.format(self.auction_id, self.first_award_id, doc_id), {"data": {"description": "document description"}}, status=403)
+    response = self.app.patch_json('/auctions/{}/awards/{}/documents/{}?acc_token={}'.format(
+        self.auction_id, self.first_award_id, doc_id, self.auction_token
+    ), {"data": {"description": "document description"}}, status=403)
     self.assertEqual(response.status, '403 Forbidden')
     self.assertEqual(response.content_type, 'application/json')
     self.assertEqual(response.json['errors'][0]["description"], "Can't update document in current (complete) auction status")

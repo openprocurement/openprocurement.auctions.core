@@ -39,7 +39,7 @@ class Root(object):
         (Allow, 'g:Administrator', 'edit_tender'),
         (Allow, 'g:Administrator', 'edit_auction_award'),
         (Allow, 'g:Administrator', 'edit_bid'),
-        (Allow, 'g:admins', ALL_PERMISSIONS),
+        (Deny, 'g:admins', ALL_PERMISSIONS),
     ]
 
     def __init__(self, request):

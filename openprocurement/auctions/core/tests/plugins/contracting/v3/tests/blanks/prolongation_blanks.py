@@ -477,7 +477,8 @@ def get_document(test_case):
         contract_id=test_case.contract_id,
         prolongation_id=test_case.prolongation_id,
         document_id=document_id,
-        key=document_key
+        key=document_key,
+        token=test_case.auction_token
     )
     get_document_response = test_case.app.get(
         url
@@ -548,7 +549,8 @@ def patch_document(test_case):
             contract_id=test_case.contract_id,
             prolongation_id=test_case.prolongation_id,
             document_id=document_id,
-            key=document_key
+            key=document_key,
+            token=test_case.auction_token
         ),
         {'data':
             {'title': 'updated.doc'}

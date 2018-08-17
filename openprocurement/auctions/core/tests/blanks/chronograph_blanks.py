@@ -53,8 +53,10 @@ def switch_to_pending(self):
 
 def switch_to_complaint(self):
     for status in ['invalid', 'resolved', 'declined']:
-        self.app.authorization = ('Basic', ('token', ''))
-        response = self.app.post_json('/auctions/{}/complaints'.format(self.auction_id), {'data': {
+        self.app.authorization = ('Basic', ('broker', ''))
+        response = self.app.post_json('/auctions/{}/complaints?acc_token={}'.format(
+            self.auction_id, self.auction_token
+        ), {'data': {
             'title': 'complaint title',
             'description': 'complaint description',
             'author': self.initial_organization,
@@ -90,18 +92,21 @@ def switch_to_complaint(self):
 
 
 def switch_to_pending_award(self):
-    response = self.app.post_json('/auctions/{}/awards/{}/complaints'.format(self.auction_id, self.award_id),
-                                  {'data': {
-                                      'title': 'complaint title',
-                                      'description': 'complaint description',
-                                      'author': self.initial_organization,
-                                      'status': 'claim'
-                                  }})
+    response = self.app.post_json('/auctions/{}/awards/{}/complaints?acc_token={}'.format(
+        self.auction_id, self.award_id, self.first_bid_token
+    ),
+      {'data': {
+          'title': 'complaint title',
+          'description': 'complaint description',
+          'author': self.initial_organization,
+          'status': 'claim'
+      }})
     self.assertEqual(response.status, '201 Created')
     self.assertEqual(response.json['data']['status'], 'claim')
 
-    response = self.app.patch_json('/auctions/{}/awards/{}'.format(self.auction_id, self.award_id),
-                                   {"data": {"status": "active"}})
+    response = self.app.patch_json('/auctions/{}/awards/{}?acc_token={}'.format(
+        self.auction_id, self.award_id, self.auction_token
+    ), {"data": {"status": "active"}})
     self.assertEqual(response.status, '200 OK')
     self.assertEqual(response.content_type, 'application/json')
     self.assertEqual(response.json['data']["status"], "active")
@@ -118,21 +123,24 @@ def switch_to_pending_award(self):
 
 
 def switch_to_complaint_award(self):
-    response = self.app.patch_json('/auctions/{}/awards/{}'.format(self.auction_id, self.award_id),
-                                   {"data": {"status": "active"}})
+    response = self.app.patch_json('/auctions/{}/awards/{}?acc_token={}'.format(
+        self.auction_id, self.award_id, self.auction_token
+    ), {"data": {"status": "active"}})
     self.assertEqual(response.status, '200 OK')
     self.assertEqual(response.content_type, 'application/json')
     self.assertEqual(response.json['data']["status"], "active")
 
     for status in ['invalid', 'resolved', 'declined']:
-        self.app.authorization = ('Basic', ('token', ''))
-        response = self.app.post_json('/auctions/{}/awards/{}/complaints'.format(self.auction_id, self.award_id),
-                                      {'data': {
-                                          'title': 'complaint title',
-                                          'description': 'complaint description',
-                                          'author': self.initial_organization,
-                                          'status': 'claim'
-                                      }})
+        self.app.authorization = ('Basic', ('broker', ''))
+        response = self.app.post_json('/auctions/{}/awards/{}/complaints?acc_token={}'.format(
+            self.auction_id, self.award_id, self.first_bid_token
+        ),
+          {'data': {
+              'title': 'complaint title',
+              'description': 'complaint description',
+              'author': self.initial_organization,
+              'status': 'claim'
+          }})
         self.assertEqual(response.status, '201 Created')
         self.assertEqual(response.json['data']['status'], 'claim')
         complaint = response.json['data']

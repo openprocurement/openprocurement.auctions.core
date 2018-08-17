@@ -569,9 +569,12 @@ def create_auction_draft(self):
     self.assertEqual(response.status, '201 Created')
     self.assertEqual(response.content_type, 'application/json')
     auction = response.json['data']
+    auction_token = response.json['access']['token']
     self.assertEqual(auction['status'], 'draft')
 
-    response = self.app.patch_json('/auctions/{}'.format(auction['id']), {'data': {'value': {'amount': 100}}}, status=403)
+    response = self.app.patch_json('/auctions/{}?acc_token={}'.format(
+        auction['id'], auction_token
+    ), {'data': {'value': {'amount': 100}}}, status=403)
     self.assertEqual(response.status, '403 Forbidden')
     self.assertEqual(response.content_type, 'application/json')
     self.assertEqual(response.json['status'], 'error')
@@ -579,13 +582,15 @@ def create_auction_draft(self):
         {u'description': u"Can't update auction in current (draft) status", u'location': u'body', u'name': u'data'}
     ])
 
-    response = self.app.patch_json('/auctions/{}'.format(auction['id']), {'data': {'status': self.initial_status}})
+    response = self.app.patch_json('/auctions/{}?acc_token={}'.format(
+        auction['id'], auction_token
+    ), {'data': {'status': self.initial_status}})
     self.assertEqual(response.status, '200 OK')
     self.assertEqual(response.content_type, 'application/json')
     auction = response.json['data']
     self.assertEqual(auction['status'], self.initial_status)
 
-    response = self.app.get('/auctions/{}'.format(auction['id']))
+    response = self.app.get('/auctions/{}?acc_token={}'.format(auction['id'], auction_token))
     self.assertEqual(response.status, '200 OK')
     self.assertEqual(response.content_type, 'application/json')
     auction = response.json['data']
@@ -807,9 +812,12 @@ def auction_features(self):
     self.assertEqual(response.status, '201 Created')
     self.assertEqual(response.content_type, 'application/json')
     auction = response.json['data']
+    auction_token = response.json['access']['token']
     self.assertEqual(auction['features'], data['features'])
 
-    response = self.app.patch_json('/auctions/{}'.format(auction['id']), {'data': {'features': [{
+    response = self.app.patch_json('/auctions/{}?acc_token={}'.format(
+        auction['id'], auction_token
+    ), {'data': {'features': [{
         "featureOf": "tenderer",
         "relatedItem": None
     }, {}, {}]}})
@@ -817,12 +825,15 @@ def auction_features(self):
     self.assertIn('features', response.json['data'])
     self.assertNotIn('relatedItem', response.json['data']['features'][0])
 
-    response = self.app.patch_json('/auctions/{}'.format(auction['id']),
-                                   {'data': {'tenderPeriod': {'startDate': None}}})
+    response = self.app.patch_json('/auctions/{}?acc_token={}'.format(
+        auction['id'], auction_token
+    ), {'data': {'tenderPeriod': {'startDate': None}}})
     self.assertEqual(response.status, '200 OK')
     self.assertIn('features', response.json['data'])
 
-    response = self.app.patch_json('/auctions/{}'.format(auction['id']), {'data': {'features': []}})
+    response = self.app.patch_json('/auctions/{}?acc_token={}'.format(
+        auction['id'], auction_token
+    ), {'data': {'features': []}})
     self.assertEqual(response.status, '200 OK')
     self.assertNotIn('features', response.json['data'])
 
@@ -844,7 +855,9 @@ def patch_auction(self):
     self.assertEqual(response.content_type, 'application/json')
     self.assertNotEqual(response.json['data']['status'], 'cancelled')
 
-    response = self.app.patch_json('/auctions/{}'.format(auction['id']), {'data': {'status': 'cancelled'}})
+    response = self.app.patch_json('/auctions/{}?acc_token={}'.format(
+        auction['id'], owner_token
+    ), {'data': {'status': 'cancelled'}})
     self.assertEqual(response.status, '200 OK')
     self.assertEqual(response.content_type, 'application/json')
     self.assertNotEqual(response.json['data']['status'], 'cancelled')
@@ -863,12 +876,13 @@ def patch_auction(self):
 
     # response = self.app.patch_json('/auctions/{}'.format(
     # auction['id']), {'data': {'tenderPeriod': {'startDate': auction['enquiryPeriod']['endDate']}}})
-    # self.assertEqual(response.status, '200 OK')
+    # self.assertEqual(response.status, '200 OK'
     # self.assertEqual(response.content_type, 'application/json')
     # self.assertIn('startDate', response.json['data']['tenderPeriod'])
 
-    response = self.app.patch_json('/auctions/{}'.format(
-        auction['id']), {'data': {'procurementMethodRationale': 'Open'}})
+    response = self.app.patch_json('/auctions/{}?acc_token={}'.format(
+        auction['id'], owner_token
+    ), {'data': {'procurementMethodRationale': 'Open'}})
     self.assertEqual(response.status, '200 OK')
     self.assertEqual(response.content_type, 'application/json')
     new_auction = response.json['data']
@@ -877,8 +891,9 @@ def patch_auction(self):
     self.assertEqual(auction, new_auction)
     self.assertEqual(dateModified, new_dateModified)
 
-    response = self.app.patch_json('/auctions/{}'.format(
-        auction['id']), {'data': {'dateModified': new_dateModified}})
+    response = self.app.patch_json('/auctions/{}?acc_token={}'.format(
+        auction['id'], owner_token
+    ), {'data': {'dateModified': new_dateModified}})
     self.assertEqual(response.status, '200 OK')
     self.assertEqual(response.content_type, 'application/json')
     new_auction2 = response.json['data']
@@ -890,8 +905,9 @@ def patch_auction(self):
     self.assertEqual(revisions[-1][u'changes'][0]['op'], u'remove')
     self.assertEqual(revisions[-1][u'changes'][0]['path'], u'/procurementMethod')
 
-    response = self.app.patch_json('/auctions/{}'.format(
-        auction['id']), {'data': {'items': [self.initial_data['items'][0]]}})
+    response = self.app.patch_json('/auctions/{}?acc_token={}'.format(
+        auction['id'], owner_token
+    ), {'data': {'items': [self.initial_data['items'][0]]}})
     self.assertEqual(response.status, '200 OK')
     self.assertEqual(response.content_type, 'application/json')
 
@@ -922,8 +938,9 @@ def patch_auction(self):
     # self.assertEqual(response.status, '200 OK')
     # self.assertEqual(response.content_type, 'application/json')
 
-    response = self.app.patch_json('/auctions/{}'.format(
-        auction['id']), {'data': {'enquiryPeriod': {'endDate': new_dateModified2}}})
+    response = self.app.patch_json('/auctions/{}?acc_token={}'.format(
+        auction['id'], owner_token
+    ), {'data': {'enquiryPeriod': {'endDate': new_dateModified2}}})
     self.assertEqual(response.status, '200 OK')
     self.assertEqual(response.content_type, 'application/json')
     new_auction = response.json['data']
@@ -955,8 +972,9 @@ def patch_auction(self):
     auction_data['status'] = 'complete'
     self.db.save(auction_data)
 
-    response = self.app.patch_json('/auctions/{}'.format(auction['id']), {'data': {'status': 'active.auction'}},
-                                   status=403)
+    response = self.app.patch_json('/auctions/{}?acc_token={}'.format(
+        auction['id'], owner_token
+    ), {'data': {'status': 'active.auction'}}, status=403)
     self.assertEqual(response.status, '403 Forbidden')
     self.assertEqual(response.content_type, 'application/json')
     self.assertEqual(response.json['errors'][0]["description"], "Can't update auction in current (complete) status")
@@ -970,18 +988,19 @@ def dateModified_auction(self):
     response = self.app.post_json('/auctions', {'data': self.initial_data})
     self.assertEqual(response.status, '201 Created')
     auction = response.json['data']
+    owner_token = response.json['access']['token']
     dateModified = auction['dateModified']
 
-    response = self.app.get('/auctions/{}'.format(auction['id']))
+    response = self.app.get('/auctions/{}?acc_token={}'.format(auction['id'], owner_token))
     self.assertEqual(response.status, '200 OK')
     self.assertEqual(response.content_type, 'application/json')
     self.assertEqual(response.json['data']['dateModified'], dateModified)
 
-    response = self.app.patch_json('/auctions/{}'.format(
-        auction['id']), {'data': {'procurementMethodRationale': 'Open'}})
+    response = self.app.patch_json('/auctions/{}?acc_token={}'.format(
+        auction['id'], owner_token
+    ), {'data': {'procurementMethodRationale': 'Open'}})
     self.assertEqual(response.status, '200 OK')
     self.assertEqual(response.content_type, 'application/json')
-    self.assertEqual(response.json['data']['dateModified'], dateModified)
     auction = response.json['data']
     dateModified = auction['dateModified']
 
@@ -1065,9 +1084,11 @@ def auction_Administrator_change(self):
     response = self.app.post_json('/auctions', {'data': self.initial_data})
     self.assertEqual(response.status, '201 Created')
     auction = response.json['data']
+    auction_token = response.json['access']['token']
 
-    response = self.app.post_json('/auctions/{}/cancellations'.format(auction['id']),
-                                  {'data': {'reason': 'cancellation reason', 'status': 'active'}})
+    response = self.app.post_json('/auctions/{}/cancellations?acc_token={}'.format(
+        auction['id'], auction_token
+    ), {'data': {'reason': 'cancellation reason', 'status': 'active'}})
     self.assertEqual(response.status, '201 Created')
     self.assertEqual(response.content_type, 'application/json')
 

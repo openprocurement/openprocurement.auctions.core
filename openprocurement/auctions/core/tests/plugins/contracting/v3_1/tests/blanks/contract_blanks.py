@@ -183,8 +183,8 @@ def patch_auction_contract_blacklisted_fields(self):
     contract = response.json['data'][0]
 
     # Trying to patch fields, that are blacklisted for editing.
-    self.app.patch_json('/auctions/{}/contracts/{}'.format(
-        self.auction_id, contract['id']
+    self.app.patch_json('/auctions/{}/contracts/{}?acc_token={}'.format(
+        self.auction_id, contract['id'], self.auction_token
     ), {"data": {"contractID": "myselfID",
                  "items": [{"description": "New Description"}],
                  "suppliers": [{"name": "New Name"}]
@@ -205,8 +205,8 @@ def patch_auction_contract_value(self):
     response = self.app.get('/auctions/{}/contracts'.format(self.auction_id))
     contract = response.json['data'][0]
 
-    response = self.app.patch_json('/auctions/{}/contracts/{}'.format(
-        self.auction_id, contract['id']
+    response = self.app.patch_json('/auctions/{}/contracts/{}?acc_token={}'.format(
+        self.auction_id, contract['id'], self.auction_token
     ), {"data": {"value": {"currency": "USD"}}}, status=403)
     self.assertEqual(response.status, '403 Forbidden')
     self.assertEqual(
@@ -214,15 +214,15 @@ def patch_auction_contract_value(self):
         "Can't update currency for contract value"
     )
 
-    response = self.app.patch_json('/auctions/{}/contracts/{}'.format(
-        self.auction_id, contract['id']
+    response = self.app.patch_json('/auctions/{}/contracts/{}?acc_token={}'.format(
+        self.auction_id, contract['id'], self.auction_token
     ), {"data": {"value": {"valueAddedTaxIncluded": False}}}, status=403)
     self.assertEqual(response.status, '403 Forbidden')
     self.assertEqual(response.json['errors'][0]["description"],
                      "Can\'t update valueAddedTaxIncluded for contract value")
 
-    response = self.app.patch_json('/auctions/{}/contracts/{}'.format(
-        self.auction_id, contract['id']
+    response = self.app.patch_json('/auctions/{}/contracts/{}?acc_token={}'.format(
+        self.auction_id, contract['id'], self.auction_token
     ), {"data": {"value": {"amount": 99}}}, status=403)
     self.assertEqual(response.status, '403 Forbidden')
     self.assertEqual(
@@ -230,8 +230,8 @@ def patch_auction_contract_value(self):
         "Value amount should be greater or equal to awarded amount (479.0)"
     )
 
-    response = self.app.patch_json('/auctions/{}/contracts/{}'.format(
-        self.auction_id, contract['id']
+    response = self.app.patch_json('/auctions/{}/contracts/{}?acc_token={}'.format(
+        self.auction_id, contract['id'], self.auction_token
     ), {"data": {"value": {"amount": 500}}})
     self.assertEqual(response.status, '200 OK')
     self.assertEqual(response.json['data']['value']['amount'], 500)
@@ -242,8 +242,8 @@ def patch_auction_contract_to_active(self):
     contract = response.json['data'][0]
 
     # Trying to patch contract to active status
-    response = self.app.patch_json('/auctions/{}/contracts/{}'.format(
-        self.auction_id, contract['id']
+    response = self.app.patch_json('/auctions/{}/contracts/{}?acc_token={}'.format(
+        self.auction_id, contract['id'], self.auction_token
     ), {"data": {"status": "active"}}, status=403)
     self.assertEqual(response.status, '403 Forbidden')
     self.assertEqual(response.content_type, 'application/json')
@@ -256,8 +256,8 @@ def patch_auction_contract_to_active(self):
     self.upload_contract_document(contract, 'contract')
 
     # Trying to patch contract to active status again
-    response = self.app.patch_json('/auctions/{}/contracts/{}'.format(
-        self.auction_id, contract['id']
+    response = self.app.patch_json('/auctions/{}/contracts/{}?acc_token={}'.format(
+        self.auction_id, contract['id'], self.auction_token
     ), {"data": {"status": "active"}}, status=403)
     self.assertEqual(response.status, '403 Forbidden')
     self.assertEqual(response.content_type, 'application/json')
@@ -269,8 +269,8 @@ def patch_auction_contract_to_active(self):
 
     # Trying to patch contract's dateSigned field with invalid value
     one_hour_in_future = (get_now() + timedelta(hours=1)).isoformat()
-    response = self.app.patch_json('/auctions/{}/contracts/{}'.format(
-        self.auction_id, contract['id']
+    response = self.app.patch_json('/auctions/{}/contracts/{}?acc_token={}'.format(
+        self.auction_id, contract['id'], self.auction_token
     ), {"data": {"dateSigned": one_hour_in_future}}, status=422)
     self.assertEqual(response.status, '422 Unprocessable Entity')
     self.assertEqual(response.json['errors'], [
@@ -281,14 +281,14 @@ def patch_auction_contract_to_active(self):
 
     # Trying to patch contract's dateSigned field with valid value
     custom_signature_date = get_now().isoformat()
-    response = self.app.patch_json('/auctions/{}/contracts/{}'.format(
-        self.auction_id, contract['id']
+    response = self.app.patch_json('/auctions/{}/contracts/{}?acc_token={}'.format(
+        self.auction_id, contract['id'], self.auction_token
     ), {"data": {"dateSigned": custom_signature_date}})
     self.assertEqual(response.status, '200 OK')
 
     # Trying to patch contract to active status again
-    response = self.app.patch_json('/auctions/{}/contracts/{}'.format(
-        self.auction_id, contract['id']
+    response = self.app.patch_json('/auctions/{}/contracts/{}?acc_token={}'.format(
+        self.auction_id, contract['id'], self.auction_token
     ), {"data": {"status": "active"}})
     self.assertEqual(response.status, '200 OK')
     self.assertEqual(response.content_type, 'application/json')
@@ -369,8 +369,8 @@ def patch_auction_contract_to_cancelled_invalid_no_rejection_or_act(self):
     contract = response.json['data'][0]
 
     # Trying to patch contract to cancelled status
-    response = self.app.patch_json('/auctions/{}/contracts/{}'.format(
-        self.auction_id, contract['id']
+    response = self.app.patch_json('/auctions/{}/contracts/{}?acc_token={}'.format(
+        self.auction_id, contract['id'], self.auction_token
     ), {"data": {"status": "cancelled"}}, status=403)
     self.assertEqual(response.status, '403 Forbidden')
     self.assertEqual(response.content_type, 'application/json')
@@ -391,8 +391,8 @@ def patch_auction_contract_to_cancelled_invalid_signed(self):
     self.upload_contract_document(contract, 'rejection')
 
     # Trying to patch contract to cancelled status
-    response = self.app.patch_json('/auctions/{}/contracts/{}'.format(
-        self.auction_id, contract['id']
+    response = self.app.patch_json('/auctions/{}/contracts/{}?acc_token={}'.format(
+        self.auction_id, contract['id'], self.auction_token
     ), {"data": {"status": "cancelled"}}, status=403)
     self.assertEqual(response.status, '403 Forbidden')
     self.assertEqual(response.content_type, 'application/json')
@@ -412,8 +412,8 @@ def patch_auction_contract_to_cancelled_rejection_protocol(self):
     self.upload_contract_document(contract, 'rejection')
 
     # Trying to patch contract to cancelled status
-    response = self.app.patch_json('/auctions/{}/contracts/{}'.format(
-        self.auction_id, contract['id']
+    response = self.app.patch_json('/auctions/{}/contracts/{}?acc_token={}'.format(
+        self.auction_id, contract['id'], self.auction_token
     ), {"data": {"status": "cancelled"}})
     self.assertEqual(response.status, '200 OK')
     self.assertEqual(response.content_type, 'application/json')
@@ -429,8 +429,8 @@ def patch_auction_contract_to_cancelled_act(self):
     self.upload_contract_document(contract, 'act')
 
     # Trying to patch contract to cancelled status
-    response = self.app.patch_json('/auctions/{}/contracts/{}'.format(
-        self.auction_id, contract['id']
+    response = self.app.patch_json('/auctions/{}/contracts/{}?acc_token={}'.format(
+        self.auction_id, contract['id'], self.auction_token
     ), {"data": {"status": "cancelled"}})
     self.assertEqual(response.status, '200 OK')
     self.assertEqual(response.content_type, 'application/json')
@@ -445,8 +445,8 @@ def patch_auction_contract_in_auction_complete_status(self):
 
     self.set_status('complete')
 
-    response = self.app.patch_json('/auctions/{}/contracts/{}'.format(
-        self.auction_id, contract['id']
+    response = self.app.patch_json('/auctions/{}/contracts/{}?acc_token={}'.format(
+        self.auction_id, contract['id'], self.auction_token
     ), {"data": {"value": {"amount": 232}}}, status=403)
     self.assertEqual(response.status, '403 Forbidden')
     self.assertEqual(
@@ -454,8 +454,8 @@ def patch_auction_contract_in_auction_complete_status(self):
         "Can't update contract in current (complete) auction status"
     )
 
-    response = self.app.patch_json('/auctions/{}/contracts/{}'.format(
-        self.auction_id, contract['id']
+    response = self.app.patch_json('/auctions/{}/contracts/{}?acc_token={}'.format(
+        self.auction_id, contract['id'], self.auction_token
     ), {"data": {"contractID": "myselfID"}}, status=403)
     self.assertEqual(response.status, '403 Forbidden')
     self.assertEqual(
@@ -463,8 +463,8 @@ def patch_auction_contract_in_auction_complete_status(self):
         "Can't update contract in current (complete) auction status"
     )
 
-    response = self.app.patch_json('/auctions/{}/contracts/{}'.format(
-        self.auction_id, contract['id']
+    response = self.app.patch_json('/auctions/{}/contracts/{}?acc_token={}'.format(
+        self.auction_id, contract['id'], self.auction_token
     ), {"data": {"items": [{"description": "New Description"}]}}, status=403)
     self.assertEqual(response.status, '403 Forbidden')
     self.assertEqual(
@@ -472,8 +472,8 @@ def patch_auction_contract_in_auction_complete_status(self):
         "Can't update contract in current (complete) auction status"
     )
 
-    response = self.app.patch_json('/auctions/{}/contracts/{}'.format(
-        self.auction_id, contract['id']
+    response = self.app.patch_json('/auctions/{}/contracts/{}?acc_token={}'.format(
+        self.auction_id, contract['id'], self.auction_token
     ), {"data": {"suppliers": [{"name": "New Name"}]}}, status=403)
     self.assertEqual(response.status, '403 Forbidden')
     self.assertEqual(
@@ -481,8 +481,8 @@ def patch_auction_contract_in_auction_complete_status(self):
         "Can't update contract in current (complete) auction status"
     )
 
-    response = self.app.patch_json('/auctions/{}/contracts/{}'.format(
-        self.auction_id, contract['id']
+    response = self.app.patch_json('/auctions/{}/contracts/{}?acc_token={}'.format(
+        self.auction_id, contract['id'], self.auction_token
     ), {"data": {"status": "active"}}, status=403)
     self.assertEqual(response.status, '403 Forbidden')
     self.assertEqual(response.content_type, 'application/json')

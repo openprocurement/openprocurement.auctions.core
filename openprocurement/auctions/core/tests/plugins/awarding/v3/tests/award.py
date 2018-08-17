@@ -1,3 +1,5 @@
+import unittest
+
 from openprocurement.auctions.core.tests.base import snitch
 from openprocurement.auctions.core.plugins.awarding.v3.tests.blanks.award_blanks import (
     # AuctionAwardProcessTest
@@ -69,8 +71,12 @@ class AuctionAwardProcessTestMixin(object):
 
 
 class CreateAuctionAwardTestMixin(object):
-    test_create_auction_award_invalid = snitch(create_auction_award_invalid)
-    test_create_auction_award = snitch(create_auction_award)
+    test_create_auction_award_invalid = unittest.skip('option not available')(
+        snitch(create_auction_award_invalid)
+    )
+    test_create_auction_award = unittest.skip('option not available')(
+        snitch(create_auction_award)
+    )
     test_award_activation_creates_contract = snitch(
         award_activation_creates_contract
     )

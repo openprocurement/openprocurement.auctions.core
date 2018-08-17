@@ -1,3 +1,5 @@
+import unittest
+
 from openprocurement.auctions.core.tests.base import snitch
 from openprocurement.auctions.core.tests.plugins.contracting.v3_1.tests.blanks.contract_blanks import (
     create_auction_contract,
@@ -17,8 +19,10 @@ from openprocurement.auctions.core.tests.plugins.contracting.v3_1.tests.blanks.c
 
 
 class AuctionContractV3_1ResourceTestCaseMixin(object):
-    test_create_auction_contract = snitch(create_auction_contract)
-    test_create_auction_contract_in_complete_status = snitch(create_auction_contract_in_complete_status)
+    test_create_auction_contract = unittest.skip('option not available')(snitch(create_auction_contract))
+    test_create_auction_contract_in_complete_status = unittest.skip('option not available')(
+        snitch(create_auction_contract_in_complete_status)
+    )
     test_get_auction_contract = snitch(get_auction_contract)
     test_patch_auction_contract_invalid = snitch(patch_auction_contract_invalid)
     test_patch_auction_contract_blacklisted_fields = snitch(patch_auction_contract_blacklisted_fields)

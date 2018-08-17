@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+import unittest
+
 from openprocurement.auctions.core.tests.base import snitch
 from openprocurement.auctions.core.tests.blanks.lot_blanks import (
     # AuctionLotResourceTest
@@ -37,7 +39,7 @@ class AuctionLotResourceTestMixin(object):
 
     test_get_auction_lots = snitch(get_auction_lots)
     test_delete_auction_lot = snitch(delete_auction_lot)
-    test_auction_lot_guarantee = snitch(auction_lot_guarantee)
+    # test_auction_lot_guarantee = snitch(auction_lot_guarantee)
 
 
 class AuctionLotProcessTestMixin(object):

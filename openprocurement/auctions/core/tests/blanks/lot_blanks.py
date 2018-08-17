@@ -443,50 +443,69 @@ def delete_auction_lot(self):
 
 
 def auction_lot_guarantee(self):
-        data = deepcopy(self.test_auction_data)
-        data['guarantee'] = {"amount": 100, "currency": "USD"}
-        response = self.app.post_json('/auctions', {'data': data})
-        auction = response.json['data']
-        self.assertEqual(response.status, '201 Created')
+        # data = deepcopy(self.test_auction_data)
+        # data['guarantee'] = {"amount": 100, "currency": "USD"}
+        # response = self.app.post_json('/auctions', {'data': data})
+        # auction = response.json['data']
+        # self.assertEqual(response.status, '201 Created')
+        # self.assertIn('guarantee', response.json['data'])
+        # self.assertEqual(response.json['data']['guarantee']['amount'], 100)
+        # self.assertEqual(response.json['data']['guarantee']['currency'], "USD")
+        #
+        response = self.app.patch_json('/auctions/{}?acc_token={}'.format(self.auction_id, self.auction_token),
+                                       {'data': {'guarantee': {"currency": "USD", 'amount': 100}}})
+        self.assertEqual(response.status, '200 OK')
         self.assertIn('guarantee', response.json['data'])
         self.assertEqual(response.json['data']['guarantee']['amount'], 100)
         self.assertEqual(response.json['data']['guarantee']['currency'], "USD")
 
-        lot = deepcopy(self.test_lots[0])
+        response = self.app.get('/auctions/{}'.format(self.auction_id))
+        lots = response.json['data']['lots']
+
+        lot = deepcopy(lots[0])
         lot['guarantee'] = {"amount": 20, "currency": "USD"}
-        response = self.app.post_json('/auctions/{}/lots'.format(auction['id']), {'data': lot})
-        self.assertEqual(response.status, '201 Created')
+        response = self.app.patch_json('/auctions/{}/lots/{}?acc_token={}'.format(
+            self.auction_id, lot['id'], self.auction_token
+        ), {'data': lot})
+        self.assertEqual(response.status, '200 OK')
         self.assertIn('guarantee', response.json['data'])
         self.assertEqual(response.json['data']['guarantee']['amount'], 20)
         self.assertEqual(response.json['data']['guarantee']['currency'], "USD")
 
-        response = self.app.patch_json('/auctions/{}'.format(auction['id']), {'data': {'guarantee': {"currency": "GBP"}}})
+        response = self.app.patch_json('/auctions/{}?acc_token={}'.format(
+            self.auction_id, self.auction_token
+        ), {'data': {'guarantee': {"currency": "GBP"}}})
         self.assertEqual(response.status, '200 OK')
         self.assertIn('guarantee', response.json['data'])
         self.assertEqual(response.json['data']['guarantee']['amount'], 20)
         self.assertEqual(response.json['data']['guarantee']['currency'], "GBP")
 
         lot['guarantee'] = {"amount": 20, "currency": "GBP"}
-        response = self.app.post_json('/auctions/{}/lots'.format(auction['id']), {'data': lot})
-        self.assertEqual(response.status, '201 Created')
-        lot_id = response.json['data']['id']
+        response = self.app.patch_json('/auctions/{}/lots/{}?acc_token={}'.format(
+            self.auction_id, lot['id'], self.auction_token
+        ), {'data': lot})
+        self.assertEqual(response.status, '200 OK')
+        self.assertIn('guarantee', response.json['data'])
         self.assertEqual(response.json['data']['guarantee']['amount'], 20)
         self.assertEqual(response.json['data']['guarantee']['currency'], "GBP")
 
-        response = self.app.get('/auctions/{}'.format(auction['id']))
+        response = self.app.get('/auctions/{}'.format(self.auction_id))
         self.assertEqual(response.json['data']['guarantee']['amount'], 20 + 20)
         self.assertEqual(response.json['data']['guarantee']['currency'], "GBP")
 
-        lot2 = deepcopy(self.test_lots[0])
+        lot2 = deepcopy(lots[0])
         lot2['guarantee'] = {"amount": 30, "currency": "GBP"}
-        response = self.app.post_json('/auctions/{}/lots'.format(auction['id']), {'data': lot2})
-        self.assertEqual(response.status, '201 Created')
-        lot2_id = response.json['data']['id']
+        response = self.app.patch_json('/auctions/{}/lots/{}?acc_token={}'.format(
+            self.auction_id, lot2['id'], self.auction_token
+        ), {'data': lot2})
+        self.assertEqual(response.status, '200 OK')
         self.assertEqual(response.json['data']['guarantee']['amount'], 30)
         self.assertEqual(response.json['data']['guarantee']['currency'], "GBP")
 
         lot2['guarantee'] = {"amount": 40, "currency": "USD"}
-        response = self.app.post_json('/auctions/{}/lots'.format(auction['id']), {'data': lot2}, status=422)
+        response = self.app.patch_json('/auctions/{}/lots/{}?acc_token={}'.format(
+            self.auction_id, lot2['id'], self.auction_token
+        ), {'data': lot2})
         self.assertEqual(response.status, '422 Unprocessable Entity')
         self.assertEqual(response.content_type, 'application/json')
         self.assertEqual(response.json['status'], 'error')
@@ -544,7 +563,9 @@ def auction_value(self):
 
 
 def auction_features_invalid(self):
-        request_path = '/auctions/{}'.format(self.auction_id)
+        request_path = '/auctions/{}?acc_token={}'.format(
+            self.auction_id, self.auction_token
+        )
         data = self.test_auction_data.copy()
         item = data['items'][0].copy()
         item['id'] = "1"
@@ -666,21 +687,28 @@ def patch_auction_bidder(self):
         self.assertEqual(response.status, '201 Created')
         self.assertEqual(response.content_type, 'application/json')
         bidder = response.json['data']
+        bid_token = response.json['access']['token']
         lot = bidder['lotValues'][0]
 
-        response = self.app.patch_json('/auctions/{}/bids/{}'.format(self.auction_id, bidder['id']), {"data": {'tenderers': [{"name": u"Державне управління управлінням справами"}]}})
+        response = self.app.patch_json('/auctions/{}/bids/{}?acc_token={}'.format(
+            self.auction_id, bidder['id'], bid_token
+        ), {"data": {'tenderers': [{"name": u"Державне управління управлінням справами"}]}})
         self.assertEqual(response.status, '200 OK')
         self.assertEqual(response.content_type, 'application/json')
         self.assertEqual(response.json['data']['lotValues'][0]['date'], lot['date'])
         self.assertNotEqual(response.json['data']['tenderers'][0]['name'], bidder['tenderers'][0]['name'])
 
-        response = self.app.patch_json('/auctions/{}/bids/{}'.format(self.auction_id, bidder['id']), {"data": {'lotValues': [{"value": {"amount": 500}, 'relatedLot': lot_id}], 'tenderers': [self.initial_organization]}})
+        response = self.app.patch_json('/auctions/{}/bids/{}?acc_token={}'.format(
+            self.auction_id, bidder['id'], bid_token
+        ), {"data": {'lotValues': [{"value": {"amount": 500}, 'relatedLot': lot_id}], 'tenderers': [self.initial_organization]}})
         self.assertEqual(response.status, '200 OK')
         self.assertEqual(response.content_type, 'application/json')
         self.assertEqual(response.json['data']['lotValues'][0]['date'], lot['date'])
         self.assertEqual(response.json['data']['tenderers'][0]['name'], bidder['tenderers'][0]['name'])
 
-        response = self.app.patch_json('/auctions/{}/bids/{}'.format(self.auction_id, bidder['id']), {"data": {'lotValues': [{"value": {"amount": 400}, 'relatedLot': lot_id}]}})
+        response = self.app.patch_json('/auctions/{}/bids/{}?acc_token={}'.format(
+            self.auction_id, bidder['id'], bid_token
+        ), {"data": {'lotValues': [{"value": {"amount": 400}, 'relatedLot': lot_id}]}})
         self.assertEqual(response.status, '200 OK')
         self.assertEqual(response.content_type, 'application/json')
         self.assertEqual(response.json['data']['lotValues'][0]["value"]["amount"], 400)
@@ -693,7 +721,9 @@ def patch_auction_bidder(self):
         self.assertEqual(response.content_type, 'application/json')
         self.assertEqual(response.json['data']['lotValues'][0]["value"]["amount"], 400)
 
-        response = self.app.patch_json('/auctions/{}/bids/{}'.format(self.auction_id, bidder['id']), {"data": {'lotValues': [{"value": {"amount": 500}, 'relatedLot': lot_id}]}}, status=403)
+        response = self.app.patch_json('/auctions/{}/bids/{}?acc_token={}'.format(
+            self.auction_id, bidder['id'], bid_token
+        ), {"data": {'lotValues': [{"value": {"amount": 500}, 'relatedLot': lot_id}]}}, status=403)
         self.assertEqual(response.status, '403 Forbidden')
         self.assertEqual(response.content_type, 'application/json')
         self.assertEqual(response.json['errors'][0]["description"], "Can't update bid in current (complete) auction status")

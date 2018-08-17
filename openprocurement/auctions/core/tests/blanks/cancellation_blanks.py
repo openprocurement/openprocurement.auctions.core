@@ -12,7 +12,7 @@ def create_auction_cancellation_invalid(self):
         {u'description': u'Not Found', u'location': u'url', u'name': u'auction_id'}
     ])
 
-    request_path = '/auctions/{}/cancellations'.format(self.auction_id)
+    request_path = '/auctions/{}/cancellations?acc_token={}'.format(self.auction_id, self.auction_token)
 
     response = self.app.post(request_path, 'data', status=415)
     self.assertEqual(response.status, '415 Unsupported Media Type')
@@ -70,7 +70,9 @@ def create_auction_cancellation_invalid(self):
             u'body', u'name': u'invalid_field'}
     ])
 
-    response = self.app.post_json('/auctions/{}/cancellations'.format(self.auction_id), {'data': {
+    response = self.app.post_json('/auctions/{}/cancellations?acc_token={}'.format(
+        self.auction_id, self.auction_token
+    ), {'data': {
         'reason': 'cancellation reason',
         "cancellationOf": "lot"
     }}, status=422)
@@ -81,7 +83,8 @@ def create_auction_cancellation_invalid(self):
         {u'description': [u'This field is required.'], u'location': u'body', u'name': u'relatedLot'}
     ])
 
-    response = self.app.post_json('/auctions/{}/cancellations'.format(self.auction_id), {'data': {
+    response = self.app.post_json('/auctions/{}/cancellations?acc_token={}'.format(
+        self.auction_id, self.auction_token), {'data': {
         'reason': 'cancellation reason',
         "cancellationOf": "lot",
         "relatedLot": '0' * 32
@@ -95,8 +98,9 @@ def create_auction_cancellation_invalid(self):
 
 
 def create_auction_cancellation(self):
-    response = self.app.post_json('/auctions/{}/cancellations'.format(
-        self.auction_id), {'data': {'reason': 'cancellation reason'}})
+    response = self.app.post_json('/auctions/{}/cancellations?acc_token={}'.format(
+        self.auction_id, self.auction_token
+    ), {'data': {'reason': 'cancellation reason'}})
     self.assertEqual(response.status, '201 Created')
     self.assertEqual(response.content_type, 'application/json')
     cancellation = response.json['data']
@@ -109,8 +113,9 @@ def create_auction_cancellation(self):
     self.assertEqual(response.content_type, 'application/json')
     self.assertEqual(response.json['data']["status"], 'active.tendering')
 
-    response = self.app.post_json('/auctions/{}/cancellations'.format(
-        self.auction_id), {'data': {'reason': 'cancellation reason', 'status': 'active'}})
+    response = self.app.post_json('/auctions/{}/cancellations?acc_token={}'.format(
+        self.auction_id, self.auction_token
+    ), {'data': {'reason': 'cancellation reason', 'status': 'active'}})
     self.assertEqual(response.status, '201 Created')
     self.assertEqual(response.content_type, 'application/json')
     cancellation = response.json['data']
@@ -125,8 +130,9 @@ def create_auction_cancellation(self):
     self.assertEqual(response.json['data']["status"], 'cancelled')
     self.assertNotIn("bids", response.json['data'])
 
-    response = self.app.post_json('/auctions/{}/cancellations'.format(
-        self.auction_id), {'data': {'reason': 'cancellation reason'}}, status=403)
+    response = self.app.post_json('/auctions/{}/cancellations?acc_token={}'.format(
+        self.auction_id, self.auction_token
+    ), {'data': {'reason': 'cancellation reason'}}, status=403)
     self.assertEqual(response.status, '403 Forbidden')
     self.assertEqual(response.content_type, 'application/json')
     self.assertEqual(response.json['errors'][0]["description"],
@@ -134,14 +140,16 @@ def create_auction_cancellation(self):
 
 
 def patch_auction_cancellation(self):
-    response = self.app.post_json('/auctions/{}/cancellations'.format(
-        self.auction_id), {'data': {'reason': 'cancellation reason'}})
+    response = self.app.post_json('/auctions/{}/cancellations?acc_token={}'.format(
+        self.auction_id, self.auction_token
+    ), {'data': {'reason': 'cancellation reason'}})
     self.assertEqual(response.status, '201 Created')
     self.assertEqual(response.content_type, 'application/json')
     cancellation = response.json['data']
 
-    response = self.app.patch_json('/auctions/{}/cancellations/{}'.format(self.auction_id, cancellation['id']),
-                                   {"data": {"status": "active"}})
+    response = self.app.patch_json('/auctions/{}/cancellations/{}?acc_token={}'.format(
+        self.auction_id, cancellation['id'], self.auction_token
+    ), {"data": {"status": "active"}})
     self.assertEqual(response.status, '200 OK')
     self.assertEqual(response.content_type, 'application/json')
     self.assertEqual(response.json['data']["status"], "active")
@@ -152,8 +160,9 @@ def patch_auction_cancellation(self):
     self.assertEqual(response.json['data']["status"], 'cancelled')
     self.assertNotIn("bids", response.json['data'])
 
-    response = self.app.patch_json('/auctions/{}/cancellations/{}'.format(self.auction_id, cancellation['id']),
-                                   {"data": {"status": "pending"}}, status=403)
+    response = self.app.patch_json('/auctions/{}/cancellations/{}?acc_token={}'.format(
+        self.auction_id, cancellation['id'], self.auction_token
+    ), {"data": {"status": "pending"}}, status=403)
     self.assertEqual(response.status, '403 Forbidden')
     self.assertEqual(response.content_type, 'application/json')
     self.assertEqual(response.json['errors'][0]["description"],
@@ -187,8 +196,9 @@ def patch_auction_cancellation(self):
 
 
 def get_auction_cancellation(self):
-    response = self.app.post_json('/auctions/{}/cancellations'.format(
-        self.auction_id), {'data': {'reason': 'cancellation reason'}})
+    response = self.app.post_json('/auctions/{}/cancellations?acc_token={}'.format(
+        self.auction_id, self.auction_token
+    ), {'data': {'reason': 'cancellation reason'}})
     self.assertEqual(response.status, '201 Created')
     self.assertEqual(response.content_type, 'application/json')
     cancellation = response.json['data']
@@ -218,8 +228,9 @@ def get_auction_cancellation(self):
 
 
 def get_auction_cancellations(self):
-    response = self.app.post_json('/auctions/{}/cancellations'.format(
-        self.auction_id), {'data': {'reason': 'cancellation reason'}})
+    response = self.app.post_json('/auctions/{}/cancellations?acc_token={}'.format(
+        self.auction_id, self.auction_token
+    ), {'data': {'reason': 'cancellation reason'}})
     self.assertEqual(response.status, '201 Created')
     self.assertEqual(response.content_type, 'application/json')
     cancellation = response.json['data']
@@ -243,7 +254,9 @@ def get_auction_cancellations(self):
 
 def create_auction_cancellation_lot(self):
     lot_id = self.initial_lots[0]['id']
-    response = self.app.post_json('/auctions/{}/cancellations'.format(self.auction_id), {'data': {
+    response = self.app.post_json('/auctions/{}/cancellations?acc_token={}'.format(
+        self.auction_id, self.auction_token
+    ), {'data': {
         'reason': 'cancellation reason',
         "cancellationOf": "lot",
         "relatedLot": lot_id
@@ -261,7 +274,9 @@ def create_auction_cancellation_lot(self):
     self.assertEqual(response.json['data']['lots'][0]["status"], 'active')
     self.assertEqual(response.json['data']["status"], 'active.tendering')
 
-    response = self.app.post_json('/auctions/{}/cancellations'.format(self.auction_id), {'data': {
+    response = self.app.post_json('/auctions/{}/cancellations?acc_token={}'.format(
+        self.auction_id, self.auction_token
+    ), {'data': {
         'reason': 'cancellation reason',
         'status': 'active',
         "cancellationOf": "lot",
@@ -281,8 +296,9 @@ def create_auction_cancellation_lot(self):
     self.assertEqual(response.json['data']['lots'][0]["status"], 'cancelled')
     self.assertEqual(response.json['data']["status"], 'cancelled')
 
-    response = self.app.post_json('/auctions/{}/cancellations'.format(
-        self.auction_id), {'data': {'reason': 'cancellation reason'}}, status=403)
+    response = self.app.post_json('/auctions/{}/cancellations?acc_token={}'.format(
+        self.auction_id, self.auction_token
+    ), {'data': {'reason': 'cancellation reason'}}, status=403)
     self.assertEqual(response.status, '403 Forbidden')
     self.assertEqual(response.content_type, 'application/json')
     self.assertEqual(response.json['errors'][0]["description"],
@@ -291,7 +307,9 @@ def create_auction_cancellation_lot(self):
 
 def patch_auction_cancellation_lot(self):
     lot_id = self.initial_lots[0]['id']
-    response = self.app.post_json('/auctions/{}/cancellations'.format(self.auction_id), {'data': {
+    response = self.app.post_json('/auctions/{}/cancellations?acc_token={}'.format(
+        self.auction_id, self.auction_token
+    ), {'data': {
         'reason': 'cancellation reason',
         "cancellationOf": "lot",
         "relatedLot": lot_id
@@ -300,7 +318,9 @@ def patch_auction_cancellation_lot(self):
     self.assertEqual(response.content_type, 'application/json')
     cancellation = response.json['data']
 
-    response = self.app.patch_json('/auctions/{}/cancellations/{}'.format(self.auction_id, cancellation['id']),
+    response = self.app.patch_json('/auctions/{}/cancellations/{}?acc_token={}'.format(
+        self.auction_id, cancellation['id'], self.auction_token
+    ),
                                    {"data": {"status": "active"}})
     self.assertEqual(response.status, '200 OK')
     self.assertEqual(response.content_type, 'application/json')
@@ -312,8 +332,9 @@ def patch_auction_cancellation_lot(self):
     self.assertEqual(response.json['data']['lots'][0]["status"], 'cancelled')
     self.assertEqual(response.json['data']["status"], 'cancelled')
 
-    response = self.app.patch_json('/auctions/{}/cancellations/{}'.format(self.auction_id, cancellation['id']),
-                                   {"data": {"status": "pending"}}, status=403)
+    response = self.app.patch_json('/auctions/{}/cancellations/{}?acc_token={}'.format(
+        self.auction_id, cancellation['id'], self.auction_token
+    ), {"data": {"status": "pending"}}, status=403)
     self.assertEqual(response.status, '403 Forbidden')
     self.assertEqual(response.content_type, 'application/json')
     self.assertEqual(response.json['errors'][0]["description"],
@@ -330,7 +351,9 @@ def patch_auction_cancellation_lot(self):
 
 def create_auction_cancellation_2_lots(self):
     lot_id = self.initial_lots[0]['id']
-    response = self.app.post_json('/auctions/{}/cancellations'.format(self.auction_id), {'data': {
+    response = self.app.post_json('/auctions/{}/cancellations?acc_token={}'.format(
+        self.auction_id, self.auction_token
+    ), {'data': {
         'reason': 'cancellation reason',
         "cancellationOf": "lot",
         "relatedLot": lot_id
@@ -348,7 +371,9 @@ def create_auction_cancellation_2_lots(self):
     self.assertEqual(response.json['data']['lots'][0]["status"], 'active')
     self.assertEqual(response.json['data']["status"], 'active.tendering')
 
-    response = self.app.post_json('/auctions/{}/cancellations'.format(self.auction_id), {'data': {
+    response = self.app.post_json('/auctions/{}/cancellations?acc_token={}'.format(
+        self.auction_id, self.auction_token
+    ), {'data': {
         'reason': 'cancellation reason',
         'status': 'active',
         "cancellationOf": "lot",
@@ -368,7 +393,9 @@ def create_auction_cancellation_2_lots(self):
     self.assertEqual(response.json['data']['lots'][0]["status"], 'cancelled')
     self.assertNotEqual(response.json['data']["status"], 'cancelled')
 
-    response = self.app.post_json('/auctions/{}/cancellations'.format(self.auction_id), {'data': {
+    response = self.app.post_json('/auctions/{}/cancellations?acc_token={}'.format(
+        self.auction_id, self.auction_token
+    ), {'data': {
         'reason': 'cancellation reason',
         'status': 'active',
         "cancellationOf": "lot",
@@ -381,7 +408,9 @@ def create_auction_cancellation_2_lots(self):
 
 def patch_auction_cancellation_2_lots(self):
     lot_id = self.initial_lots[0]['id']
-    response = self.app.post_json('/auctions/{}/cancellations'.format(self.auction_id), {'data': {
+    response = self.app.post_json('/auctions/{}/cancellations?acc_token={}'.format(
+        self.auction_id, self.auction_token
+    ), {'data': {
         'reason': 'cancellation reason',
         "cancellationOf": "lot",
         "relatedLot": lot_id
@@ -390,8 +419,9 @@ def patch_auction_cancellation_2_lots(self):
     self.assertEqual(response.content_type, 'application/json')
     cancellation = response.json['data']
 
-    response = self.app.patch_json('/auctions/{}/cancellations/{}'.format(self.auction_id, cancellation['id']),
-                                   {"data": {"status": "active"}})
+    response = self.app.patch_json('/auctions/{}/cancellations/{}?acc_token={}'.format(
+        self.auction_id, cancellation['id'], self.auction_token
+    ), {"data": {"status": "active"}})
     self.assertEqual(response.status, '200 OK')
     self.assertEqual(response.content_type, 'application/json')
     self.assertEqual(response.json['data']["status"], "active")
@@ -402,8 +432,9 @@ def patch_auction_cancellation_2_lots(self):
     self.assertEqual(response.json['data']['lots'][0]["status"], 'cancelled')
     self.assertNotEqual(response.json['data']["status"], 'cancelled')
 
-    response = self.app.patch_json('/auctions/{}/cancellations/{}'.format(self.auction_id, cancellation['id']),
-                                   {"data": {"status": "pending"}}, status=403)
+    response = self.app.patch_json('/auctions/{}/cancellations/{}?acc_token={}'.format(
+        self.auction_id, cancellation['id'], self.auction_token
+    ), {"data": {"status": "pending"}}, status=403)
     self.assertEqual(response.status, '403 Forbidden')
     self.assertEqual(response.content_type, 'application/json')
     self.assertEqual(response.json['errors'][0]["description"], "Can update cancellation only in active lot status")
@@ -437,8 +468,9 @@ def not_found(self):
             u'url', u'name': u'cancellation_id'}
     ])
 
-    response = self.app.post('/auctions/{}/cancellations/{}/documents'.format(self.auction_id, self.cancellation_id), status=404, upload_files=[
-                             ('invalid_value', 'name.doc', 'content')])
+    response = self.app.post('/auctions/{}/cancellations/{}/documents?acc_token={}'.format(
+        self.auction_id, self.cancellation_id, self.auction_token
+    ), status=404, upload_files=[('invalid_value', 'name.doc', 'content')])
     self.assertEqual(response.status, '404 Not Found')
     self.assertEqual(response.content_type, 'application/json')
     self.assertEqual(response.json['status'], 'error')
@@ -523,8 +555,9 @@ def not_found(self):
 
 
 def create_auction_cancellation_document(self):
-    response = self.app.post('/auctions/{}/cancellations/{}/documents'.format(
-        self.auction_id, self.cancellation_id), upload_files=[('file', 'name.doc', 'content')])
+    response = self.app.post('/auctions/{}/cancellations/{}/documents?acc_token={}'.format(
+        self.auction_id, self.cancellation_id, self.auction_token
+    ), upload_files=[('file', 'name.doc', 'content')])
     self.assertEqual(response.status, '201 Created')
     self.assertEqual(response.content_type, 'application/json')
     doc_id = response.json["data"]['id']
@@ -569,24 +602,26 @@ def create_auction_cancellation_document(self):
 
     self.set_status('complete')
 
-    response = self.app.post('/auctions/{}/cancellations/{}/documents'.format(
-        self.auction_id, self.cancellation_id), upload_files=[('file', 'name.doc', 'content')], status=403)
+    response = self.app.post('/auctions/{}/cancellations/{}/documents?acc_token={}'.format(
+        self.auction_id, self.cancellation_id, self.auction_token
+    ), upload_files=[('file', 'name.doc', 'content')], status=403)
     self.assertEqual(response.status, '403 Forbidden')
     self.assertEqual(response.content_type, 'application/json')
     self.assertEqual(response.json['errors'][0]["description"], "Can't add document in current (complete) auction status")
 
 
 def put_auction_cancellation_document(self):
-    response = self.app.post('/auctions/{}/cancellations/{}/documents'.format(
-        self.auction_id, self.cancellation_id), upload_files=[('file', 'name.doc', 'content')])
+    response = self.app.post('/auctions/{}/cancellations/{}/documents?acc_token={}'.format(
+        self.auction_id, self.cancellation_id, self.auction_token
+    ), upload_files=[('file', 'name.doc', 'content')])
     self.assertEqual(response.status, '201 Created')
     self.assertEqual(response.content_type, 'application/json')
     doc_id = response.json["data"]['id']
     self.assertIn(doc_id, response.headers['Location'])
 
-    response = self.app.put('/auctions/{}/cancellations/{}/documents/{}'.format(self.auction_id, self.cancellation_id, doc_id),
-                            status=404,
-                            upload_files=[('invalid_name', 'name.doc', 'content')])
+    response = self.app.put('/auctions/{}/cancellations/{}/documents/{}?acc_token={}'.format(
+        self.auction_id, self.cancellation_id, doc_id, self.auction_token
+    ), status=404, upload_files=[('invalid_name', 'name.doc', 'content')])
     self.assertEqual(response.status, '404 Not Found')
     self.assertEqual(response.content_type, 'application/json')
     self.assertEqual(response.json['status'], 'error')
@@ -595,8 +630,9 @@ def put_auction_cancellation_document(self):
             u'body', u'name': u'file'}
     ])
 
-    response = self.app.put('/auctions/{}/cancellations/{}/documents/{}'.format(
-        self.auction_id, self.cancellation_id, doc_id), upload_files=[('file', 'name.doc', 'content2')])
+    response = self.app.put('/auctions/{}/cancellations/{}/documents/{}?acc_token={}'.format(
+        self.auction_id, self.cancellation_id, doc_id, self.auction_token
+    ), upload_files=[('file', 'name.doc', 'content2')])
     self.assertEqual(response.status, '200 OK')
     self.assertEqual(response.content_type, 'application/json')
     self.assertEqual(doc_id, response.json["data"]["id"])
@@ -616,8 +652,9 @@ def put_auction_cancellation_document(self):
     self.assertEqual(doc_id, response.json["data"]["id"])
     self.assertEqual('name.doc', response.json["data"]["title"])
 
-    response = self.app.put('/auctions/{}/cancellations/{}/documents/{}'.format(
-        self.auction_id, self.cancellation_id, doc_id), 'content3', content_type='application/msword')
+    response = self.app.put('/auctions/{}/cancellations/{}/documents/{}?acc_token={}'.format(
+        self.auction_id, self.cancellation_id, doc_id, self.auction_token
+    ), 'content3', content_type='application/msword')
     self.assertEqual(response.status, '200 OK')
     self.assertEqual(response.content_type, 'application/json')
     self.assertEqual(doc_id, response.json["data"]["id"])
@@ -632,22 +669,26 @@ def put_auction_cancellation_document(self):
 
     self.set_status('complete')
 
-    response = self.app.put('/auctions/{}/cancellations/{}/documents/{}'.format(
-        self.auction_id, self.cancellation_id, doc_id), upload_files=[('file', 'name.doc', 'content3')], status=403)
+    response = self.app.put('/auctions/{}/cancellations/{}/documents/{}?acc_token={}'.format(
+        self.auction_id, self.cancellation_id, doc_id, self.auction_token
+    ), upload_files=[('file', 'name.doc', 'content3')], status=403)
     self.assertEqual(response.status, '403 Forbidden')
     self.assertEqual(response.content_type, 'application/json')
     self.assertEqual(response.json['errors'][0]["description"], "Can't update document in current (complete) auction status")
 
 
 def patch_auction_cancellation_document(self):
-    response = self.app.post('/auctions/{}/cancellations/{}/documents'.format(
-        self.auction_id, self.cancellation_id), upload_files=[('file', 'name.doc', 'content')])
+    response = self.app.post('/auctions/{}/cancellations/{}/documents?acc_token={}'.format(
+        self.auction_id, self.cancellation_id, self.auction_token
+    ), upload_files=[('file', 'name.doc', 'content')])
     self.assertEqual(response.status, '201 Created')
     self.assertEqual(response.content_type, 'application/json')
     doc_id = response.json["data"]['id']
     self.assertIn(doc_id, response.headers['Location'])
 
-    response = self.app.patch_json('/auctions/{}/cancellations/{}/documents/{}'.format(self.auction_id, self.cancellation_id, doc_id), {"data": {"description": "document description"}})
+    response = self.app.patch_json('/auctions/{}/cancellations/{}/documents/{}?acc_token={}'.format(
+        self.auction_id, self.cancellation_id, doc_id, self.auction_token
+    ), {"data": {"description": "document description"}})
     self.assertEqual(response.status, '200 OK')
     self.assertEqual(response.content_type, 'application/json')
     self.assertEqual(doc_id, response.json["data"]["id"])
@@ -661,7 +702,9 @@ def patch_auction_cancellation_document(self):
 
     self.set_status('complete')
 
-    response = self.app.patch_json('/auctions/{}/cancellations/{}/documents/{}'.format(self.auction_id, self.cancellation_id, doc_id), {"data": {"description": "document description"}}, status=403)
+    response = self.app.patch_json('/auctions/{}/cancellations/{}/documents/{}?acc_token={}'.format(
+        self.auction_id, self.cancellation_id, doc_id, self.auction_token
+    ), {"data": {"description": "document description"}}, status=403)
     self.assertEqual(response.status, '403 Forbidden')
     self.assertEqual(response.content_type, 'application/json')
     self.assertEqual(response.json['errors'][0]["description"], "Can't update document in current (complete) auction status")
