@@ -27,3 +27,26 @@ swiftsure_item = {
         "streetAddress": u"вул. Банкова 1"
     }
 }
+
+
+dgf_item = {
+   "description": "Земля для військовослужбовців",
+   "classification": {
+       "scheme": "CAV",
+       "description": "Земельні ділянки",
+       "id": "06000000-2"
+   },
+   "address": {
+       "postalCode": "79000",
+       "countryName": "Україна",
+       "streetAddress": "вул. Банкова 1",
+       "region": "м. Київ",
+       "locality": "м. Київ"
+   },
+   "id": "1ced20e127fa4bd3beb914523d629dca",
+   "unit": {
+       "code": "44617100-9",
+       "name": "item"
+   },
+   "quantity": 5
+}
