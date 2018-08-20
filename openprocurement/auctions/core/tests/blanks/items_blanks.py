@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
+from openprocurement.auctions.core.endpoints import ENDPOINTS
 
 
-def get_item(test_case):
+def post_item(test_case):
     pass
