@@ -8,7 +8,8 @@ from openprocurement.auctions.core.tests.fixtures.items import dgf_item
 
 def post_item(test_case):
     response = test_case.app.post_json(
-        ENDPOINTS['items'].format(auction_id=test_case.auction_id),
+        ENDPOINTS['items'].format(auction_id=test_case.auction_id) +
+            '?acc_token={}'.format(test_case.auction_token),
         {'data': dgf_item}
     )
     test_case.assertEqual(response.status_code, 201)
