@@ -484,3 +484,16 @@ tessel_auction_roles = {
     ),
     'pending.activation': enquiries_role,
 }
+
+dgf_item_roles = {
+    'create': blacklist(
+        'deliveryAddress',
+        'deliveryDate',
+        'deliveryLocation',
+    ),
+    'edit_active.tendering': blacklist(
+        'deliveryAddress',
+        'deliveryDate',
+        'deliveryLocation',
+    ),
+}

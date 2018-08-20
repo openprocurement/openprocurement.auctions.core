@@ -95,6 +95,7 @@ from openprocurement.auctions.core.models.roles import (
     Administrator_bid_role,
     auction_roles,
     default_lot_role,
+    dgf_item_roles,
     embedded_lot_role,
     sensitive_embedded_role,
     view_bid_role,
@@ -162,16 +163,7 @@ class DgfAdditionalClassification(Classification):
 class dgfItem(flashItem):
     """A good, service, or work to be contracted."""
     class Options:
-        roles = {
-            'create': blacklist(
-                'deliveryLocation',
-                'deliveryAddress',
-                'deliveryDate'),
-            'edit_active.tendering': blacklist(
-                'deliveryLocation',
-                'deliveryAddress',
-                'deliveryDate'),
-        }
+        roles = dgf_item_roles
     classification = ModelType(dgfCAVClassification, required=True)
     additionalClassifications = ListType(
         ModelType(DgfAdditionalClassification), default=list())
