@@ -44,3 +44,7 @@ def get_item(test_case):
     test_case.assertEqual(item_resp.status_code, 200)
     test_case.assertNotIn('auctionID', data.keys())
     test_case.assertIn('classification', data.keys())
+
+
+def get_items_collection(test_case):
+    pass
