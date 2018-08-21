@@ -28,4 +28,19 @@ def post_item(test_case):
 
 
 def get_item(test_case):
-    pass
+    item_id = test_case.app.post_json(
+        ENDPOINTS['items'].format(auction_id=test_case.auction_id) +
+            '?acc_token={}'.format(test_case.auction_token),
+        {'data': dgf_item}
+    ).json['data']['id']
+
+    item_resp = test_case.app.get(
+        ENDPOINTS['item'].format(
+            auction_id=test_case.auction_id,
+            item_id=item_id
+        )
+    )
+    data = item_resp.json['data']
+    test_case.assertEqual(item_resp.status_code, 200)
+    test_case.assertNotIn('auctionID', data.keys())
+    test_case.assertIn('classification', data.keys())
