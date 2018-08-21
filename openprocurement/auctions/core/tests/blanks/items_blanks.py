@@ -1,8 +1,5 @@
 # -*- coding: utf-8 -*-
 from openprocurement.auctions.core.endpoints import ENDPOINTS
-from openprocurement.auctions.core.tests.helpers import (
-    get_auction,
-)
 from openprocurement.auctions.core.tests.fixtures.items import dgf_item
 from openprocurement.auctions.core.tests.helpers import (
     get_auction,
