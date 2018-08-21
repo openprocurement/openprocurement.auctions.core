@@ -513,4 +513,7 @@ dgf_item_roles = {
         'schema_properties',
         'unit',
     ),
+    'edit': blacklist(
+        'id',
+    ),
 }
