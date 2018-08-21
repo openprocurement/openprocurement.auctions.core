@@ -6,6 +6,7 @@ from openprocurement.auctions.core.tests.helpers import (
 from openprocurement.auctions.core.tests.fixtures.items import dgf_item
 from openprocurement.auctions.core.tests.helpers import (
     get_auction,
+    patch_item,
     post_item,
 )
 
@@ -70,4 +71,20 @@ def get_items_collection(test_case):
 
 
 def patch_description(test_case):
-    pass
+    item_resp = post_item(
+        test_case,
+        test_case.auction_id,
+        test_case.auction_token,
+        dgf_item
+    )
+    item_id = item_resp.json['data']['id']
+    item_description_old = item_resp.json['data']['description']
+    patch_resp = patch_item(
+        test_case,
+        test_case.auction_id,
+        item_id,
+        test_case.auction_token,
+        {'description': '123'}
+    )
+    test_case.assertIn('description', patch_resp.json['data'].keys())
+    test_case.assertEqual('123', patch_resp.json['data']['description'])
