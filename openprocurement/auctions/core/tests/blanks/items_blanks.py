@@ -9,7 +9,7 @@ from openprocurement.auctions.core.tests.helpers import (
 )
 
 
-def post_item(test_case):
+def post_single_item(test_case):
     auction_data_before_post = get_auction(test_case, test_case.auction_id)
 
     response = test_case.app.post_json(
