@@ -10,6 +10,7 @@ from openprocurement.api.utils import (
     error_handler,
     get_now,
     update_logging_context,
+    get_resource_accreditation
 )
 from openprocurement.api.validation import (
     validate_accreditations,
@@ -139,7 +140,7 @@ def validate_auction_auction_data(request, **kwargs):
         if SANDBOX_MODE \
         and auction.submissionMethodDetails \
         and auction.submissionMethodDetails in [u'quick(mode:no-auction)', u'quick(mode:fast-forward)'] \
-        and auction._procedure_type in ENGLISH_AUCTION_PROCUREMENT_METHOD_TYPES:
+        and auction._internal_type in ENGLISH_AUCTION_PROCUREMENT_METHOD_TYPES:
             if auction.lots:
                 data['lots'] = [{'auctionPeriod': {'startDate': now, 'endDate': now}} if i.id == lot_id else {} for i in auction.lots]
             else:
@@ -153,8 +154,9 @@ def validate_auction_auction_data(request, **kwargs):
 
 
 def validate_bid_data(request, **kwargs):
-    if not request.check_accreditation(request.auction.edit_accreditation):
-        request.errors.add('body', 'accreditation', 'Broker Accreditation level does not permit bid creation')
+    accreditation = get_resource_accreditation(request, 'auction', request.context, 'edit')
+    if not request.check_accreditation(accreditation):
+        request.errors.add('procurementMethodType', 'accreditation', 'Broker Accreditation level does not permit bid creation')
         request.errors.status = 403
         return
     if request.auction.get('mode', None) is None and request.check_accreditation('t'):
@@ -338,12 +340,15 @@ def validate_patch_complaint_data_patch_common(request, **kwargs):
 
 
 def validate_question_data(request, **kwargs):
-    if not request.check_accreditation(request.auction.edit_accreditation):
-        request.errors.add('procurementMethodType', 'accreditation', 'Broker Accreditation level does not permit question creation')
+    accreditation = get_resource_accreditation(request, 'auction', request.context, 'edit')
+    if not request.check_accreditation(accreditation):
+        msg = 'Broker Accreditation level does not permit question creation'
+        request.errors.add('procurementMethodType', 'accreditation', msg)
         request.errors.status = 403
         return
     if request.auction.get('mode', None) is None and request.check_accreditation('t'):
-        request.errors.add('procurementMethodType', 'mode', 'Broker Accreditation level does not permit question creation')
+        msg = 'Broker Accreditation level does not permit question creation'
+        request.errors.add('procurementMethodType', 'mode', msg)
         request.errors.status = 403
         return
     update_logging_context(request, {'question_id': '__new__'})
@@ -357,12 +362,15 @@ def validate_patch_question_data(request, **kwargs):
 
 
 def validate_complaint_data(request, **kwargs):
-    if not request.check_accreditation(request.auction.edit_accreditation):
-        request.errors.add('procurementMethodType', 'accreditation', 'Broker Accreditation level does not permit complaint creation')
+    accreditation = get_resource_accreditation(request, 'auction', request.auction, 'edit')
+    if not request.check_accreditation(accreditation):
+        msg = 'Broker Accreditation level does not permit complaint creation'
+        request.errors.add('procurementMethodType', 'accreditation', msg)
         request.errors.status = 403
         return
     if request.auction.get('mode', None) is None and request.check_accreditation('t'):
-        request.errors.add('procurementMethodType', 'mode', 'Broker Accreditation level does not permit complaint creation')
+        msg = 'Broker Accreditation level does not permit complaint creation'
+        request.errors.add('procurementMethodType', 'mode', msg)
         request.errors.status = 403
         return
     update_logging_context(request, {'complaint_id': '__new__'})

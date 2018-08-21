@@ -475,7 +475,7 @@ def register_auction_procurementMethodType(config, model, pmt):
     :param pmt:
         Procurement method type associated with procedure type
     """
-    config.registry.pmtConfigurator[pmt] = model._procedure_type
+    config.registry.pmtConfigurator[pmt] = model._internal_type
     config.registry.auction_procurementMethodTypes[pmt] = model
 
 
