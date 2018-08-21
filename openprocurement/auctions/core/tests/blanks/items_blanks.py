@@ -6,6 +6,7 @@ from openprocurement.auctions.core.tests.helpers import (
 from openprocurement.auctions.core.tests.fixtures.items import dgf_item
 from openprocurement.auctions.core.tests.helpers import (
     get_auction,
+    post_item,
 )
 
 
@@ -28,12 +29,12 @@ def post_single_item(test_case):
 
 
 def get_item(test_case):
-    item_id = test_case.app.post_json(
-        ENDPOINTS['items'].format(auction_id=test_case.auction_id) +
-            '?acc_token={}'.format(test_case.auction_token),
-        {'data': dgf_item}
+    item_id = post_item(
+        test_case,
+        test_case.auction_id,
+        test_case.auction_token,
+        dgf_item
     ).json['data']['id']
-
     item_resp = test_case.app.get(
         ENDPOINTS['item'].format(
             auction_id=test_case.auction_id,
