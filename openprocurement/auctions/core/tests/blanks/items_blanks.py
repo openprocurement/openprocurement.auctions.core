@@ -48,4 +48,22 @@ def get_item(test_case):
 
 
 def get_items_collection(test_case):
-    pass
+    item_id_1 = post_item(
+        test_case,
+        test_case.auction_id,
+        test_case.auction_token,
+        dgf_item
+    ).json['data']['id']
+    item_id_2 = post_item(
+        test_case,
+        test_case.auction_id,
+        test_case.auction_token,
+        dgf_item
+    ).json['data']['id']
+    coll_get_resp = test_case.app.get(
+        ENDPOINTS['items'].format(auction_id=test_case.auction_id)
+    )
+    coll_ids = [item['id'] for item in coll_get_resp.json['data']]
+    test_case.assertTrue(len(coll_ids) > 2)
+    test_case.assertIn(item_id_1, coll_ids)
+    test_case.assertIn(item_id_2, coll_ids)
