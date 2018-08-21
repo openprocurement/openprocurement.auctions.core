@@ -67,3 +67,7 @@ def get_items_collection(test_case):
     test_case.assertTrue(len(coll_ids) > 2)
     test_case.assertIn(item_id_1, coll_ids)
     test_case.assertIn(item_id_2, coll_ids)
+
+
+def patch_description(test_case):
+    pass
