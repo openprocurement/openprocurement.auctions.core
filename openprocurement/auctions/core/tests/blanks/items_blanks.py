@@ -25,3 +25,7 @@ def post_item(test_case):
     items_after_post = len(auction_data_after_post.json['data']['items'])
     # check that one item was added
     test_case.assertEqual(items_before_post + 1, items_after_post)
+
+
+def get_item(test_case):
+    pass
