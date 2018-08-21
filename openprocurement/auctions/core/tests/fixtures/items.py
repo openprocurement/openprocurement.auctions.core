@@ -43,7 +43,6 @@ dgf_item = {
        "region": "м. Київ",
        "locality": "м. Київ"
    },
-   "id": "1ced20e127fa4bd3beb914523d629dca",
    "unit": {
        "code": "44617100-9",
        "name": "item"
