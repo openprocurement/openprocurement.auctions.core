@@ -10,6 +10,15 @@ def get_auction(test_case, auction_id):
     )
 
 
+def get_item(test_case, auction_id, item_id):
+    return test_case.app.get(
+        ENDPOINTS['item'].format(
+            auction_id=auction_id,
+            item_id=item_id
+        )
+    )
+
+
 def post_item(test_case, auction_id, auction_token, item_data):
     return test_case.app.post_json(
         ENDPOINTS['items'].format(auction_id=auction_id) + '?acc_token={}'.format(auction_token),
