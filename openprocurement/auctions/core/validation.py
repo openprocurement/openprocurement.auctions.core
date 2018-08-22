@@ -476,3 +476,17 @@ def cpvs_validator(data, code):
     if data.get('scheme') == u'CPVS' and code not in CPVS_CODES_DGF_CDB2:
         raise ValidationError(BaseType.MESSAGES['choices'].format(unicode(CPVS_CODES_DGF_CDB2)))
     return True
+
+
+def validate_rectification_period(request, **kwargs):
+    """Forbid to use view if auction is out of it's rectificationPeriod"""
+    from openprocurement.auctions.core.models.schema import get_auction
+    auction = get_auction(request.context)
+    if get_now() not in auction.rectificationPeriod:
+        request.errors.add(
+            'body',
+            'data',
+            'Can\'t edit resource, because it\'s related auction\'s rectification period has expired.'
+        )
+        request.errors.status = 403
+        raise error_handler(request)
