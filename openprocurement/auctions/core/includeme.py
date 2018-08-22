@@ -39,8 +39,7 @@ def includeme(config, plugin_map):
     config.add_subscriber(set_logging_context, ContextFound)
 
     # add accreditation
-    config.registry.accreditation = {'auction': {}}
-
+    config.registry.accreditation['auction'] = {}
 
     # auction procurementMethodType plugins support
     config.registry.auction_procurementMethodTypes = {}
