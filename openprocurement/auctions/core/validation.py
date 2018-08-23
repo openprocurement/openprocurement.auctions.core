@@ -156,7 +156,7 @@ def validate_auction_auction_data(request, **kwargs):
 def validate_bid_data(request, **kwargs):
     accreditation = get_resource_accreditation(request, 'auction', request.context, 'edit')
     if not request.check_accreditation(accreditation):
-        request.errors.add('procurementMethodType', 'accreditation', 'Broker Accreditation level does not permit bid creation')
+        request.errors.add('body', 'accreditation', 'Broker Accreditation level does not permit bid creation')
         request.errors.status = 403
         return
     if request.auction.get('mode', None) is None and request.check_accreditation('t'):
@@ -343,12 +343,12 @@ def validate_question_data(request, **kwargs):
     accreditation = get_resource_accreditation(request, 'auction', request.context, 'edit')
     if not request.check_accreditation(accreditation):
         msg = 'Broker Accreditation level does not permit question creation'
-        request.errors.add('procurementMethodType', 'accreditation', msg)
+        request.errors.add('body', 'accreditation', msg)
         request.errors.status = 403
         return
     if request.auction.get('mode', None) is None and request.check_accreditation('t'):
         msg = 'Broker Accreditation level does not permit question creation'
-        request.errors.add('procurementMethodType', 'mode', msg)
+        request.errors.add('body', 'mode', msg)
         request.errors.status = 403
         return
     update_logging_context(request, {'question_id': '__new__'})
@@ -365,12 +365,12 @@ def validate_complaint_data(request, **kwargs):
     accreditation = get_resource_accreditation(request, 'auction', request.auction, 'edit')
     if not request.check_accreditation(accreditation):
         msg = 'Broker Accreditation level does not permit complaint creation'
-        request.errors.add('procurementMethodType', 'accreditation', msg)
+        request.errors.add('body', 'accreditation', msg)
         request.errors.status = 403
         return
     if request.auction.get('mode', None) is None and request.check_accreditation('t'):
         msg = 'Broker Accreditation level does not permit complaint creation'
-        request.errors.add('procurementMethodType', 'mode', msg)
+        request.errors.add('body', 'mode', msg)
         request.errors.status = 403
         return
     update_logging_context(request, {'complaint_id': '__new__'})
