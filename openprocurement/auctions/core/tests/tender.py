@@ -16,6 +16,12 @@ from openprocurement.auctions.core.tests.blanks.tender_blanks import (
 )
 
 
+from openprocurement.auctions.core.tests.blanks.extract_credentials import (
+    get_extract_credentials,
+    forbidden_users
+)
+
+
 class AuctionResourceTestMixin(object):
     test_empty_listing = snitch(empty_listing)
     test_listing = snitch(listing)
@@ -31,3 +37,12 @@ class DgfInsiderResourceTestMixin(object):
     test_patch_auction = snitch(patch_auction)
     test_dateModified_auction = snitch(dateModified_auction)
     test_guarantee = snitch(guarantee)
+
+
+class ExtractCredentialsMixin(object):
+    """ Mixin with tests for extract_credentials entry point
+    """
+    valid_user = 'convoy'
+
+    test_get_extract_credentials = snitch(get_extract_credentials)
+    test_forbidden_users = snitch(forbidden_users)

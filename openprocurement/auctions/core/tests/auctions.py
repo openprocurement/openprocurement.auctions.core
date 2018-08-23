@@ -61,17 +61,6 @@ class AuctionRectificationPeriodTestMixin(object):
     test_patch_auction_after_rectificationPeriod = snitch(patch_auction_after_rectificationPeriod)
 
 
-
-
-class ExtractCredentialsMixin(object):
-    """ Mixin with tests for extract_credentials entry point
-    """
-    valid_user = 'concierge'
-
-    test_get_extract_credentials = snitch(get_extract_credentials)
-    test_forbidden_users = snitch(forbidden_users)
-
-
 def suite():
     tests = unittest.TestSuite()
     tests.addTest(unittest.makeSuite(AuctionResourceTest))
