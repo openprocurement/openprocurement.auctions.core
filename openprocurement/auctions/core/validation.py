@@ -476,3 +476,19 @@ def cpvs_validator(data, code):
     if data.get('scheme') == u'CPVS' and code not in CPVS_CODES_DGF_CDB2:
         raise ValidationError(BaseType.MESSAGES['choices'].format(unicode(CPVS_CODES_DGF_CDB2)))
     return True
+
+
+def validate_item_rectification_period(request, **kwargs):
+    """Forbid to use view if auction is out of it's rectificationPeriod"""
+    auction = request.context.__parent__
+    if get_now() not in auction.rectificationPeriod:
+        request.errors.add(
+            'body',
+            'data',
+            'Item can be edited only during the rectification period of the auction: from ({0}) to ({1}).'.format(
+                auction.rectificationPeriod.startDate.isoformat(),
+                auction.rectificationPeriod.endDate.isoformat()
+            )
+        )
+        request.errors.status = 403
+        raise error_handler(request)

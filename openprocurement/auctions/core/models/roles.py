@@ -484,3 +484,36 @@ tessel_auction_roles = {
     ),
     'pending.activation': enquiries_role,
 }
+
+dgf_item_roles = {
+    'create': blacklist(
+        'deliveryAddress',
+        'deliveryDate',
+        'deliveryLocation',
+    ),
+    'edit_active.tendering': blacklist(
+        'deliveryAddress',
+        'deliveryDate',
+        'deliveryLocation',
+    ),
+    'view': whitelist(
+        'additionalClassifications',
+        'address',
+        'classification',
+        'deliveryAddress',
+        'deliveryDate',
+        'deliveryLocation',
+        'description',
+        'description_en',
+        'description_ru',
+        'id',
+        'location',
+        'quantity',
+        'relatedLot',
+        'schema_properties',
+        'unit',
+    ),
+    'edit': blacklist(
+        'id',
+    ),
+}

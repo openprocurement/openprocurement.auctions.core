@@ -553,3 +553,11 @@ def validate_with(validators):
             return func(*args, **kwargs)
         return wrapper
     return actual_validator
+
+
+def get_auction(model):
+    while not IAuction.providedBy(model):
+        model = getattr(model, '__parent__', None)
+        if model is None:
+            return None
+    return model

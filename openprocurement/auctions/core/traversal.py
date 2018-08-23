@@ -111,6 +111,10 @@ def factory(request):
         if request.matchdict.get('document_id'):
             return get_item(bid, 'document', request)
         return bid
+    #  Item branch
+    elif request.matchdict.get('item_id'):
+        item = get_item(auction, 'item', request)
+        return item
     #  Complaint branch
     elif request.matchdict.get('complaint_id'):
         complaint = get_item(auction, 'complaint', request)
