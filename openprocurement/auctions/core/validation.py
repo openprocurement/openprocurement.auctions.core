@@ -478,15 +478,17 @@ def cpvs_validator(data, code):
     return True
 
 
-def validate_rectification_period(request, **kwargs):
+def validate_item_rectification_period(request, **kwargs):
     """Forbid to use view if auction is out of it's rectificationPeriod"""
-    from openprocurement.auctions.core.models.schema import get_auction
-    auction = get_auction(request.context)
+    auction = request.context.__parent__
     if get_now() not in auction.rectificationPeriod:
         request.errors.add(
             'body',
             'data',
-            'Can\'t edit resource, because it\'s related auction\'s rectification period has expired.'
+            'Item can be edited only during the rectification period of the auction: from ({0}) to ({1}).'.format(
+                auction.rectificationPeriod.startDate.isoformat(),
+                auction.rectificationPeriod.endDate.isoformat()
+            )
         )
         request.errors.status = 403
         raise error_handler(request)

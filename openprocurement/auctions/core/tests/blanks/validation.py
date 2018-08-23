@@ -42,7 +42,7 @@ def patch_item_after_rectification_period(test_case):
     auc_doc.update(rectification_period)
     test_case.db[test_case.auction_id] = auc_doc
     # forge completed
-    patch_item(
+    resp = patch_item(
         test_case,
         test_case.auction_id,
         item_before_patch['id'],
@@ -50,6 +50,7 @@ def patch_item_after_rectification_period(test_case):
         {'description': 'ololol'},
         status=403
     )
+    test_case.assertIn('rectification', resp.json['errors'][0]['description'])
     item_after_patch = get_item(
         test_case,
         test_case.auction_id,
