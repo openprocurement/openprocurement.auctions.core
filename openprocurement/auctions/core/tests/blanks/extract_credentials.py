@@ -7,7 +7,7 @@ def get_extract_credentials(self):
     path = '/auctions/{}/extract_credentials'.format(self.auction_id)
     response = self.app.get(path)
     response_data_keys = response.json['data'].keys()
-    _ = [self.assertIn(key, response_data_keys) for key in expected_keys]
+    self.assertSetEqual(set(expected_keys), set(response_data_keys))
 
 
 def forbidden_users(self):
