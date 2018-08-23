@@ -23,3 +23,7 @@ def patch_item_during_rectification_period(test_case):
         item_before_patch['id']
     ).json['data']
     test_case.assertEqual(item_after_patch['description'], target_value)
+
+
+def patch_item_after_rectification_period(self):
+    pass
