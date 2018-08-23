@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import unittest
 
+
 from openprocurement.auctions.core.tests.base import BaseWebTest, snitch
 from openprocurement.auctions.core.tests.blanks.tender_blanks import empty_listing
 from openprocurement.auctions.core.tests.blanks.auction_blanks import (
@@ -19,6 +20,11 @@ from openprocurement.auctions.core.tests.blanks.auction_blanks import (
     post_auction_auction_document_2_lots,
     patch_auction_in_rectificationPeriod,
     patch_auction_after_rectificationPeriod,
+)
+
+from openprocurement.auctions.core.tests.blanks.extract_credentials import (
+    get_extract_credentials,
+    forbidden_users
 )
 
 
