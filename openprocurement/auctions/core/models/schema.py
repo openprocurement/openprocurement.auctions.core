@@ -86,7 +86,10 @@ from openprocurement.auctions.core.constants import (
     DGF_CDB2_ADDRESS_REQUIRED_FROM,
     DGF_CDB2_CLASSIFICATION_PRECISELY_FROM
 )
-from openprocurement.auctions.core.utils import get_auction_creation_date
+from openprocurement.auctions.core.utils import (
+    get_auction,
+    get_auction_creation_date,
+)
 from openprocurement.auctions.core.validation import (
     validate_disallow_dgfPlatformLegalDetails,
     cpvs_validator
@@ -104,14 +107,7 @@ from openprocurement.auctions.core.models.roles import (
 
 
 deprecated('IAuction', 'IAuction moved to interfaces.py')
-
-
-def get_auction(model):
-    while not IAuction.providedBy(model):
-        model = getattr(model, '__parent__', None)
-        if model is None:
-            return None
-    return model
+deprecated('get_auction', 'get_auction moved to utils.py')
 
 
 class RectificationPeriod(Period):
