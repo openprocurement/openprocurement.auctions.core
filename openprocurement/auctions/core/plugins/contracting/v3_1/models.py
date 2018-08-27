@@ -8,7 +8,7 @@ from openprocurement.api.models.schematics_extender import (
 )
 from openprocurement.auctions.core.models import (
     dgfOrganization as Organization,
-    SwiftsureItem as Item,
+    LokiItem as Item,
     contractV3_1Document as Document,
     dgfComplaint as Complaint
 )
