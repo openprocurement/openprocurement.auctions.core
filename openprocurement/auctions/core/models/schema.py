@@ -254,6 +254,9 @@ class dgfCDB2Item(flashItem):
                     raise ValidationError(u'This field is required.')
 
 
+from openprocurement.api.models.registry_models import LokiItem
+
+
 class SwiftsureItem(dgfCDB2Item):
     registrationDetails = ModelType(RegistrationDetails)
     quantity = DecimalType(precision=-4)
