@@ -227,7 +227,7 @@ def patch_auction_contract_value(self):
     self.assertEqual(response.status, '403 Forbidden')
     self.assertEqual(
         response.json['errors'][0]["description"],
-        "Value amount should be greater or equal to awarded amount (479.0)"
+        "Value amount should be greater or equal to awarded amount (479)"
     )
 
     response = self.app.patch_json('/auctions/{}/contracts/{}?acc_token={}'.format(
