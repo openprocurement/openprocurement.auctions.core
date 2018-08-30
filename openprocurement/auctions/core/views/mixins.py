@@ -438,7 +438,6 @@ class AuctionBidResource(APIResource):
             }
 
         """
-
         if self.request.authenticated_role != 'Administrator' and self.request.validated['auction_status'] != 'active.tendering':
             self.request.errors.add('body', 'data', 'Can\'t update bid in current ({}) auction status'.format(self.request.validated['auction_status']))
             self.request.errors.status = 403

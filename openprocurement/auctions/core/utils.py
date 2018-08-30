@@ -165,14 +165,14 @@ def save_auction(request):
             auction.dateModified = now
         try:
             auction.store(request.registry.db)
-        except ModelValidationError, e:
+        except ModelValidationError as e:
             for i in e.message:
                 request.errors.add('body', i, e.message[i])
             request.errors.status = 422
-        except ResourceConflict, e:  # pragma: no cover
+        except ResourceConflict as e:  # pragma: no cover
             request.errors.add('body', 'data', str(e))
             request.errors.status = 409
-        except Exception, e:  # pragma: no cover
+        except Exception as e:  # pragma: no cover
             request.errors.add('body', 'data', str(e))
         else:
             predict = old_dateModified and old_dateModified.isoformat()
@@ -188,6 +188,7 @@ def apply_patch(request, data=None, save=True, src=None):
         request.context.import_data(patch)
         if save:
             return save_auction(request)
+        return True
 
 
 def cleanup_bids_for_cancelled_lots(auction):

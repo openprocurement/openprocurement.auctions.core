@@ -66,7 +66,6 @@ def get_item(parent, key, request):
 
 
 def factory(request):
-
     request.validated['auction_src'] = {}
     root = Root(request)
     if not request.matchdict or not request.matchdict.get('auction_id'):
