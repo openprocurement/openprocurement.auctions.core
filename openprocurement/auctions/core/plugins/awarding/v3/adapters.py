@@ -1,5 +1,9 @@
 # -*- coding: utf-8 -*-
-from openprocurement.api.utils import get_now, error_handler
+from openprocurement.api.utils import (
+    get_now,
+    error_handler,
+    validate_with,
+)
 
 from openprocurement.auctions.core.adapters import (
     AuctionAwardingNextCheckAdapter
@@ -10,7 +14,7 @@ from openprocurement.auctions.core.plugins.awarding.base.adapters import (
 from openprocurement.auctions.core.plugins.awarding.base.utils import (
     check_document_existence,
 )
-from openprocurement.auctions.core.utils import validate_with, apply_patch
+from openprocurement.auctions.core.utils import apply_patch
 from openprocurement.auctions.core.validation import (
     validate_patch_award_data,
     validate_award_data_post_common,

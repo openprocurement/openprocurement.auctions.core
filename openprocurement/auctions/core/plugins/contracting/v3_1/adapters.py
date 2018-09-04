@@ -2,6 +2,7 @@
 from openprocurement.api.utils import (
     get_now,
     error_handler,
+    validate_with,
 )
 
 from openprocurement.auctions.core.plugins.contracting.base.adapters import (
@@ -17,7 +18,6 @@ from openprocurement.auctions.core.plugins.contracting.v3_1.validators import (
 )
 from openprocurement.auctions.core.utils import (
     apply_patch,
-    validate_with,
     get_related_award_of_contract,
 )
 from openprocurement.auctions.core.validation import (

@@ -14,10 +14,10 @@ from openprocurement.auctions.core.plugins.awarding.base.adapters import (
 )
 from openprocurement.api.utils import (
     get_now,
+    validate_with,
 )
 from openprocurement.auctions.core.utils import (
     apply_patch,
-    validate_with,
 )
 from openprocurement.auctions.core.validation import (
     validate_award_data_post_common,

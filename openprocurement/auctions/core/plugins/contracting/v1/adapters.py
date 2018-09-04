@@ -1,12 +1,15 @@
 # -*- coding: utf-8 -*-
-from openprocurement.api.utils import error_handler, get_now
+from openprocurement.api.utils import (
+    error_handler,
+    get_now,
+    validate_with,
+)
 
 from openprocurement.auctions.core.plugins.contracting.base.adapters import (
     BaseContractManagerAdapter
 )
 from openprocurement.auctions.core.utils import (
     apply_patch,
-    validate_with,
     check_auction_status,
 )
 from openprocurement.auctions.core.validation import validate_patch_contract_data

@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from openprocurement.api.utils import (
+    validate_with,
     error_handler,
     get_now,
 )
@@ -15,7 +16,6 @@ from openprocurement.auctions.core.adapters import (
     AuctionAwardingNextCheckAdapter,
 )
 from openprocurement.auctions.core.utils import (
-    validate_with,
     apply_patch,
 )
 from openprocurement.auctions.core.validation import (
