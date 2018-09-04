@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from datetime import datetime, time, timedelta
-from functools import partial, wraps
+from functools import partial
 from logging import getLogger
 from re import compile as re_compile
 from time import sleep
@@ -541,18 +541,6 @@ def dgf_get_file(request):
         request.response.location = document.url
         return document.url
     return get_file(request)
-
-
-def validate_with(validators):
-    def actual_validator(func):
-        @wraps(func)
-        def wrapper(*args, **kwargs):
-            request = args[1]
-            for validator in validators:
-                validator(request)
-            return func(*args, **kwargs)
-        return wrapper
-    return actual_validator
 
 
 def get_auction(model):
