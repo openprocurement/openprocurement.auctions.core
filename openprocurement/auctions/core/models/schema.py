@@ -39,6 +39,7 @@ from openprocurement.api.models.auction_models import (  # noqa: F401
     ComplaintModelType,  # noqa forwarded import
     Contract as BaseContract,
     Document as BaseDocument,
+    dgfOrganization,
     Feature,
     IdentifierAuctions,
     IsoDateTimeType,
