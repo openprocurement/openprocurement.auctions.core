@@ -40,7 +40,7 @@ from openprocurement.api.models.auction_models import (  # noqa: F401
     Contract as BaseContract,
     Document as BaseDocument,
     Feature,
-    Identifier as BaseIdentifier,
+    IdentifierAuctions,
     IsoDateTimeType,
     Item as BaseItem,
     ListType,
@@ -604,11 +604,6 @@ class flashComplaint(Model):
             raise ValidationError(u"relatedLot should be one of lots")
 
 
-class dgfOrganization(BaseOrganization):
-    identifier = ModelType(Identifier, required=True)
-    additionalIdentifiers = ListType(ModelType(Identifier))
-
-
 def validate_ua_fin(items, *args):
     if items and not any([i.scheme == u"UA-FIN" for i in items]):
         raise ValidationError(
@@ -616,9 +611,9 @@ def validate_ua_fin(items, *args):
 
 
 class FinancialOrganization(dgfOrganization):
-    identifier = ModelType(Identifier, required=True)
+    identifier = ModelType(IdentifierAuctions, required=True)
     additionalIdentifiers = ListType(
-        ModelType(Identifier),
+        ModelType(IdentifierAuctions),
         required=True,
         validators=[validate_ua_fin])
 
