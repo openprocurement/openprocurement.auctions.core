@@ -31,7 +31,7 @@ from openprocurement.schemas.dgf.schemas_store import SchemaStore
 from barbecue import vnmax
 from openprocurement.api.constants import TZ, SANDBOX_MODE, AUCTIONS_COMPLAINT_STAND_STILL_TIME
 from openprocurement.api.interfaces import IAwardingNextCheck
-from openprocurement.api.models.auction_models import (  # noqa: F401
+from openprocurement.api.models.schema import (  # noqa: F401
     Address,
     CPV_CODES,
     Cancellation as BaseCancellation,
@@ -47,6 +47,7 @@ from openprocurement.api.models.auction_models import (  # noqa: F401
     ListType,
     Location,
     Model,
+    ProcuringEntity,
     ModelType,
     Organization as BaseOrganization,
     Value,
@@ -1028,23 +1029,6 @@ class Lot(Model):
             if data.get('value').amount < value.amount:
                 raise ValidationError(
                     u"value should be less than value of lot")
-
-
-class ProcuringEntity(dgfOrganization):
-    """An organization."""
-    class Options:
-        roles = {
-            'embedded': schematics_embedded_role,
-            'view': schematics_default_role,
-            'edit_active.enquiries': schematics_default_role + blacklist("kind"),
-            'edit_active.tendering': schematics_default_role + blacklist("kind"),
-        }
-
-    kind = StringType(choices=['general', 'special', 'defense', 'other'])
-
-
-class SwiftsureProcuringEntity(ProcuringEntity):
-    additionalContactPoints = ListType(ModelType(ContactPoint), default=list())
 
 
 class ContractTerms(Model):
