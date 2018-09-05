@@ -78,7 +78,6 @@ from openprocurement.auctions.core.constants import (
     INFORMATION_DOCUMENT_TYPES,
     CAV_CODES_DGF,
     CAV_CODES_FLASH,
-    ORA_CODES,
     CPVS_CODES_DGF_CDB2,
     CAVPS_CODES_DGF_CDB2,
     CPV_NON_SPECIFIC_LOCATION_UNITS_DGF_CDB2,
@@ -603,10 +602,6 @@ class flashComplaint(Model):
         if relatedLot and isinstance(data['__parent__'], Model) and relatedLot not in [
                 i.id for i in get_auction(data['__parent__']).lots]:
             raise ValidationError(u"relatedLot should be one of lots")
-
-
-class Identifier(BaseIdentifier):
-    scheme = StringType(required=True, choices=ORA_CODES)
 
 
 class dgfOrganization(BaseOrganization):
