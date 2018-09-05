@@ -154,8 +154,8 @@ def validate_auction_auction_data(request, **kwargs):
 
 
 def validate_bid_data(request, **kwargs):
-    accreditation = get_resource_accreditation(request, 'auction', request.context, 'edit')
-    if not request.check_accreditation(accreditation):
+    levels = get_resource_accreditation(request, 'auction', request.context, 'edit')
+    if not any([request.check_accreditation(level) for level in levels]):
         request.errors.add('body', 'accreditation', 'Broker Accreditation level does not permit bid creation')
         request.errors.status = 403
         return
@@ -340,8 +340,8 @@ def validate_patch_complaint_data_patch_common(request, **kwargs):
 
 
 def validate_question_data(request, **kwargs):
-    accreditation = get_resource_accreditation(request, 'auction', request.context, 'edit')
-    if not request.check_accreditation(accreditation):
+    levels = get_resource_accreditation(request, 'auction', request.context, 'edit')
+    if not any([request.check_accreditation(level) for level in levels]):
         msg = 'Broker Accreditation level does not permit question creation'
         request.errors.add('body', 'accreditation', msg)
         request.errors.status = 403
@@ -362,8 +362,8 @@ def validate_patch_question_data(request, **kwargs):
 
 
 def validate_complaint_data(request, **kwargs):
-    accreditation = get_resource_accreditation(request, 'auction', request.auction, 'edit')
-    if not request.check_accreditation(accreditation):
+    levels = get_resource_accreditation(request, 'auction', request.auction, 'edit')
+    if not any([request.check_accreditation(level) for level in levels]):
         msg = 'Broker Accreditation level does not permit complaint creation'
         request.errors.add('body', 'accreditation', msg)
         request.errors.status = 403
