@@ -29,11 +29,15 @@ from schematics_flexible.schematics_flexible import FlexibleModelType
 from openprocurement.schemas.dgf.schemas_store import SchemaStore
 
 from barbecue import vnmax
-from openprocurement.api.constants import TZ, SANDBOX_MODE, AUCTIONS_COMPLAINT_STAND_STILL_TIME
+from openprocurement.api.constants import (
+    AUCTIONS_COMPLAINT_STAND_STILL_TIME,
+    CPV_CODES,
+    SANDBOX_MODE,
+    TZ,
+)
 from openprocurement.api.interfaces import IAwardingNextCheck
 from openprocurement.api.models.schema import (  # noqa: F401
     Address,
-    CPV_CODES,
     Cancellation as BaseCancellation,
     Classification,
     ComplaintModelType,  # noqa forwarded import
