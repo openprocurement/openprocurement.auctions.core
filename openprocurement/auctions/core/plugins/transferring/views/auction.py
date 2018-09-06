@@ -3,7 +3,7 @@ from openprocurement.api.plugins.transferring.validation import (
     validate_ownership_data
 )
 from openprocurement.auctions.core.plugins.transferring.validation import (
-    validate_auction_accreditation_level
+    validate_change_ownership_accreditation
 )
 from openprocurement.auctions.core.utils import (
     json_view,
@@ -22,7 +22,7 @@ from openprocurement.auctions.core.utils import (
 class AuctionsResource(APIResource):
 
     @json_view(permission='create_auction',
-               validators=(validate_auction_accreditation_level,
+               validators=(validate_change_ownership_accreditation,
                            validate_ownership_data))
     def post(self):
         auction = self.request.validated['auction']
@@ -40,7 +40,6 @@ class AuctionsResource(APIResource):
             )
 
             return {'data': self.request.context.serialize('view')}
-
 
 
 @opresource(
