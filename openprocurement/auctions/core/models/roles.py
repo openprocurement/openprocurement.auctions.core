@@ -230,7 +230,7 @@ dgf_blacklist_if_not_in_rectificationPeriod = blacklist(
     'guarantee',
     'items',
     'minimalStep',
-    'tenderAttepmts',
+    'tenderAttempts',
     'title',
     'title_en',
     'title_ru',
