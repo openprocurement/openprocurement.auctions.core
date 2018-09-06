@@ -844,8 +844,10 @@ def patch_auction_in_rectificationPeriod(test_case):
 
 
 def patch_auction_after_rectificationPeriod(test_case):
-    # test_case.app.authorization = ('Basic', ('broker', ''))
-    pre_patch_title = test_case.app.get("/auctions/{0}".format(test_case.auction_id)).json['data']['title']
+    target_attr = 'tenderAttempts'
+    target_value = 5
+
+    pre_patch_value = test_case.app.get("/auctions/{0}".format(test_case.auction_id)).json['data'][target_attr]
     # let's forge rectificationPeriod
     auc_doc = test_case.db[test_case.auction_id]
     rectification_period = {
@@ -862,9 +864,9 @@ def patch_auction_after_rectificationPeriod(test_case):
             test_case.auction_id,
             test_case.auction_token,
         ),
-        {'data': {'title': 'lol'}}
+        {'data': {target_attr: target_value}}
     )
-    after_patch_title = test_case.app.get(
+    after_patch_value = test_case.app.get(
         "/auctions/{0}".format(test_case.auction_id),
-    ).json['data']['title']
-    assert pre_patch_title == after_patch_title
+    ).json['data'][target_attr]
+    assert pre_patch_value == after_patch_value
