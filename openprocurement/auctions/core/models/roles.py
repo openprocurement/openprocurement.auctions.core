@@ -7,6 +7,9 @@ from openprocurement.api.models.auction_models import (
     schematics_default_role,
     schematics_embedded_role,
 )
+from openprocurement.api.models.roles import (
+    Administrator_role,
+)
 from openprocurement.api.models.common import (
     sensitive_embedded_role,
 )
@@ -158,15 +161,6 @@ chronograph_view_role = whitelist(
     'status',
     'submissionMethodDetails',
     'tenderPeriod',
-)
-
-Administrator_role = whitelist(
-    'auctionPeriod',
-    'lots',
-    'mode',
-    'procuringEntity',
-    'status',
-    'suspended',
 )
 
 view_role = (blacklist('_attachments', 'revisions') + auction_embedded_role)
