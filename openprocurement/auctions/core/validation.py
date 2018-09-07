@@ -17,6 +17,7 @@ from openprocurement.api.validation import (
     validate_data, # noqa forwarded import
     validate_json_data, # noqa forwarded import
     validate_patch_document_data,  # noqa forwarded import
+    validate_accreditation_level,
     validate_t_accreditation,
 )
 
@@ -138,9 +139,9 @@ def validate_auction_auction_data(request, **kwargs):
     if request.method == 'POST':
         now = get_now().isoformat()
         if SANDBOX_MODE \
-        and auction.submissionMethodDetails \
-        and auction.submissionMethodDetails in [u'quick(mode:no-auction)', u'quick(mode:fast-forward)'] \
-        and auction._internal_type in ENGLISH_AUCTION_PROCUREMENT_METHOD_TYPES:
+                and auction.submissionMethodDetails \
+                and auction.submissionMethodDetails in [u'quick(mode:no-auction)', u'quick(mode:fast-forward)'] \
+                and auction._internal_type in ENGLISH_AUCTION_PROCUREMENT_METHOD_TYPES:
             if auction.lots:
                 data['lots'] = [{'auctionPeriod': {'startDate': now, 'endDate': now}} if i.id == lot_id else {} for i in auction.lots]
             else:
@@ -153,19 +154,38 @@ def validate_auction_auction_data(request, **kwargs):
     request.validated['data'] = data
 
 
+def check_subresource_create_accredetation(request, err_msg):
+    levels = get_resource_accreditation(request, 'auction', request.auction, 'edit')
+    if not validate_accreditation_level(request, request.auction, levels, err_msg):
+        return False
+    return True
+
+
 def validate_bid_data(request, **kwargs):
-    accreditation = get_resource_accreditation(request, 'auction', request.context, 'edit')
-    if not request.check_accreditation(accreditation):
-        request.errors.add('body', 'accreditation', 'Broker Accreditation level does not permit bid creation')
-        request.errors.status = 403
-        return
-    if request.auction.get('mode', None) is None and request.check_accreditation('t'):
-        request.errors.add('body', 'mode', 'Broker Accreditation level does not permit bid creation')
-        request.errors.status = 403
+    err_msg = 'Broker Accreditation level does not permit bid creation'
+    if not check_subresource_create_accredetation(request, err_msg):
         return
     update_logging_context(request, {'bid_id': '__new__'})
     model = type(request.auction).bids.model_class
     return validate_data(request, model, "bid")
+
+
+def validate_question_data(request, **kwargs):
+    err_msg = 'Broker Accreditation level does not permit question creation'
+    if not check_subresource_create_accredetation(request, err_msg):
+        return
+    update_logging_context(request, {'question_id': '__new__'})
+    model = type(request.auction).questions.model_class
+    return validate_data(request, model, "question")
+
+
+def validate_complaint_data(request, **kwargs):
+    err_msg = 'Broker Accreditation level does not permit complaint creation'
+    if not check_subresource_create_accredetation(request, err_msg):
+        return
+    update_logging_context(request, {'complaint_id': '__new__'})
+    model = type(request.auction).complaints.model_class
+    return validate_data(request, model, "complaint")
 
 
 def validate_patch_bid_data(request, **kwargs):
@@ -218,11 +238,10 @@ def validate_complaint_data_post_common(request, **kwargs):
     if auction.status not in ['active.qualification', 'active.awarded']:
         request.errors.add('body', 'data',
                            'Can\'t add complaint in current ({}) auction status'.format(auction.status))
-    elif any([i.status != 'active' for i in auction.lots if
-            i.id == context.lotID]):
+    elif any([i.status != 'active' for i in auction.lots if i.id == context.lotID]):
         request.errors.add('body', 'data', 'Can add complaint only in active lot status')
     elif context.complaintPeriod and condition_date:
-        request.errors.add('body', 'data','Can add complaint only in complaintPeriod')
+        request.errors.add('body', 'data', 'Can add complaint only in complaintPeriod')
     else:
         return
     request.errors.status = 403
@@ -252,13 +271,11 @@ def validate_file_upload_post_common(request, **kwargs):
 def validate_file_update_put_common(request, **kwargs):
     if request.authenticated_role != request.context.author:
         request.errors.add('url', 'role', 'Can update document only author')
-    elif request.validated['auction_status'] not in ['active.qualification',
-                                                   'active.awarded']:
+    elif request.validated['auction_status'] not in ['active.qualification', 'active.awarded']:
         request.errors.add('body', 'data',
                            'Can\'t update document in current ({})'
                            ' auction status'.format(request.validated['auction_status']))
-    elif any([i.status != 'active' for i in request.validated['auction'].lots
-            if i.id == request.validated['award'].lotID]):
+    elif any([i.status != 'active' for i in request.validated['auction'].lots if i.id == request.validated['award'].lotID]):
         request.errors.add('body', 'data',
                            'Can update document only in active lot status')
     elif request.validated['complaint'].status not in STATUS4ROLE.get(request.authenticated_role, []):
@@ -274,13 +291,11 @@ def validate_file_update_put_common(request, **kwargs):
 def validate_patch_document_data_patch_common(request, **kwargs):
     if request.authenticated_role != request.context.author:
         request.errors.add('url', 'role', 'Can update document only author')
-    elif request.validated['auction_status'] not in ['active.qualification',
-                                                   'active.awarded']:
+    elif request.validated['auction_status'] not in ['active.qualification', 'active.awarded']:
         request.errors.add('body', 'data',
                            'Can\'t update document in current ({})'
                            ' auction status'.format(request.validated['auction_status']))
-    elif any([i.status != 'active' for i in request.validated['auction'].lots
-            if i.id == request.validated['award'].lotID]):
+    elif any([i.status != 'active' for i in request.validated['auction'].lots if i.id == request.validated['award'].lotID]):
         request.errors.add('body', 'data',
                            'Can update document only in active lot status')
     elif request.validated['complaint'].status not in STATUS4ROLE.get(
@@ -326,10 +341,8 @@ def validate_patch_complaint_data_patch_common(request, **kwargs):
     if auction.status not in ['active.qualification', 'active.awarded']:
         request.errors.add('body', 'data', 'Can\'t update complaint in current'
                                            ' ({}) auction status'.format(auction.status))
-    elif any([i.status != 'active' for i in auction.lots if
-            i.id == request.validated['award'].lotID]):
-        request.errors.add('body', 'data', 'Can update complaint only'
-                                          ' in active lot status')
+    elif any([i.status != 'active' for i in auction.lots if i.id == request.validated['award'].lotID]):
+        request.errors.add('body', 'data', 'Can update complaint only' ' in active lot status')
     elif request.context.status not in ['draft', 'claim', 'answered', 'pending']:
         request.errors.add('body', 'data', 'Can\'t update complaint in current'
                                            ' ({}) status'.format(request.context.status))
@@ -339,43 +352,9 @@ def validate_patch_complaint_data_patch_common(request, **kwargs):
     raise error_handler(request)
 
 
-def validate_question_data(request, **kwargs):
-    accreditation = get_resource_accreditation(request, 'auction', request.context, 'edit')
-    if not request.check_accreditation(accreditation):
-        msg = 'Broker Accreditation level does not permit question creation'
-        request.errors.add('body', 'accreditation', msg)
-        request.errors.status = 403
-        return
-    if request.auction.get('mode', None) is None and request.check_accreditation('t'):
-        msg = 'Broker Accreditation level does not permit question creation'
-        request.errors.add('body', 'mode', msg)
-        request.errors.status = 403
-        return
-    update_logging_context(request, {'question_id': '__new__'})
-    model = type(request.auction).questions.model_class
-    return validate_data(request, model, "question")
-
-
 def validate_patch_question_data(request, **kwargs):
     model = type(request.auction).questions.model_class
     return validate_data(request, model)
-
-
-def validate_complaint_data(request, **kwargs):
-    accreditation = get_resource_accreditation(request, 'auction', request.auction, 'edit')
-    if not request.check_accreditation(accreditation):
-        msg = 'Broker Accreditation level does not permit complaint creation'
-        request.errors.add('body', 'accreditation', msg)
-        request.errors.status = 403
-        return
-    if request.auction.get('mode', None) is None and request.check_accreditation('t'):
-        msg = 'Broker Accreditation level does not permit complaint creation'
-        request.errors.add('body', 'mode', msg)
-        request.errors.status = 403
-        return
-    update_logging_context(request, {'complaint_id': '__new__'})
-    model = type(request.auction).complaints.model_class
-    return validate_data(request, model, "complaint")
 
 
 def validate_patch_complaint_data(request, **kwargs):
@@ -467,7 +446,6 @@ def validate_patch_lot_data(request, **kwargs):
 def validate_disallow_dgfPlatformLegalDetails(docs, *args):
     if any([i.documentType == 'x_dgfPlatformLegalDetails' for i in docs]):
         raise ValidationError(u"Disallow documents with x_dgfPlatformLegalDetails documentType")
-
 
 
 # additional_classification_validators
