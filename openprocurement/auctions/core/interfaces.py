@@ -2,10 +2,7 @@
 from zope.interface import (
     Attribute, Interface
 )
-
-
-class IAuction(Interface):
-    """ Base auction marker interface """
+from openprocurement.api.interfaces import IAuction  # noqa: F401
 
 
 class IAuctionManager(Interface):
