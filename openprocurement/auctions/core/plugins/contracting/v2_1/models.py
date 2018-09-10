@@ -4,6 +4,9 @@ from zope.interface import implementer
 from openprocurement.api.models.schematics_extender import (
     ListType,
 )
+from openprocurement.api.models.schema import (
+    ContractAuctions as BaseContract,
+)
 
 from openprocurement.auctions.core.models import (
     dgfOrganization as Organization,
@@ -12,9 +15,6 @@ from openprocurement.auctions.core.models import (
     dgfComplaint as Complaint
 )
 
-from openprocurement.auctions.core.models import (
-    Contract as BaseContract
-)
 from .interfaces import IContractV2_1
 
 
