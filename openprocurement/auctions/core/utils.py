@@ -549,3 +549,22 @@ def get_auction(model):
         if model is None:
             return None
     return model
+
+
+def pendify_auction(auction_model, target_status):
+    """Set terminal status of auction, but take into account need of pre-terminal status of it
+
+    Let auction a1 have pre-terminal statuses, e.g. "pending.complete", "pending.cancelled", etc.
+    So, pendify_auction(a1, "complete") will set status of the a1 to "pending.complete".
+    Otherwise, if some auction a2 will not have pre-terminal statuses, this function will
+    operate as following: pendify_auction(a2, "complete") will turn status of a2 into "complete".
+    """
+    pending_prefix = 'pending.'
+    has_preterminal_statuses = hasattr(auction_model, 'merchandisingObject')
+
+    status = target_status
+
+    if has_preterminal_statuses:
+        status = pending_prefix + target_status
+
+    auction_model.status = status
