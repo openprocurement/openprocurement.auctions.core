@@ -13,8 +13,8 @@ from openprocurement.auctions.core.models import (
     dgfComplaint as Complaint
 )
 
-from openprocurement.auctions.core.models import (
-    Contract as BaseContract
+from openprocurement.api.models.schema import (
+    ContractAuctions as BaseContract
 )
 from .interfaces import IContractV3_1
 

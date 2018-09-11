@@ -2,12 +2,12 @@
 from schematics.types.compound import ModelType
 from zope.interface import implementer
 
-from openprocurement.api.models.auction_models import (
+from openprocurement.api.models.schema import (
+    ContractAuctions as BaseContract,
     ListType,
 )
 
 from openprocurement.auctions.core.models import (
-    Contract as BaseContract,
     dgfOrganization as Organization,
     dgfItem as Item,
     dgfDocument as Document,

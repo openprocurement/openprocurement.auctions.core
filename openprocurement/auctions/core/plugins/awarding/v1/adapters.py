@@ -14,10 +14,10 @@ from openprocurement.api.utils import (
     calculate_business_date,
     error_handler,
     get_now,
+    validate_with,
 )
 from openprocurement.auctions.core.utils import (
     apply_patch,
-    validate_with,
 )
 from openprocurement.auctions.core.models import STAND_STILL_TIME
 from openprocurement.auctions.core.validation import (

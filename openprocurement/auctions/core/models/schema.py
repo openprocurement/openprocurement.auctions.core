@@ -29,23 +29,28 @@ from schematics_flexible.schematics_flexible import FlexibleModelType
 from openprocurement.schemas.dgf.schemas_store import SchemaStore
 
 from barbecue import vnmax
-from openprocurement.api.constants import TZ, SANDBOX_MODE, AUCTIONS_COMPLAINT_STAND_STILL_TIME
-from openprocurement.api.interfaces import IAwardingNextCheck
-from openprocurement.api.models.auction_models import (  # noqa: F401
-    Address,
+from openprocurement.api.constants import (
+    AUCTIONS_COMPLAINT_STAND_STILL_TIME,
     CPV_CODES,
+    SANDBOX_MODE,
+    TZ,
+)
+from openprocurement.api.interfaces import IAwardingNextCheck
+from openprocurement.api.models.schema import (  # noqa: F401
+    Address,
     Cancellation as BaseCancellation,
     Classification,
     ComplaintModelType,  # noqa forwarded import
-    Contract as BaseContract,
     Document as BaseDocument,
+    dgfOrganization,
     Feature,
-    Identifier as BaseIdentifier,
+    IdentifierAuctions,
     IsoDateTimeType,
     Item as BaseItem,
     ListType,
     Location,
     Model,
+    ProcuringEntity,
     ModelType,
     Organization as BaseOrganization,
     Value,
@@ -78,7 +83,6 @@ from openprocurement.auctions.core.constants import (
     INFORMATION_DOCUMENT_TYPES,
     CAV_CODES_DGF,
     CAV_CODES_FLASH,
-    ORA_CODES,
     CPVS_CODES_DGF_CDB2,
     CAVPS_CODES_DGF_CDB2,
     CPV_NON_SPECIFIC_LOCATION_UNITS_DGF_CDB2,
@@ -153,7 +157,6 @@ class flashItem(BaseItem):
 
 class DgfAdditionalClassification(Classification):
     _id_field_validators = Classification._id_field_validators + (koatuu_validator,)
-
 
 
 class dgfItem(flashItem):
@@ -605,15 +608,6 @@ class flashComplaint(Model):
             raise ValidationError(u"relatedLot should be one of lots")
 
 
-class Identifier(BaseIdentifier):
-    scheme = StringType(required=True, choices=ORA_CODES)
-
-
-class dgfOrganization(BaseOrganization):
-    identifier = ModelType(Identifier, required=True)
-    additionalIdentifiers = ListType(ModelType(Identifier))
-
-
 def validate_ua_fin(items, *args):
     if items and not any([i.scheme == u"UA-FIN" for i in items]):
         raise ValidationError(
@@ -621,9 +615,9 @@ def validate_ua_fin(items, *args):
 
 
 class FinancialOrganization(dgfOrganization):
-    identifier = ModelType(Identifier, required=True)
+    identifier = ModelType(IdentifierAuctions, required=True)
     additionalIdentifiers = ListType(
-        ModelType(Identifier),
+        ModelType(IdentifierAuctions),
         required=True,
         validators=[validate_ua_fin])
 
@@ -652,49 +646,6 @@ class swiftsureCancellation(BaseCancellation):
     documents = ListType(
         ModelType(swiftsureCancellationDocument),
         default=list())
-
-
-class Contract(BaseContract):
-    class Options:
-        roles = {
-            'create': blacklist(
-                'id',
-                'status',
-                'date',
-                'documents',
-                'dateSigned'),
-            'edit': blacklist(
-                'id',
-                'documents',
-                'date',
-                'awardID',
-                'suppliers',
-                'items',
-                'contractID'),
-            'embedded': schematics_embedded_role,
-            'view': schematics_default_role,
-        }
-    awardID = StringType(required=True)
-
-    def validate_awardID(self, data, awardID):
-        if (
-            awardID and
-            isinstance(data['__parent__'], Model) and
-            awardID not in [i.id for i in data['__parent__'].awards]
-        ):
-            raise ValidationError(u"awardID should be one of awards")
-
-    def validate_dateSigned(self, data, value):
-        if value and isinstance(data['__parent__'], Model):
-            award = [
-                i for i in data['__parent__'].awards if i.id == data['awardID']][0]
-            if award.complaintPeriod.endDate >= value:
-                raise ValidationError(
-                    u"Contract signature date should be after award complaint period end date ({})".format(
-                        award.complaintPeriod.endDate.isoformat()))
-            if value > get_now():
-                raise ValidationError(
-                    u"Contract signature date can't be in the future")
 
 
 class Parameter(Model):
@@ -1037,23 +988,6 @@ class Lot(Model):
             if data.get('value').amount < value.amount:
                 raise ValidationError(
                     u"value should be less than value of lot")
-
-
-class ProcuringEntity(dgfOrganization):
-    """An organization."""
-    class Options:
-        roles = {
-            'embedded': schematics_embedded_role,
-            'view': schematics_default_role,
-            'edit_active.enquiries': schematics_default_role + blacklist("kind"),
-            'edit_active.tendering': schematics_default_role + blacklist("kind"),
-        }
-
-    kind = StringType(choices=['general', 'special', 'defense', 'other'])
-
-
-class SwiftsureProcuringEntity(ProcuringEntity):
-    additionalContactPoints = ListType(ModelType(ContactPoint), default=list())
 
 
 class ContractTerms(Model):

@@ -11,6 +11,7 @@ from schematics.types.compound import ModelType
 from zope.interface import implementer
 
 from openprocurement.api.models.common import Period
+from openprocurement.api.models.schema import ContractAuctions as BaseContract
 from openprocurement.api.models.schematics_extender import (
     ListType,
     IsoDateTimeType,
@@ -23,7 +24,6 @@ from openprocurement.auctions.core.models import (
     dgfItem as Item,
     dgfDocument as BaseDocument,
     dgfComplaint as Complaint,
-    Contract as BaseContract
 )
 from openprocurement.auctions.core.plugins.contracting.v3.constants import (
     PROLONGATION_DATE_PUBLISHED_LIMIT_PERIOD,
