@@ -559,12 +559,12 @@ def pendify_auction(auction_model, target_status):
     Otherwise, if some auction a2 will not have pre-terminal statuses, this function will
     operate as following: pendify_auction(a2, "complete") will turn status of a2 into "complete".
     """
-    pending_prefix = 'pending.'
+    pending_prefix = 'pending'
     has_preterminal_statuses = hasattr(auction_model, 'merchandisingObject')
 
     status = target_status
 
     if has_preterminal_statuses:
-        status = pending_prefix + target_status
+        status = '{0}.{1}'.format(pending_prefix, target_status)
 
     auction_model.status = status
