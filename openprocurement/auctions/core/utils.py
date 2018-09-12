@@ -560,8 +560,9 @@ def pendify_auction(auction_model, target_status):
     operate as following: pendify_auction(a2, "complete") will turn status of a2 into "complete".
     """
     pending_prefix = 'pending'
-    has_preterminal_statuses = hasattr(auction_model, 'merchandisingObject')
+    possible_pre_terminal_status = '{0}.{1}'.format(pending_prefix, target_status)
 
-    status = '{0}.{1}'.format(pending_prefix, target_status) if has_preterminal_statuses else target_status
+    status_choices = auction_model.__class__.status.choices
+    has_related_pre_terminal_status = possible_pre_terminal_status in status_choices
 
-    auction_model.status = status
+    auction_model.status = possible_pre_terminal_status if has_related_pre_terminal_status else target_status
