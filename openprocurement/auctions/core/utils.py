@@ -562,9 +562,6 @@ def pendify_auction(auction_model, target_status):
     pending_prefix = 'pending'
     has_preterminal_statuses = hasattr(auction_model, 'merchandisingObject')
 
-    status = target_status
-
-    if has_preterminal_statuses:
-        status = '{0}.{1}'.format(pending_prefix, target_status)
+    status = '{0}.{1}'.format(pending_prefix, target_status) if has_preterminal_statuses else target_status
 
     auction_model.status = status
