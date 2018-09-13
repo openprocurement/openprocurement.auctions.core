@@ -49,7 +49,7 @@ from openprocurement.auctions.core.constants import (
     DOCUMENT_TYPE_URL_ONLY,
     DOCUMENT_TYPE_OFFLINE
 )
-from openprocurement.auctions.core.interfaces import IAuction
+from openprocurement.auctions.core.interfaces import IAuction, IAuctionManager
 from openprocurement.auctions.core.plugins.awarding import includeme as awarding
 from openprocurement.auctions.core.plugins.contracting import includeme as contracting
 from openprocurement.auctions.core.traversal import factory
@@ -219,12 +219,13 @@ def remove_draft_bids(request):
 
 def check_bids(request):
     auction = request.validated['auction']
+    adapter = request.registry.getAdapter(auction, IAuctionManager)
     if auction.lots:
         _ = [setattr(i.auctionPeriod, 'startDate', None) for i in auction.lots if i.numberOfBids < 2 and i.auctionPeriod and i.auctionPeriod.startDate]
         _ = [setattr(i, 'status', 'unsuccessful') for i in auction.lots if i.numberOfBids == 0 and i.status == 'active']
         cleanup_bids_for_cancelled_lots(auction)
         if not set([i.status for i in auction.lots]).difference(set(['unsuccessful', 'cancelled'])):
-            auction.status = 'unsuccessful'
+            adapter.pendify_auction_status('unsuccessful')
         elif max([i.numberOfBids for i in auction.lots if i.status == 'active']) < 2:
             request.content_configurator.start_awarding()
 
@@ -232,7 +233,7 @@ def check_bids(request):
         if auction.numberOfBids < 2 and auction.auctionPeriod and auction.auctionPeriod.startDate:
             auction.auctionPeriod.startDate = None
         if auction.numberOfBids == 0:
-            auction.status = 'unsuccessful'
+            adapter.pendify_auction_status('unsuccessful')
         if auction.numberOfBids == 1:
             # auction.status = 'active.qualification'
             request.content_configurator.start_awarding()
@@ -313,6 +314,7 @@ def check_status(request):
 
 def check_auction_status(request):
     auction = request.validated['auction']
+    adapter = request.registry.getAdapter(auction, IAuctionManager)
     now = get_now()
     if auction.lots:
         if any([i.status in auction.block_complaint_status and i.relatedLot is None for i in auction.complaints]):
@@ -352,20 +354,20 @@ def check_auction_status(request):
         if statuses == set(['cancelled']):
             LOGGER.info('Switched lot %s of auction %s to %s', lot.id, auction.id, 'cancelled',
                         extra=context_unpack(request, {'MESSAGE_ID': 'switched_lot_cancelled'}, {'LOT_ID': lot.id}))
-            auction.status = 'cancelled'
+            adapter.pendify_auction_status('cancelled')
         elif not statuses.difference(set(['unsuccessful', 'cancelled'])):
             LOGGER.info('Switched lot %s of auction %s to %s', lot.id, auction.id, 'unsuccessful',
                         extra=context_unpack(request, {'MESSAGE_ID': 'switched_lot_unsuccessful'}, {'LOT_ID': lot.id}))
-            auction.status = 'unsuccessful'
+            adapter.pendify_auction_status('unsuccessful')
         elif not statuses.difference(set(['complete', 'unsuccessful', 'cancelled'])):
             LOGGER.info('Switched lot %s of auction %s to %s', lot.id, auction.id, 'complete',
                         extra=context_unpack(request, {'MESSAGE_ID': 'switched_lot_complete'}, {'LOT_ID': lot.id}))
-            auction.status = 'complete'
+            adapter.pendify_auction_status('complete')
     else:
         if auction.contracts and auction.contracts[-1].status == 'active':
             LOGGER.info('Switched auction %s to %s', auction.id, 'complete',
                         extra=context_unpack(request, {'MESSAGE_ID': 'switched_auction_complete'}))
-            auction.status = 'complete'
+            adapter.pendify_auction_status('complete')
 
 
 opresource = partial(resource, error_handler=error_handler, factory=factory)
