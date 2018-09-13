@@ -12,7 +12,6 @@ from openprocurement.auctions.core.plugins.awarding.base.utils import (
     check_lots_awarding,
     add_award_route_url,
     set_unsuccessful_award,
-    set_auction_status_unsuccessful,
     set_award_status_unsuccessful,
     get_bids_to_qualify
 )
@@ -63,8 +62,8 @@ def switch_to_next_award(request):
         award = award.serialize()
         add_award_route_url(request, auction, award, awarding_type)
     elif all([award.status in ['cancelled', 'unsuccessful'] for award in auction.awards]):
-    
-        set_auction_status_unsuccessful(auction, now)
+        auction.awardPeriod.endDate = now
+        auction.status = 'unsuccessful'
 
 
 def next_check_awarding(auction):
@@ -88,7 +87,7 @@ def check_award_status(request, award, now):
     protocol_overdue = protocol_overdue_predicate(award, 'pending', now)
     # seek for contract overdue
     related_contract = get_related_contract_of_award(award['id'], auction)
-    contract_overdue = contract_overdue_predicate(related_contract,'pending', now) if related_contract else None
+    contract_overdue = contract_overdue_predicate(related_contract, 'pending', now) if related_contract else None
 
     if protocol_overdue or contract_overdue:
         set_unsuccessful_award(request, auction, award, now)

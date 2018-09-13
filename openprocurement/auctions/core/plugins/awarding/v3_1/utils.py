@@ -13,7 +13,6 @@ from openprocurement.auctions.core.plugins.awarding.base.utils import (
     check_lots_awarding,
     add_award_route_url,
     set_unsuccessful_award,
-    set_auction_status_unsuccessful,
     set_award_status_unsuccessful,
     get_bids_to_qualify
 )
@@ -85,8 +84,8 @@ def switch_to_next_award(request):
         award = award.serialize()
         add_award_route_url(request, auction, award, awarding_type)
     elif all([award.status in ['cancelled', 'unsuccessful'] for award in auction.awards]):
-    
-        set_auction_status_unsuccessful(auction, now)
+        auction.awardPeriod.endDate = now
+        auction.status = 'unsuccessful'
 
 
 def next_check_awarding(auction):
