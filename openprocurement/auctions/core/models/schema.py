@@ -26,6 +26,7 @@ from schematics.types import (
 
 from schematics.types.serializable import serializable
 from schematics_flexible.schematics_flexible import FlexibleModelType
+from openprocurement.api.models.schematics_extender import IsoDurationType
 from openprocurement.schemas.dgf.schemas_store import SchemaStore
 
 from barbecue import vnmax

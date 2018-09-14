@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-from functools import partial
 
 from openprocurement.api.utils import get_now
 from openprocurement.api.utils import (
@@ -22,7 +21,9 @@ from openprocurement.auctions.core.design import (
     auctions_real_by_local_seq_view,
     auctions_test_by_local_seq_view,
 )
-from openprocurement.auctions.core.interfaces import IAuctionManager
+from openprocurement.auctions.core.interfaces import (
+    IAuctionManager
+)
 from openprocurement.auctions.core.utils import (
     generate_auction_id,
     save_auction,
