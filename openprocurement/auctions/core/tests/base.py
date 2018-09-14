@@ -383,6 +383,7 @@ class BaseAuctionWebTest(BaseResourceWebTest):
                 item['relatedLot'] = lots[i % len(lots)]['id']
         response = self.app.post_json('/auctions', {'data': data})
         auction = response.json['data']
+        self.auction = auction
         self.auction_token = response.json['access']['token']
         self.auction_transfer = response.json['access']['transfer']
         self.auction_id = auction['id']

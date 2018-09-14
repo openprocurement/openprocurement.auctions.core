@@ -13,7 +13,7 @@ class AuctionConfigurator(ContentConfigurator):
 
 
 class AuctionAwardingNextCheckAdapter(AwardingNextCheckAdapter):
-    name = 'Auction Awarding Next Check Adapter' 
+    name = 'Auction Awarding Next Check Adapter'
 
 
 class AuctionManagerAdapter(object):

@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-from functools import partial
 
 from openprocurement.api.utils import get_now
 from openprocurement.api.utils import (
@@ -22,7 +21,9 @@ from openprocurement.auctions.core.design import (
     auctions_real_by_local_seq_view,
     auctions_test_by_local_seq_view,
 )
-from openprocurement.auctions.core.interfaces import IAuctionManager
+from openprocurement.auctions.core.interfaces import (
+    IAuctionManager
+)
 from openprocurement.auctions.core.utils import (
     generate_auction_id,
     save_auction,
@@ -213,10 +214,8 @@ class AuctionsResource(APIResourceListing):
             }
 
         """
-        self.request.registry.getAdapter(
-            self.request.validated['auction'],
-            IAuctionManager
-        ).create_auction(self.request)
+        # self.request.registry.getAdapter(self.request.validated['auction'], IAuctionManager).create_auction(self.request)
+        manager = self.request.registry.queryMultiAdapter((self.request, self.request.validated['auction']), IAuctionManager)
         auction_id = generate_id()
         auction = self.request.validated['auction']
         auction.id = auction_id
@@ -231,7 +230,7 @@ class AuctionsResource(APIResourceListing):
         self.request.validated['auction_src'] = {}
         if save_auction(self.request):
             self.LOGGER.info('Created auction {} ({})'.format(auction_id, auction.auctionID),
-                        extra=context_unpack(self.request, {'MESSAGE_ID': 'auction_create'}, {'auction_id': auction_id, 'auctionID': auction.auctionID}))
+                             extra=context_unpack(self.request, {'MESSAGE_ID': 'auction_create'}, {'auction_id': auction_id, 'auctionID': auction.auctionID}))
             self.request.response.status = 201
             auction_route_name = get_auction_route_name(self.request, auction)
             self.request.response.headers[
