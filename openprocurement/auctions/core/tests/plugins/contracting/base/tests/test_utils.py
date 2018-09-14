@@ -6,33 +6,50 @@ import uuid
 from openprocurement.auctions.core.plugins.contracting.base.utils import (
     check_auction_status
 )
+from openprocurement.auctions.core.adapters import AuctionManagerAdapter
 
 
 BASE_UTILS_PATH = 'openprocurement.auctions.core.plugins.contracting.base.utils'
 
 
+@mock.patch('{}.{}'.format(BASE_UTILS_PATH, 'LOGGER'))
+@mock.patch('{}.{}'.format(BASE_UTILS_PATH, 'context_unpack'))
 class Test(unittest.TestCase):
 
-    @mock.patch('{}.{}'.format(BASE_UTILS_PATH, 'LOGGER'))
-    @mock.patch('{}.{}'.format(BASE_UTILS_PATH, 'context_unpack'))
     def test_check_auction_status(self, context_unpack, mock_logger):
         auction_id = uuid.uuid4().hex
         contract_not_active_status = 'not_active'
-        end_award_statuses = ('unsuccessful', 'cancelled')
         contract = munch.Munch({'status': contract_not_active_status})
-        award = munch.Munch({'status': end_award_statuses[0]})
-        auction = munch.Munch({'awards': (award,),
-                               'contracts': (contract,),
-                               'status': None,
-                               'id': auction_id})
-        request = munch.Munch({'validated': {'auction': auction}})
+        award = munch.Munch({'status': 'unsuccessful'})
+        auction = munch.Munch({
+            'awards': (award,),
+            'contracts': (contract,),
+            'status': None,
+            'id': auction_id})
+        adapter = AuctionManagerAdapter(auction)
+        request = munch.munchify({
+            'validated': {'auction': auction},
+            'registry': {'getAdapter': mock.Mock(return_value=adapter)}
+        })
 
         check_auction_status(request)
         self.assertEqual(auction.status, 'unsuccessful')
 
-        auction.status = None
-        award.status = 'not_ended'
-        contract.status = 'active'
+    def test_check_auction_status_complete(self, context_unpack, mock_logger):
+        auction_id = uuid.uuid4().hex
+        contract = munch.Munch({'status': 'active'})
+        award = munch.Munch({'status': 'not_ended'})
+        auction = munch.Munch({
+            'awards': (award,),
+            'contracts': (contract,),
+            'status': None,
+            'id': auction_id})
+        adapter = AuctionManagerAdapter(auction)
+        request = munch.munchify({
+            'validated': {'auction': auction},
+            'registry': {'getAdapter': mock.Mock(return_value=adapter)}
+        })
+
         check_auction_status(request)
         self.assertEqual(auction.status, 'complete')
 

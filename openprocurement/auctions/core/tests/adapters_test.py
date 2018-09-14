@@ -13,6 +13,7 @@ class AuctionManagerAdapterTest(unittest.TestCase):
     def setUp(self):
         self.auction = Mock()
         self.adapter = AuctionManagerAdapter(self.auction)
+        self.adapter.allow_pre_terminal_statuses = True
 
     def test_terminalize_with_merchandising_object(self):
         self.auction.merchandisingObject = '1' * 32

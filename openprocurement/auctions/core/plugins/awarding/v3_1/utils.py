@@ -8,6 +8,7 @@ from openprocurement.api.utils import (
     calculate_business_date
 )
 
+from openprocurement.auctions.core.interfaces import IAuctionManager
 from openprocurement.auctions.core.plugins.awarding.base.utils import (
     make_award,
     check_lots_awarding,
@@ -73,6 +74,7 @@ def create_awards(request):
 
 def switch_to_next_award(request):
     auction = request.validated['auction']
+    adapter = request.registry.getAdapter(auction, IAuctionManager)
     now = get_now()
     awarding_type = request.content_configurator.awarding_type
     waiting_awards = [i for i in auction.awards if i['status'] == 'pending.waiting']
@@ -85,7 +87,7 @@ def switch_to_next_award(request):
         add_award_route_url(request, auction, award, awarding_type)
     elif all([award.status in ['cancelled', 'unsuccessful'] for award in auction.awards]):
         auction.awardPeriod.endDate = now
-        auction.status = 'unsuccessful'
+        adapter.pendify_auction_status('unsuccessful')
 
 
 def next_check_awarding(auction):
