@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from schematics.exceptions import ValidationError
 from schematics.types import BaseType
-from openprocurement.api.constants import SANDBOX_MODE
+from openprocurement.api.constants import SANDBOX_MODE, KVTSPZ_CODES
 from openprocurement.auctions.core.constants import (
     ENGLISH_AUCTION_PROCUREMENT_METHOD_TYPES,
     CPVS_CODES_DGF_CDB2
@@ -451,10 +451,15 @@ def validate_disallow_dgfPlatformLegalDetails(docs, *args):
 # additional_classification_validators
 
 def cpvs_validator(data, code):
-    if data.get('scheme') == u'CPVS' and code not in CPVS_CODES_DGF_CDB2:
+    if data.get('scheme') == 'CPVS' and code not in CPVS_CODES_DGF_CDB2:
         raise ValidationError(BaseType.MESSAGES['choices'].format(unicode(CPVS_CODES_DGF_CDB2)))
     return True
 
+
+def kvtspz_validator(data, code):
+    if data.get('scheme') == 'kvtspz' and code not in KVTSPZ_CODES:
+        raise ValidationError(BaseType.MESSAGES['choices'].format(unicode(KVTSPZ_CODES)))
+    return True
 
 def validate_item_rectification_period(request, **kwargs):
     """Forbid to use view if auction is out of it's rectificationPeriod"""

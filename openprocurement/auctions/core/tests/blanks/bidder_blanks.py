@@ -574,7 +574,7 @@ def put_auction_bidder_document_json(self):
 def create_auction_bidder(self):
     dateModified = self.db.get(self.auction_id).get('dateModified')
 
-    if self.initial_organization == self.test_financial_organization:
+    if getattr(self, 'test_financial_organization', None) and self.initial_organization == self.test_financial_organization:
         response = self.app.post_json('/auctions/{}/bids'.format(
             self.auction_id), {
             'data': {'tenderers': [self.initial_organization], "value": {"amount": 500}, 'qualified': True,
@@ -594,7 +594,7 @@ def create_auction_bidder(self):
 
     self.set_status('complete')
 
-    if self.initial_organization == self.test_financial_organization:
+    if getattr(self, 'test_financial_organization', None) and self.initial_organization == self.test_financial_organization:
         response = self.app.post_json('/auctions/{}/bids'.format(
             self.auction_id), {
             'data': {'tenderers': [self.initial_organization], "value": {"amount": 500}, 'qualified': True,

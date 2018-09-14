@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-from functools import partial
 
 from openprocurement.api.utils import get_now
 from openprocurement.api.utils import (
@@ -22,7 +21,10 @@ from openprocurement.auctions.core.design import (
     auctions_real_by_local_seq_view,
     auctions_test_by_local_seq_view,
 )
-from openprocurement.auctions.core.interfaces import IAuctionManager
+from openprocurement.auctions.core.interfaces import (
+    IAuctionManager,
+    IAuctionInitializator
+)
 from openprocurement.auctions.core.utils import (
     generate_auction_id,
     save_auction,
@@ -213,16 +215,17 @@ class AuctionsResource(APIResourceListing):
             }
 
         """
-        self.request.registry.getAdapter(
-            self.request.validated['auction'],
-            IAuctionManager
-        ).create_auction(self.request)
+        manager = self.request.registry.queryMultiAdapter((self.request, self.request.validated['auction']), IAuctionManager)
+        initializator = self.request.registry.getAdapter(self.request.validated['auction'], IAuctionInitializator)
         auction_id = generate_id()
         auction = self.request.validated['auction']
         auction.id = auction_id
         auction.auctionID = generate_auction_id(get_now(), self.db, self.server_id)
         if hasattr(auction, "initialize"):
             auction.initialize()
+        else:
+            manager.initialize(initializator)
+
         status = self.request.json_body['data'].get('status')
         if status and status in ['draft', 'pending.verification']:
             auction.status = status

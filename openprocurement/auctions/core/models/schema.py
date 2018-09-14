@@ -70,7 +70,7 @@ from openprocurement.api.models.common import (  # noqa: F401
     RegistrationDetails,
     Revision,
 )
-from openprocurement.api.models.schematics_extender import DecimalType
+from openprocurement.api.models.schematics_extender import DecimalType, IsoDurationType
 from openprocurement.api.utils import get_now, get_request_from_root, serialize_document_url
 from openprocurement.api.validation import (
     validate_items_uniq,  # noqa forwarded import
@@ -398,6 +398,16 @@ class dgfCDB2Document(dgfDocument):
         'qualificationDocuments', 'eligibilityDocuments', 'tenderNotice',
         'illustration', 'auctionProtocol', 'x_dgfAssetFamiliarization',
         'x_presentation', 'x_nda'
+    ])
+
+
+class LandLeaseDocument(dgfDocument):
+    documentOf = StringType( required=True, choices=['auction', 'item', 'bid', 'award', 'contract'], default='auction')
+    documentType = StringType(choices=[
+        'notice', 'technicalSpecifications', 'evaluationCriteria', 'bidders',
+        'illustration', 'x_PublicAssetCertificate', 'x_PlatformLegalDetails',
+        'x_presentation', 'informationDetails', 'x_dgfAssetFamiliarization',
+        'x_nda', 'cancellationDetails', 'clarifications'
     ])
 
 
@@ -1326,16 +1336,16 @@ class Auction(BaseResourceItem):
     def __repr__(self):
         return '<%s:%r@%r>' % (type(self).__name__, self.id, self.rev)
 
-    def initialize(self):
-        if not self.enquiryPeriod.startDate:
-            self.enquiryPeriod.startDate = get_now()
-        if not self.tenderPeriod.startDate:
-            self.tenderPeriod.startDate = self.enquiryPeriod.endDate
-        now = get_now()
-        self.date = now
-        if self.lots:
-            for lot in self.lots:
-                lot.date = now
+   # def initialize(self):
+   #     if not self.enquiryPeriod.startDate:
+   #         self.enquiryPeriod.startDate = get_now()
+   #     if not self.tenderPeriod.startDate:
+   #         self.tenderPeriod.startDate = self.enquiryPeriod.endDate
+   #     now = get_now()
+   #     self.date = now
+   #     if self.lots:
+   #         for lot in self.lots:
+   #             lot.date = now
 
     @serializable(serialize_when_none=False)
     def next_check(self):

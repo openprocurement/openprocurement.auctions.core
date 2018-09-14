@@ -4,7 +4,7 @@ from types import FunctionType
 from uuid import uuid4
 from copy import deepcopy
 from datetime import datetime, timedelta
-
+from openprocurement.api.models.schematics_extender import IsoDateTimeType
 from openprocurement.api.constants import VERSION
 from openprocurement.api.tests.base import (
     JSON_RENDERER_ERROR,  # noqa forwarded import
@@ -383,6 +383,7 @@ class BaseAuctionWebTest(BaseResourceWebTest):
                 item['relatedLot'] = lots[i % len(lots)]['id']
         response = self.app.post_json('/auctions', {'data': data})
         auction = response.json['data']
+        self.auction = auction
         self.auction_token = response.json['access']['token']
         self.auction_transfer = response.json['access']['transfer']
         self.auction_id = auction['id']
