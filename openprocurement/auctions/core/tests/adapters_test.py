@@ -20,6 +20,12 @@ class AuctionManagerAdapterTest(unittest.TestCase):
         self.adapter.pendify_auction_status('complete')
         self.assertEqual(self.auction.status, 'pending.complete')
 
+    def test_terminalize_with_merchandising_object_forbid_flag(self):
+        self.adapter.allow_pre_terminal_statuses = False
+        self.auction.merchandisingObject = '1' * 32
+        self.adapter.pendify_auction_status('complete')
+        self.assertEqual(self.auction.status, 'complete')
+
     def test_terminalize_without_merchandising_object(self):
         del self.auction.merchandisingObject
         self.adapter.pendify_auction_status('complete')
