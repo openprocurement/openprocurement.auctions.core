@@ -214,8 +214,10 @@ class AuctionsResource(APIResourceListing):
             }
 
         """
-        # self.request.registry.getAdapter(self.request.validated['auction'], IAuctionManager).create_auction(self.request)
-        manager = self.request.registry.queryMultiAdapter((self.request, self.request.validated['auction']), IAuctionManager)
+        self.request.registry.getAdapter(
+            self.request.validated['auction'],
+            IAuctionManager
+        ).create_auction(self.request)
         auction_id = generate_id()
         auction = self.request.validated['auction']
         auction.id = auction_id
@@ -230,7 +232,7 @@ class AuctionsResource(APIResourceListing):
         self.request.validated['auction_src'] = {}
         if save_auction(self.request):
             self.LOGGER.info('Created auction {} ({})'.format(auction_id, auction.auctionID),
-                             extra=context_unpack(self.request, {'MESSAGE_ID': 'auction_create'}, {'auction_id': auction_id, 'auctionID': auction.auctionID}))
+                        extra=context_unpack(self.request, {'MESSAGE_ID': 'auction_create'}, {'auction_id': auction_id, 'auctionID': auction.auctionID}))
             self.request.response.status = 201
             auction_route_name = get_auction_route_name(self.request, auction)
             self.request.response.headers[
