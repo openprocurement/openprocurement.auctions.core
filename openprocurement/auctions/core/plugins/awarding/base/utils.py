@@ -17,8 +17,7 @@ def check_document_existence(award, document_type):
 
 
 def invalidate_bids_under_threshold(auction):
-    amount = auction['value']['amount'] + auction['minimalStep']['amount']
-    value_threshold = round(amount, 2)
+    value_threshold = auction['value']['amount'] + auction['minimalStep']['amount']
     for bid in auction['bids']:
         if bid['value']['amount'] < value_threshold:
             bid['status'] = 'invalid'
