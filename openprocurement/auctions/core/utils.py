@@ -188,6 +188,7 @@ def apply_patch(request, data=None, save=True, src=None):
         request.context.import_data(patch)
         if save:
             return save_auction(request)
+        return True
 
 
 def cleanup_bids_for_cancelled_lots(auction):
