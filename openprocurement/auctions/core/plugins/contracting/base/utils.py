@@ -5,6 +5,7 @@ from pkg_resources import get_distribution
 from openprocurement.api.utils import (
     context_unpack,
 )
+from openprocurement.auctions.core.interfaces import IAuctionManager
 
 # Obtain pure distribution name
 PKG = get_distribution('.'.join(__package__.split('.')[:3]))
@@ -18,6 +19,7 @@ def check_auction_status(request):
         else if it has active contract - mark it as complete.
     """
     auction = request.validated['auction']
+    adapter = request.registry.getAdapter(auction, IAuctionManager)
     if auction.awards:
         awards_statuses = set([award.status for award in auction.awards])
     else:
@@ -27,13 +29,13 @@ def check_auction_status(request):
             'Switched auction {} to {}'.format(auction.id, 'unsuccessful'),
             extra=context_unpack(request, {'MESSAGE_ID': 'switched_auction_unsuccessful'})
         )
-        auction.status = 'unsuccessful'
+        adapter.pendify_auction_status('unsuccessful')
     if auction.contracts and auction.contracts[-1].status == 'active':
         LOGGER.info(
             'Switched auction {} to {}'.format(auction.id, 'complete'),
             extra=context_unpack(request, {'MESSAGE_ID': 'switched_auction_complete'})
         )
-        auction.status = 'complete'
+        adapter.pendify_auction_status('complete')
 
 
 def check_document_existence(contract, document_type):

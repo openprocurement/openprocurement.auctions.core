@@ -625,20 +625,22 @@ class AuctionCancellationResource(APIResource):
         auction = self.request.validated['auction']
         if auction.status in ['active.tendering', 'active.auction']:
             auction.bids = []
-        auction.status = 'cancelled'
+        adapter = self.request.registry.getAdapter(auction, IAuctionManager)
+        adapter.pendify_auction_status('cancelled')
 
     def cancel_lot(self, cancellation=None):
         if not cancellation:
             cancellation = self.context
         auction = self.request.validated['auction']
+        adapter = self.request.registry.getAdapter(auction, IAuctionManager)
         _ = [setattr(i, 'status', 'cancelled') for i in auction.lots if i.id == cancellation.relatedLot]
         statuses = set([lot.status for lot in auction.lots])
         if statuses == set(['cancelled']):
             self.cancel_auction()
         elif not statuses.difference(set(['unsuccessful', 'cancelled'])):
-            auction.status = 'unsuccessful'
+            adapter.pendify_auction_status('unsuccessful')
         elif not statuses.difference(set(['complete', 'unsuccessful', 'cancelled'])):
-            auction.status = 'complete'
+            adapter.pendify_auction_status('complete')
         if auction.status == 'active.auction' and all([
             i.auctionPeriod and i.auctionPeriod.endDate
             for i in self.request.validated['auction'].lots

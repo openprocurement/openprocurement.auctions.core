@@ -81,11 +81,6 @@ def check_lots_awarding(auction):
     return checks
 
 
-def set_auction_status_unsuccessful(auction, now):
-    auction.awardPeriod.endDate = now
-    auction.status = 'unsuccessful'
-
-
 def set_award_status_unsuccessful(award, now):
     award.status = 'unsuccessful'
     award.complaintPeriod.endDate = now
