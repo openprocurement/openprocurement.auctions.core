@@ -138,6 +138,10 @@ MOCK_CONFIG = connection_mock_config(PARTIAL_MOCK_CONFIG, ('plugins','api', 'plu
 class BaseWebTest(CoreWebTest):
     mock_config = MOCK_CONFIG
 
+    def setUp(self):
+        super(BaseWebTest, self).setUp()
+        if self.docservice:
+            self.setUpDS()
 
 class BaseAuctionWebTest(BaseResourceWebTest):
     initial_data = None
