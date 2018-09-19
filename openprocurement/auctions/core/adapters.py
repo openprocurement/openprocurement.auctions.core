@@ -49,6 +49,7 @@ class AuctionManagerAdapter(object):
 
         if (
             getattr(auction, 'merchandisingObject', False)  # indicates registry integration
+            and auction.merchandisingObject != False
             and self.allow_pre_terminal_statuses  # allows to manage using of preterm statuses
         ):
             status = '{0}.{1}'.format(pending_prefix, target_status)
