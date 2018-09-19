@@ -45,6 +45,7 @@ from openprocurement.api.models.schema import (  # noqa: F401
     Document as BaseDocument,
     dgfOrganization,
     Feature,
+    Identifier,
     IdentifierAuctions,
     IsoDateTimeType,
     Item as BaseItem,
