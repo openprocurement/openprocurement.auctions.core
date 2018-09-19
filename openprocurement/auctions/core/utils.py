@@ -552,3 +552,8 @@ def get_auction(model):
         if model is None:
             return None
     return model
+
+def remove_bid(request, auction, bid):
+    auction.bids.remove(bid)
+    extra = context_unpack(request, {'MESSAGE_ID': 'remove_bid: {}'.format(bid.id)})
+    LOGGER.info('Remove bid', extra=extra)
