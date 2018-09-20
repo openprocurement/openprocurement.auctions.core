@@ -87,6 +87,11 @@ class Award(BaseAward):
         if not period.endDate:
             auction = get_auction(self)
             period.endDate = calculate_business_date(
-                period.startDate, CONTRACT_SIGNING_TIME, auction, working_days=False, specific_hour=AWARDING_PERIODS_END_DATE_HOUR
+                period.startDate,
+                CONTRACT_SIGNING_TIME,
+                auction,
+                working_days=False,
+                specific_hour=AWARDING_PERIODS_END_DATE_HOUR,
+                result_is_working_day=True
             )
         return period.to_primitive()
