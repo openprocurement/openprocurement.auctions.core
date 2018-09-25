@@ -480,6 +480,7 @@ class awardV3_1Document(swiftsureDocument):
 class contractV3_1Document(swiftsureDocument):
     documentType = StringType(
         choices=[
+            'notice',
             'contractSigned',
             'contractAnnexe',
             'rejectionProtocol',
