@@ -214,27 +214,31 @@ class AuctionsResource(APIResourceListing):
             }
 
         """
-        self.request.registry.getAdapter(
-            self.request.validated['auction'],
-            IAuctionManager
-        ).create_auction(self.request)
-        auction_id = generate_id()
         auction = self.request.validated['auction']
-        auction.id = auction_id
-        auction.auctionID = generate_auction_id(get_now(), self.db, self.server_id)
-        if hasattr(auction, "initialize"):
-            auction.initialize()
-        status = self.request.json_body['data'].get('status')
-        if status and status in ['draft', 'pending.verification']:
-            auction.status = status
+
+        if auction['_internal_type'] == 'geb':
+            manager = self.request.registry.queryMultiAdapter((self.request, auction), IAuctionManager)
+            auction = manager.create()
+            if not auction:
+                return
+            manager.initialize()
+        else:
+            self.request.registry.getAdapter(auction, IAuctionManager).create_auction(self.request)
+            auction_id = generate_id()
+            auction.id = auction_id
+            auction.auctionID = generate_auction_id(get_now(), self.db, self.server_id)
+            if hasattr(auction, "initialize"):
+                auction.initialize()
+            status = self.request.json_body['data'].get('status')
+            if status and status in ['draft', 'pending.verification']:
+                auction.status = status
         acc = set_ownership(auction, self.request)
         self.request.validated['auction'] = auction
         self.request.validated['auction_src'] = {}
         if save_auction(self.request):
-            self.LOGGER.info('Created auction {} ({})'.format(auction_id, auction.auctionID),
-                        extra=context_unpack(self.request, {'MESSAGE_ID': 'auction_create'}, {'auction_id': auction_id, 'auctionID': auction.auctionID}))
+            self.LOGGER.info('Created auction {} ({})'.format(auction['id'], auction.auctionID),
+                        extra=context_unpack(self.request, {'MESSAGE_ID': 'auction_create'}, {'auction_id': auction['id'], 'auctionID': auction.auctionID}))
             self.request.response.status = 201
             auction_route_name = get_auction_route_name(self.request, auction)
-            self.request.response.headers[
-                'Location'] = self.request.route_url(route_name=auction_route_name, auction_id=auction_id)
+            self.request.response.headers['Location'] = self.request.route_url(route_name=auction_route_name, auction_id=auction['id'])
             return {'data': auction.serialize(auction.status), 'access': acc}
