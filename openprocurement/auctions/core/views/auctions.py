@@ -221,7 +221,7 @@ class AuctionsResource(APIResourceListing):
             auction = manager.create()
             if not auction:
                 return
-            manager.initialize()
+            manager.initialize(manager.context.status)
         else:
             self.request.registry.getAdapter(auction, IAuctionManager).create_auction(self.request)
             auction_id = generate_id()

@@ -2,7 +2,10 @@
 from zope.interface import (
     Attribute, Interface
 )
-from openprocurement.api.interfaces import IAuction as BaseIAuction
+from openprocurement.api.interfaces import (
+    IAuction as BaseIAuction,
+    IContentConfigurator    # noqa forwarded import
+)
 
 
 class IAuction(BaseIAuction):
@@ -27,6 +30,10 @@ class IAuctionCreator(Interface):
 
 class IAuctionChecker(Interface):
     """Interface for auctions checkers"""
+
+
+class IAuctioneer(Interface):
+    """Interface for auctions auction"""
 
 
 class IAuctionDocumenter(Interface):
