@@ -9,6 +9,7 @@ FIELDS = [
     'lots',
     'procurementMethodType',
     'next_check',
+    'auctionParameters',
     #'auctionUrl',
     #'awardPeriod',
     #'dateModified',
