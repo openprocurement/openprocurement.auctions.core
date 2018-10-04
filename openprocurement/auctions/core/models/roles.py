@@ -438,6 +438,7 @@ tessel_auction_roles = {
             'date',
             'dateModified',
             'doc_id',
+            'documents',
             'eligibilityCriteria',
             'eligibilityCriteria_en',
             'eligibilityCriteria_ru',
