@@ -29,7 +29,7 @@ from openprocurement.auctions.core.plugins.awarding.base.predicates import (
 )
 
 
-def create_awards(request):
+def create_awards(request, pending_admission_for_one_bid):
     """
         Function create NUMBER_OF_BIDS_TO_BE_QUALIFIED awards objects
         First award always in pending.verification status
@@ -43,11 +43,20 @@ def create_awards(request):
     auction.awardPeriod = type(auction).awardPeriod({'startDate': now})
     awarding_type = request.content_configurator.awarding_type
     valid_bids = [bid for bid in auction.bids if bid['value'] is not None]
-    if len(valid_bids) == 1:
-        bid = valid_bids[0].serialize()
-        award = make_award(request, auction, bid, 'pending.admission', now, parent=True)
+
+    award_status = 'pending.admission' if len(valid_bids) == 1 and pending_admission_for_one_bid else 'pending'
+
+    bids = chef(valid_bids, auction.features or [], [], True)
+    bids_to_qualify = get_bids_to_qualify(bids)
+    for bid, status in izip_longest(bids[:bids_to_qualify], [award_status], fillvalue='pending.waiting'):
+        bid = bid.serialize()
+        award = make_award(request, auction, bid, status, now, parent=True)
+
         if bid['status'] == 'invalid':
             set_award_status_unsuccessful(award, now)
+        if award.status == 'pending':
+            award.signingPeriod = award.verificationPeriod = {'startDate': now}
+            add_award_route_url(request, auction, award, awarding_type)
         if award.status == 'pending.admission':
             award.admissionPeriod = {
                 'startDate': now,
@@ -57,19 +66,8 @@ def create_awards(request):
                 )
             }
             add_award_route_url(request, auction, award, awarding_type)
+
         auction.awards.append(award)
-    else:
-        bids = chef(valid_bids, auction.features or [], [], True)
-        bids_to_qualify = get_bids_to_qualify(bids)
-        for bid, status in izip_longest(bids[:bids_to_qualify], ['pending'], fillvalue='pending.waiting'):
-            bid = bid.serialize()
-            award = make_award(request, auction, bid, status, now, parent=True)
-            if bid['status'] == 'invalid':
-                set_award_status_unsuccessful(award, now)
-            if award.status == 'pending':
-                award.signingPeriod = award.verificationPeriod = {'startDate': now}
-                add_award_route_url(request, auction, award, awarding_type)
-            auction.awards.append(award)
 
 
 def switch_to_next_award(request):

@@ -39,13 +39,14 @@ class AwardingV3_1ConfiguratorMixin(object):
     """
     award_model = Award
     awarding_type = 'awarding_3_1'
+    pending_admission_for_one_bid = True
 
     def start_awarding(self):
         """
             Call create_awards method, that create specified in constant
             number of awards in pending and pending.waiting status
         """
-        return create_awards(self.request)
+        return create_awards(self.request, self.pending_admission_for_one_bid)
 
     def back_to_awarding(self):
         """
