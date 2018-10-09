@@ -58,3 +58,4 @@ STATUS4ROLE = {
     'reviewers': ['pending'],
     'tender_owner': ['claim'],
 }
+MINIMAL_PERIOD_FROM_RECTIFICATION_END = timedelta(days=5)
