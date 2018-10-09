@@ -8,7 +8,8 @@ from openprocurement.auctions.core.utils import (
 from openprocurement.auctions.core.interfaces import (
     IAuctionManager,
     IBidManager,
-    IQuestionManager
+    IQuestionManager,
+    IDocumentManager
 )
 
 
@@ -96,6 +97,24 @@ class BidManager(object):
 @implementer(IQuestionManager)
 class QuestionManager(object):
     name = 'Question Manager'
+
+    def __init__(self, request, context):
+        self._request = request
+        self.context = context
+        self._auction = context.__parent__
+
+    def change(self):
+        changer = self.Changer(self._request, self.context)
+        return changer.change()
+
+    def save(self):
+        if self._auction.modified:
+            return save_auction(self._request)
+
+
+@implementer(IDocumentManager)
+class DocumentManager(object):
+    name = 'Document Manager'
 
     def __init__(self, request, context):
         self._request = request
