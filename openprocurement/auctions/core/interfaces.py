@@ -78,3 +78,11 @@ class IBidDeleter(Interface):
 
 class IBidInitializator(Interface):
     """Interface for bid initializators"""
+
+
+class IDocumentManager(Interface):
+    """Interface for documents managers"""
+
+
+class IDocumentChanger(Interface):
+    """Interface for documents changer"""
