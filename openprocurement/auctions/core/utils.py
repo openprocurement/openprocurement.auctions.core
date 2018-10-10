@@ -47,7 +47,8 @@ from openprocurement.api.utils import (
 
 from openprocurement.auctions.core.constants import (
     DOCUMENT_TYPE_URL_ONLY,
-    DOCUMENT_TYPE_OFFLINE
+    DOCUMENT_TYPE_OFFLINE,
+    MINIMAL_PERIOD_FROM_RECTIFICATION_END,
 )
 from openprocurement.auctions.core.interfaces import IAuction, IAuctionManager
 from openprocurement.auctions.core.plugins.awarding import includeme as awarding
@@ -557,3 +558,27 @@ def remove_bid(request, auction, bid):
     auction.bids.remove(bid)
     extra = context_unpack(request, {'MESSAGE_ID': 'remove_bid: {}'.format(bid.id)})
     LOGGER.info('Remove bid', extra=extra)
+
+
+def generate_rectificationPeriod_tender_period_margin(auction, tp_margin=MINIMAL_PERIOD_FROM_RECTIFICATION_END):
+    """Generate rectificationPeriod for an auction basing on margin from the end of the tenderPeriod
+    
+        :param auction: auction model
+        :param tp_margin: timedelta; margin from the end of
+            the tenderPertiod to the end of rectificationPeriod.
+            It's default value is 5 days.
+    """
+    now = get_now()
+    if not auction.rectificationPeriod:
+        period = type(auction).rectificationPeriod.model_class()
+    period.startDate = period.startDate or now
+    if not period.endDate:
+        calculated_endDate = TZ.localize(
+            calculate_business_date(
+                auction.tenderPeriod.endDate,
+                -tp_margin,
+                auction
+            ).replace(tzinfo=None))
+        period.endDate = calculated_endDate if calculated_endDate > now else now
+    period.invalidationDate = None
+    return period
