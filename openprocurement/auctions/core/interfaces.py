@@ -32,6 +32,10 @@ class IAuctionChecker(Interface):
     """Interface for auctions checkers"""
 
 
+class IAuctionItemer(Interface):
+    """Interface for auctions items"""
+
+
 class IAuctioneer(Interface):
     """Interface for auctions auction"""
 
@@ -42,6 +46,18 @@ class IAuctionDocumenter(Interface):
 
 class IAuctionQuestioner(Interface):
     """Interface for auctions questioners"""
+
+
+class IAuctionSubResourcesRepresenter(Interface):
+    """Interface for auctions subresource representation"""
+
+
+class IAuctionSubResourceItemRepresenter(Interface):
+    """Interface for auctions subresource item representation"""
+
+
+class IAuctionSubResourcesRepresentersFactory(Interface):
+    """Interface for auctions subresource representer factory"""
 
 
 class IQuestion(Interface):
@@ -86,3 +102,19 @@ class IDocumentManager(Interface):
 
 class IDocumentChanger(Interface):
     """Interface for documents changer"""
+
+
+class IItemManager(Interface):
+    """Interface for items manager"""
+
+
+class IItemChanger(Interface):
+    """Interface for item changer"""
+
+
+class IItemLogger(Interface):
+    """Interface for item logger"""
+
+
+class IItemRepresenter(Interface):
+    """Interface for item represent"""

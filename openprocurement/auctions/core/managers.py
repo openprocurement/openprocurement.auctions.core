@@ -9,7 +9,8 @@ from openprocurement.auctions.core.interfaces import (
     IAuctionManager,
     IBidManager,
     IQuestionManager,
-    IDocumentManager
+    IDocumentManager,
+    IItemManager
 )
 
 
@@ -42,6 +43,10 @@ class AuctionManager(object):
         questioner = self.Questioner(self._request, self.context)
         return questioner.add_question()
 
+    def add_item(self):
+        itemer = self.Itemer(self._request, self.context)
+        return itemer.add_item()
+
     def check(self):
         checker = self.Checker(self._request, self.context)
         return checker.check()
@@ -57,6 +62,14 @@ class AuctionManager(object):
     def create(self):
         creator = self.Creator(self._request, self.context)
         return creator.create()
+
+    def represent_subresources_listing(self, subresource_type):
+        representer = self.SubResourceRepresenter(self._request, self.context)
+        return representer.represent_listing(subresource_type)
+
+    def represent_subresource_created(self, item):
+        representer = self.SubResourceRepresenter(self._request, self.context)
+        return representer.represent_created(item)
 
     def save(self):
         if self.context.modified:
@@ -110,6 +123,37 @@ class QuestionManager(object):
     def save(self):
         if self._auction.modified:
             return save_auction(self._request)
+
+
+@implementer(IItemManager)
+class ItemManager(object):
+    name = 'Item Manager'
+
+    def __init__(self, request, context):
+        self._request = request
+        self.context = context
+        self._auction = context.__parent__
+        self._is_changed = False
+        self._is_saved = False
+
+    def change(self):
+        changer = self.Changer(self._request, self.context)
+        self._is_changed = changer.change()
+
+        return self._is_changed
+
+    def represent(self, method):
+        representer = self.Representer(self.context)
+        return representer.represent(method)
+
+    def log_action(self, action, verbose):
+        logger = self.Logger(self._request, self.context)
+        logger.log_action(action, verbose)
+
+    def save(self):
+        if self._is_changed:
+            self._is_saved = save_auction(self._request)
+        return self._is_saved
 
 
 @implementer(IDocumentManager)

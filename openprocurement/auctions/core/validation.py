@@ -179,6 +179,15 @@ def validate_question_data(request, **kwargs):
     return validate_data(request, model, "question")
 
 
+def validate_item_data(request, **kwargs):
+    err_msg = 'Broker Accreditation level does not permit item creation'
+    if not check_subresource_create_accredetation(request, err_msg):
+        return
+    update_logging_context(request, {'item_id': '__new__'})
+    model = type(request.auction).questions.model_class
+    return validate_data(request, model, "item")
+
+
 def validate_complaint_data(request, **kwargs):
     err_msg = 'Broker Accreditation level does not permit complaint creation'
     if not check_subresource_create_accredetation(request, err_msg):
@@ -354,6 +363,11 @@ def validate_patch_complaint_data_patch_common(request, **kwargs):
 
 def validate_patch_question_data(request, **kwargs):
     model = type(request.auction).questions.model_class
+    return validate_data(request, model)
+
+
+def validate_patch_item_data(request, **kwargs):
+    model = type(request.auction).items.model_class
     return validate_data(request, model)
 
 

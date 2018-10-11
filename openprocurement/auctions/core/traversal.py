@@ -23,6 +23,7 @@ class Root(object):
         (Allow, 'g:brokers', 'create_bid'),
         (Allow, 'g:brokers', 'create_complaint'),
         (Allow, 'g:brokers', 'create_question'),
+        (Allow, 'g:brokers', 'create_item'),
         (Allow, 'g:brokers', 'create_auction'),
         (Allow, 'g:brokers', 'create_tender'),
         (Allow, 'g:auction', 'auction'),
@@ -66,7 +67,6 @@ def get_item(parent, key, request):
 
 
 def factory(request):
-
     request.validated['auction_src'] = {}
     root = Root(request)
     if not request.matchdict or not request.matchdict.get('auction_id'):
