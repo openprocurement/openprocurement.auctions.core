@@ -84,6 +84,8 @@ class BidManager(object):
         self._request = request
         self.context = context
         self._auction = context.__parent__
+        self._is_changed = False
+        self._is_saved = False
 
     def initialize(self):
         initializator = self.Initializator(self._request, self.context)
@@ -91,20 +93,27 @@ class BidManager(object):
 
     def change(self):
         changer = self.Changer(self._request, self.context)
-        return changer.change()
+        self._is_changed = changer.change()
+
+        return self._is_changed
 
     def upload_document(self):
         documenter = self.Documenter(self._request, self.context)
-        return documenter.upload_document()
+        document = documenter.upload_document()
+        if document:
+            self._is_changed = True
+        return document
 
     def save(self):
-        if self._auction.modified:
-            return save_auction(self._request)
+        if self._is_changed:
+            self._is_saved = save_auction(self._request)
+        return self._is_saved
 
     def delete(self):
         deleter = self.Deleter(self._request, self.context)
-        if deleter.validate():
-            return deleter.delete()
+        self._is_changed = deleter.delete()
+
+        return self._is_changed
 
 
 @implementer(IQuestionManager)

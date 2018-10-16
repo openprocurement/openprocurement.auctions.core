@@ -118,3 +118,7 @@ class IItemLogger(Interface):
 
 class IItemRepresenter(Interface):
     """Interface for item represent"""
+
+
+class INamedValidators(Interface):
+    """Interface for named validators"""
