@@ -562,15 +562,17 @@ def remove_bid(request, auction, bid):
 
 def generate_rectificationPeriod_tender_period_margin(auction, tp_margin=MINIMAL_PERIOD_FROM_RECTIFICATION_END):
     """Generate rectificationPeriod for an auction basing on margin from the end of the tenderPeriod
-    
+
         :param auction: auction model
         :param tp_margin: timedelta; margin from the end of
             the tenderPertiod to the end of rectificationPeriod.
             It's default value is 5 days.
     """
     now = get_now()
-    if not auction.rectificationPeriod:
+    period = auction.rectificationPeriod
+    if not period:
         period = type(auction).rectificationPeriod.model_class()
+
     period.startDate = period.startDate or now
     if not period.endDate:
         calculated_endDate = TZ.localize(
