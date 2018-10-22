@@ -8,9 +8,11 @@ from openprocurement.auctions.core.utils import (
 from openprocurement.auctions.core.interfaces import (
     IAuctionManager,
     IBidManager,
-    IQuestionManager,
+    IBidDocumentManager,
+    ICancellationManager,
     IDocumentManager,
-    IItemManager
+    IItemManager,
+    IQuestionManager
 )
 
 
@@ -47,6 +49,11 @@ class AuctionManager(object):
         itemer = self.Itemer(self._request, self.context)
         return itemer.add_item()
 
+    def cancel(self):
+        canceller = self.Canceller(self._request, self.context)
+        cancellation = canceller.cancel()
+        return cancellation
+
     def check(self):
         checker = self.Checker(self._request, self.context)
         return checker.check()
@@ -63,13 +70,17 @@ class AuctionManager(object):
         creator = self.Creator(self._request, self.context)
         return creator.create()
 
-    def represent_subresources_listing(self, subresource_type):
-        representer = self.SubResourceRepresenter(self._request, self.context)
-        return representer.represent_listing(subresource_type)
+    def log_action(self, action, verbose):
+        logger = self.Logger(self._request, self.context)
+        logger.log_action(action, verbose)
 
-    def represent_subresource_created(self, item):
+    def represent_subresources_listing(self, subresource_implemented):
         representer = self.SubResourceRepresenter(self._request, self.context)
-        return representer.represent_created(item)
+        return representer.represent_listing(subresource_implemented)
+
+    def represent_subresource_created(self, subresource):
+        representer = self.SubResourceRepresenter(self._request, self.context)
+        return representer.represent_created(subresource)
 
     def save(self):
         if self.context.modified:
@@ -165,6 +176,43 @@ class ItemManager(object):
         return self._is_saved
 
 
+@implementer(ICancellationManager)
+class CancellationManager(object):
+    name = 'Cancellation Manager'
+
+    def __init__(self, request, context):
+        self._request = request
+        self.context = context
+        self._auction = context.__parent__
+        self._is_changed = False
+        self._is_saved = False
+
+    def change(self):
+        changer = self.Changer(self._request, self.context)
+        self._is_changed = changer.change()
+        return self._is_changed
+
+    def represent(self, method):
+        representer = self.Representer(self.context)
+        return representer.represent(method)
+
+    def upload_document(self):
+        documenter = self.Documenter(self._request, self.context)
+        document = documenter.upload_document()
+        if document:
+            self._is_changed = True
+        return document
+
+    def log_action(self, action, verbose):
+        logger = self.Logger(self._request, self.context)
+        logger.log_action(action, verbose)
+
+    def save(self):
+        if self._is_changed:
+            self._is_saved = save_auction(self._request)
+        return self._is_saved
+
+
 @implementer(IDocumentManager)
 class DocumentManager(object):
     name = 'Document Manager'
@@ -181,3 +229,25 @@ class DocumentManager(object):
     def save(self):
         if self._auction.modified:
             return save_auction(self._request)
+
+
+@implementer(IBidDocumentManager)
+class BidDocumentManager(object):
+    name = 'Cancellation Manager'
+
+    def __init__(self, request, context):
+        self._request = request
+        self.context = context
+        self._auction = context.__parent__
+        self._is_changed = False
+        self._is_saved = False
+
+    def change(self):
+        changer = self.Changer(self._request, self.context)
+        self._is_changed = changer.change()
+        return self._is_changed
+
+    def save(self):
+        if self._is_changed:
+            self._is_saved = save_auction(self._request)
+        return self._is_saved
