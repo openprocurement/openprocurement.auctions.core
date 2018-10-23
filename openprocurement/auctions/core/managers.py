@@ -37,18 +37,6 @@ class AuctionManager(object):
         auctioner = self.Auctioneer(self._request, self.context)
         return auctioner.decide_procedure()
 
-    def upload_document(self):
-        documenter = self.Documenter(self._request, self.context)
-        return documenter.upload_document()
-
-    def add_question(self):
-        questioner = self.Questioner(self._request, self.context)
-        return questioner.add_question()
-
-    def add_item(self):
-        itemer = self.Itemer(self._request, self.context)
-        return itemer.add_item()
-
     def cancel(self):
         canceller = self.Canceller(self._request, self.context)
         cancellation = canceller.cancel()
@@ -66,9 +54,9 @@ class AuctionManager(object):
         auctioner = self.Auctioneer(self._request, self.context)
         return auctioner.bring_auction_result()
 
-    def create(self):
+    def create(self, applicant):
         creator = self.Creator(self._request, self.context)
-        return creator.create()
+        return creator.create(applicant)
 
     def log_action(self, action, verbose):
         logger = self.Logger(self._request, self.context)
@@ -108,12 +96,12 @@ class BidManager(object):
 
         return self._is_changed
 
-    def upload_document(self):
-        documenter = self.Documenter(self._request, self.context)
-        document = documenter.upload_document()
-        if document:
+    def create(self, applicant):
+        creator = self.Creator(self._request, self.context)
+        creature = creator.create(applicant)
+        if creature:
             self._is_changed = True
-        return document
+        return creature
 
     def save(self):
         if self._is_changed:
@@ -162,6 +150,13 @@ class ItemManager(object):
 
         return self._is_changed
 
+    def create(self, applicant):
+        creator = self.Creator(self._request, self.context)
+        creature = creator.create(applicant)
+        if creature:
+            self._is_changed = True
+        return creature
+
     def represent(self, method):
         representer = self.Representer(self.context)
         return representer.represent(method)
@@ -196,12 +191,12 @@ class CancellationManager(object):
         representer = self.Representer(self.context)
         return representer.represent(method)
 
-    def upload_document(self):
-        documenter = self.Documenter(self._request, self.context)
-        document = documenter.upload_document()
-        if document:
+    def create(self, applicant):
+        creator = self.Creator(self._request, self.context)
+        creature = creator.create(applicant)
+        if creature:
             self._is_changed = True
-        return document
+        return creature
 
     def log_action(self, action, verbose):
         logger = self.Logger(self._request, self.context)

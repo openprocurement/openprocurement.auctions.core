@@ -218,7 +218,8 @@ class AuctionsResource(APIResourceListing):
 
         if auction['_internal_type'] == 'geb':
             manager = self.request.registry.queryMultiAdapter((self.request, auction), IAuctionManager)
-            auction = manager.create()
+            applicant = self.request.validated['auction']
+            auction = manager.create(applicant)
             if not auction:
                 return
             manager.initialize(manager.context.status)

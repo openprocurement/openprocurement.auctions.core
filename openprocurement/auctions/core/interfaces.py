@@ -7,6 +7,10 @@ from openprocurement.api.interfaces import (
     IContentConfigurator    # noqa forwarded import
 )
 
+
+class ICreator(Interface):
+    """Interface for creator"""
+
 # Auction interfaces
 
 
@@ -26,32 +30,34 @@ class IAuctionChanger(Interface):
     """Interface for auctions changers"""
 
 
-class IAuctionCreator(Interface):
-    """Interface for auctions creators"""
-
-
 class IAuctionChecker(Interface):
     """Interface for auctions checkers"""
-
-
-class IAuctionItemer(Interface):
-    """Interface for auctions items"""
-
-
-class IAuctionCanceller(Interface):
-    """Interface for auctions cancellations"""
 
 
 class IAuctionLogger(Interface):
     """Interface for auction logger"""
 
-
-class IAuctionDocumenter(Interface):
-    """Interface for auctions documenters"""
+# auction creators
 
 
-class IAuctionQuestioner(Interface):
-    """Interface for auctions questioners"""
+class IAuctionCreator(Interface):
+    """Interface for auctions creators"""
+
+
+class IAuctionCancellationCreator(Interface):
+    """Interface for auction cancellation creator"""
+
+
+class IAuctionQuestionCreator(Interface):
+    """Interface for auction creator"""
+
+
+class IAuctionDocumentCreator(Interface):
+    """Interface for auction document creator"""
+
+
+class IAuctionItemCreator(Interface):
+    """Interface for auctions creator"""
 
 
 class IAuctionSubResourcesRepresenter(Interface):
@@ -104,16 +110,16 @@ class IBidChanger(Interface):
     """Interface for bid changers"""
 
 
-class IBidDocumenter(Interface):
-    """Interface for bids documenters"""
-
-
 class IBidDocumentManager(Interface):
     """Interface for bid documents manager"""
 
 
 class IBidDocumentChanger(Interface):
     """Interface for bid documents changer"""
+
+
+class IBidDocumentCreator(Interface):
+    """Interface for bid document creator"""
 
 
 class IBidDeleter(Interface):
@@ -144,8 +150,8 @@ class ICancellationChanger(Interface):
     """Interface for items manager"""
 
 
-class ICancellationDocumenter(Interface):
-    """Interface for cancellations documenters"""
+class ICancellationDocumentCreator(Interface):
+    """Interface for cancellations document creator"""
 
 
 class ICancellationLogger(Interface):
