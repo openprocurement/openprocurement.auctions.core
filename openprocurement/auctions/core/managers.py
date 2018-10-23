@@ -207,6 +207,14 @@ class CancellationManager(object):
         logger = self.Logger(self._request, self.context)
         logger.log_action(action, verbose)
 
+    def represent_subresources_listing(self, subresource_implemented):
+        representer = self.SubResourceRepresenter(self._request, self.context)
+        return representer.represent_listing(subresource_implemented)
+
+    def represent_subresource_created(self, subresource):
+        representer = self.SubResourceRepresenter(self._request, self.context)
+        return representer.represent_created(subresource)
+
     def save(self):
         if self._is_changed:
             self._is_saved = save_auction(self._request)
