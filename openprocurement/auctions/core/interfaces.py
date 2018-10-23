@@ -159,6 +159,24 @@ class ICancellationRepresenter(Interface):
 class ICancellationChangerInitializator(Interface):
     """Interface for auction cancellation changer initializator"""
 
+
+class ICancellationSubResourcesRepresenter(Interface):
+    """
+    Interface for cancellation subresource representer
+    """
+
+
+class ICancellationSubResourceDocumentRepresenter(Interface):
+    """
+    Interface for cancellation subresource document representer
+    """
+
+
+class ICancellationSubResourcesRepresentersFactory(Interface):
+    """
+    Interface for cancellation subresource representer factory
+    """
+
 # Item interfaces
 
 
