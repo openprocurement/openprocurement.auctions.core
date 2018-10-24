@@ -184,7 +184,7 @@ def validate_item_data(request, **kwargs):
     if not check_subresource_create_accredetation(request, err_msg):
         return
     update_logging_context(request, {'item_id': '__new__'})
-    model = type(request.auction).questions.model_class
+    model = type(request.auction).items.model_class
     return validate_data(request, model, "item")
 
 
