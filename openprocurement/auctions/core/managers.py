@@ -46,7 +46,10 @@ class AuctionManager(object):
 
     def check(self):
         checker = self.Checker(self._request, self.context)
-        return checker.check()
+        checker.check()
+        if self.context.status == 'active.qualification':
+            awarding = self.Awarding(self._request, self.context)
+            awarding.start_awarding()
 
     def update_auction_urls(self):
         auctioner = self.Auctioneer(self._request, self.context)
