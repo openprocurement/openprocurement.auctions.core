@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 from .models import Award
 from .utils import (
-    create_awards,
     switch_to_next_award,
     next_check_awarding,
     check_award_status
 )
 
+from datetime import timedelta
 from openprocurement.auctions.core.adapters import (
     AuctionAwardingNextCheckAdapter
 )
@@ -16,7 +16,7 @@ from openprocurement.auctions.core.plugins.awarding.base.adapters import (
 from openprocurement.api.utils import (
     get_now,
     error_handler,
-    validate_with,
+    validate_with
 )
 from openprocurement.auctions.core.utils import (
     apply_patch,
@@ -29,9 +29,12 @@ from openprocurement.auctions.core.validation import (
 from openprocurement.auctions.core.plugins.awarding.base.utils import (
     check_document_existence
 )
+from openprocurement.auctions.core.plugins.awarding.base.adapters import (
+    BaseAwardingMixin
+)
 
 
-class AwardingV3_1ConfiguratorMixin(object):
+class AwardingV3_1ConfiguratorMixin(BaseAwardingMixin):
     """Brings methods that are needed for the process of Awarding
 
         start_awarding - call after auction ends in auction view
@@ -40,13 +43,9 @@ class AwardingV3_1ConfiguratorMixin(object):
     award_model = Award
     awarding_type = 'awarding_3_1'
     pending_admission_for_one_bid = True
-
-    def start_awarding(self):
-        """
-            Call create_awards method, that create specified in constant
-            number of awards in pending and pending.waiting status
-        """
-        return create_awards(self.request, self.pending_admission_for_one_bid)
+    AWARDING_PERIODS_END_DATE_HOUR = 18
+    VERIFY_ADMISSION_PROTOCOL_TIME = timedelta(days=5)
+    NUMBER_OF_BIDS_TO_BE_QUALIFIED = 2
 
     def back_to_awarding(self):
         """

@@ -33,9 +33,11 @@ class AuctionManager(object):
         changer = self.Changer(self._request, self.context)
         return changer.change()
 
-    def decide_procedure(self):
+    def award(self):
         auctioner = self.Auctioneer(self._request, self.context)
-        return auctioner.decide_procedure()
+        if auctioner.award():
+            awarding = self.Awarding(self._request, self.context)
+            awarding.start_awarding()
 
     def cancel(self):
         canceller = self.Canceller(self._request, self.context)
@@ -50,9 +52,10 @@ class AuctionManager(object):
         auctioner = self.Auctioneer(self._request, self.context)
         return auctioner.update_auction_urls()
 
-    def bring_auction_result(self):
+    def auction_report(self):
         auctioner = self.Auctioneer(self._request, self.context)
-        return auctioner.bring_auction_result()
+        if auctioner.report():
+            auctioner.initialize()
 
     def create(self, applicant):
         creator = self.Creator(self._request, self.context)
