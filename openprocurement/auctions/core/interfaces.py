@@ -26,6 +26,10 @@ class IAuctionInitializator(Interface):
     """Interface for auctions initializators"""
 
 
+class IAuctionReportInitializator(Interface):
+    """Interface for auctions initializators"""
+
+
 class IAuctionChanger(Interface):
     """Interface for auctions changers"""
 
