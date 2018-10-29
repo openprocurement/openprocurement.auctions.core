@@ -235,6 +235,10 @@ class DocumentManager(object):
         changer = self.Changer(self._request, self.context)
         return changer.change()
 
+    def put(self):
+        changer = self.Changer(self._request, self.context)
+        return changer.put()
+
     def save(self):
         if self._auction.modified:
             return save_auction(self._request)
