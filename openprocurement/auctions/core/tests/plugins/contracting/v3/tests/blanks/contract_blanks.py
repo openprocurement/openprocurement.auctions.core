@@ -1,3 +1,5 @@
+from datetime import timedelta
+
 from openprocurement.api.utils import get_now
 from openprocurement.auctions.core.utils import get_related_award_of_contract
 
@@ -179,3 +181,39 @@ def get_auction_contract(self):
         {u'description': u'Not Found', u'location':
             u'url', u'name': u'auction_id'}
     ])
+
+
+def update_signingPeriod_by_administrator(self):
+    response = self.app.get('/auctions/{}/contracts'.format(self.auction_id))
+    contract = response.json['data'][0]
+
+    response = self.app.post('/auctions/{}/contracts/{}/documents?acc_token={}'.format(
+        self.auction_id, contract['id'], self.auction_token
+    ), upload_files=[('file', 'name.doc', 'content')])
+    self.assertEqual(response.status, '201 Created')
+    self.assertEqual(response.content_type, 'application/json')
+
+    # check that signingPeriod can be patched by administrator
+    data_to_patch = {
+        'data': {
+            'signingPeriod': {
+                'startDate': (get_now() - timedelta(days=10)).isoformat(),
+                'endDate': get_now().isoformat()
+            }
+        }
+    }
+
+
+    self.app.authorization = ('Basic', ('administrator', ''))
+    self.app.patch_json(
+        '/auctions/{0}/contracts/{1}?acc_token={2}'.format(
+            self.auction_id, contract['id'], self.auction_token
+        ),
+        data_to_patch,
+        status=200
+    )
+    after_patch_contract_response = self.app.get(
+        '/auctions/{0}/contracts/{1}'.format(self.auction_id, contract['id'])
+    )
+
+    self.assertEqual(data_to_patch['data']['signingPeriod'], after_patch_contract_response.json['data']['signingPeriod'])

@@ -7,6 +7,7 @@ from openprocurement.auctions.core.plugins.contracting.v3.tests.blanks.contract_
     get_auction_contract,
     patch_signing_period,
     patch_date_paid,
+    update_signingPeriod_by_administrator
 )
 
 
@@ -18,3 +19,4 @@ class AuctionContractV3ResourceTestCaseMixin(object):
     test_get_auction_contract = snitch(get_auction_contract)
     test_patch_signing_period = snitch(patch_signing_period)
     test_patch_date_paid = snitch(patch_date_paid)
+    test_update_signingPeriod_by_administrator = snitch(update_signingPeriod_by_administrator)
