@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from schematics.types.compound import ModelType
+from schematics.transforms import whitelist
 from zope.interface import implementer
 
 from openprocurement.api.models.common import Period
@@ -21,6 +22,12 @@ from .interfaces import IContractV3_1
 
 @implementer(IContractV3_1)
 class Contract(BaseContract):
+
+    class Options:
+        roles = {
+            'Administrator': whitelist('signingPeriod'),
+        }
+
     items = ListType(ModelType(Item))
     suppliers = ListType(ModelType(Organization), min_size=1, max_size=1)
     complaints = ListType(ModelType(Complaint), default=list())
