@@ -583,3 +583,39 @@ def patch_auction_contract_2_lots(self):
         response.json['errors'][0]["description"],
         "Can update contract only in active lot status"
     )
+
+
+def update_signingPeriod_by_administrator(self):
+    response = self.app.get('/auctions/{}/contracts'.format(self.auction_id))
+    contract = response.json['data'][0]
+
+    response = self.app.post('/auctions/{}/contracts/{}/documents?acc_token={}'.format(
+        self.auction_id, contract['id'], self.auction_token
+    ), upload_files=[('file', 'name.doc', 'content')])
+    self.assertEqual(response.status, '201 Created')
+    self.assertEqual(response.content_type, 'application/json')
+
+    # check that signingPeriod can be patched by administrator
+    data_to_patch = {
+        'data': {
+            'signingPeriod': {
+                'startDate': (get_now() - timedelta(days=10)).isoformat(),
+                'endDate': get_now().isoformat()
+            }
+        }
+    }
+
+
+    self.app.authorization = ('Basic', ('administrator', ''))
+    self.app.patch_json(
+        '/auctions/{0}/contracts/{1}?acc_token={2}'.format(
+            self.auction_id, contract['id'], self.auction_token
+        ),
+        data_to_patch,
+        status=200
+    )
+    after_patch_contract_response = self.app.get(
+        '/auctions/{0}/contracts/{1}'.format(self.auction_id, contract['id'])
+    )
+
+    self.assertEqual(data_to_patch['data']['signingPeriod'], after_patch_contract_response.json['data']['signingPeriod'])

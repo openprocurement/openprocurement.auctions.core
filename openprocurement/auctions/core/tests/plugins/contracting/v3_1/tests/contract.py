@@ -14,7 +14,8 @@ from openprocurement.auctions.core.tests.plugins.contracting.v3_1.tests.blanks.c
     patch_auction_contract_to_cancelled_invalid_no_rejection_or_act,
     patch_auction_contract_to_cancelled_invalid_signed,
     patch_auction_contract_to_cancelled_rejection_protocol,
-    patch_auction_contract_to_cancelled_act
+    patch_auction_contract_to_cancelled_act,
+    update_signingPeriod_by_administrator
 )
 
 
@@ -38,3 +39,4 @@ class AuctionContractV3_1ResourceTestCaseMixin(object):
         patch_auction_contract_to_cancelled_rejection_protocol
     )
     test_patch_auction_contract_to_cancelled_act = snitch(patch_auction_contract_to_cancelled_act)
+    test_update_signingPeriod_by_administrator = snitch(update_signingPeriod_by_administrator)
