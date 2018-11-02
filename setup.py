@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 import os
 
-version = '1.2.7'
+version = '1.2.7+patch1'
 auction_core = 'openprocurement.auctions.core.includeme:includeme'
 auction_transferring = 'openprocurement.auctions.core.plugins.transferring.includeme:includeme'
 
