@@ -35,7 +35,6 @@ class BaseAwardingMixin(object):
         auction = self.context
         auction.status = 'active.qualification'
         now = get_now()
-        self._start_awarding = now
 
         auction.awardPeriod = type(auction).awardPeriod({'startDate': now})
         awarding_type = self.awarding_type
