@@ -32,6 +32,7 @@ from openprocurement.api.utils import (
     context_unpack,
     json_view,  # noqa forwarded import
     APIResource,  # noqa forwarded import
+    set_specific_hour, # noqa forwarded import
     get_file,
     upload_file,
     connection_mock_config,  # noqa forwarded import
