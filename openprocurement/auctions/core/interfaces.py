@@ -130,6 +130,14 @@ class IBidDeleter(Interface):
     """Interface for bids deleters"""
 
 
+class IBidRepresenter(Interface):
+    """Interface for bids representers"""
+
+
+class IBidLogger(Interface):
+    """Interface for bids loggers"""
+
+
 class IBidInitializator(Interface):
     """Interface for bid initializators"""
 
