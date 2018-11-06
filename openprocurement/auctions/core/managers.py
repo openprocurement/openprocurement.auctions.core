@@ -99,7 +99,6 @@ class BidManager(object):
     def change(self):
         changer = self.Changer(self._request, self.context)
         self._is_changed = changer.change()
-
         return self._is_changed
 
     def create(self, applicant):
@@ -109,6 +108,10 @@ class BidManager(object):
             self._is_changed = True
         return creature
 
+    def log_action(self, action, verbose):
+        logger = self.Logger(self._request, self.context)
+        logger.log_action(action, verbose)
+
     def save(self):
         if self._is_changed:
             self._is_saved = save_auction(self._request)
@@ -117,8 +120,11 @@ class BidManager(object):
     def delete(self):
         deleter = self.Deleter(self._request, self.context)
         self._is_changed = deleter.delete()
-
         return self._is_changed
+
+    def represent(self, method):
+        representer = self.Representer(self.context)
+        return representer.represent(method)
 
 
 @implementer(IQuestionManager)
