@@ -205,6 +205,22 @@ def patch_auction_contract_value(self):
     response = self.app.get('/auctions/{}/contracts'.format(self.auction_id))
     contract = response.json['data'][0]
 
+    response = self.app.patch_json(
+        '/auctions/{}/contracts/{}?acc_token={}'.format(
+            self.auction_id, contract['id'], self.auction_token
+        ),
+        {
+            "data": {
+                "value": {
+                    "currency": "UAH",
+                    "amount": 500,
+                    "valueAddedTaxIncluded": True,
+                }
+            }
+        },
+        status=200
+    )
+
     response = self.app.patch_json('/auctions/{}/contracts/{}?acc_token={}'.format(
         self.auction_id, contract['id'], self.auction_token
     ), {"data": {"value": {"currency": "USD"}}}, status=403)
@@ -232,9 +248,9 @@ def patch_auction_contract_value(self):
 
     response = self.app.patch_json('/auctions/{}/contracts/{}?acc_token={}'.format(
         self.auction_id, contract['id'], self.auction_token
-    ), {"data": {"value": {"amount": 500}}})
+    ), {"data": {"value": {"amount": 501}}})
     self.assertEqual(response.status, '200 OK')
-    self.assertEqual(response.json['data']['value']['amount'], 500)
+    self.assertEqual(response.json['data']['value']['amount'], 501)
 
 
 def patch_auction_contract_to_active(self):
@@ -287,12 +303,45 @@ def patch_auction_contract_to_active(self):
     self.assertEqual(response.status, '200 OK')
 
     # Trying to patch contract to active status again
-    response = self.app.patch_json('/auctions/{}/contracts/{}?acc_token={}'.format(
-        self.auction_id, contract['id'], self.auction_token
-    ), {"data": {"status": "active"}})
-    self.assertEqual(response.status, '200 OK')
+    response = self.app.patch_json(
+        '/auctions/{}/contracts/{}?acc_token={}'.format(
+            self.auction_id, contract['id'], self.auction_token
+        ),
+        {"data": {"status": "active"}},
+        status=403
+    )
     self.assertEqual(response.content_type, 'application/json')
-    self.assertEqual(response.json['data']["status"], "active")
+    self.assertEqual(
+        response.json["errors"][0]['description'],
+        "Can't activate contract without value defined"
+    )
+
+    # Passing value to the contract
+    response = self.app.patch_json(
+        '/auctions/{}/contracts/{}?acc_token={}'.format(
+            self.auction_id, contract['id'], self.auction_token
+        ),
+        {
+            "data": {
+                "value": {
+                    "currency": "UAH",
+                    "amount": 500,
+                    "valueAddedTaxIncluded": True,
+                },
+            }
+        },
+        status=200
+    )
+    # activating contract
+    response = self.app.patch_json(
+        '/auctions/{}/contracts/{}?acc_token={}'.format(
+            self.auction_id, contract['id'], self.auction_token
+        ),
+        {
+            "data": {'status': 'active'}
+        },
+        status=200
+    )
 
     response = self.app.get('/auctions/{}/contracts/{}'.format(
         self.auction_id, contract['id'])
@@ -300,7 +349,7 @@ def patch_auction_contract_to_active(self):
     self.assertEqual(response.status, '200 OK')
     self.assertEqual(response.content_type, 'application/json')
     self.assertEqual(response.json['data']["status"], "active")
-    self.assertEqual(response.json['data']["value"]['amount'], 479)
+    self.assertEqual(response.json['data']['value']['amount'], 500)
     self.assertEqual(
         response.json['data']['contractID'], contract['contractID']
     )
@@ -339,6 +388,22 @@ def patch_auction_contract_to_active_date_signed_burst(self):
     self.assertEqual(response.json['data']["status"], "pending")
 
     # Trying to patch contract's status to 'active' with valid dateSigned field value
+    # Passing value to the contract
+    response = self.app.patch_json(
+        '/auctions/{}/contracts/{}?acc_token={}'.format(
+            self.auction_id, contract['id'], self.auction_token
+        ),
+        {
+            "data": {
+                "value": {
+                    "currency": "UAH",
+                    "amount": 500,
+                    "valueAddedTaxIncluded": True,
+                },
+            }
+        },
+        status=200
+    )
     custom_signature_date = get_now().isoformat()
     response = self.app.patch_json('/auctions/{}/contracts/{}?acc_token={}'.format(
         self.auction_id, contract['id'], self.auction_token
@@ -355,7 +420,7 @@ def patch_auction_contract_to_active_date_signed_burst(self):
     self.assertEqual(response.status, '200 OK')
     self.assertEqual(response.content_type, 'application/json')
     self.assertEqual(response.json['data']["status"], "active")
-    self.assertEqual(response.json['data']["value"]['amount'], 479)
+    self.assertEqual(response.json['data']['value']['amount'], 500)
     self.assertEqual(
         response.json['data']['contractID'], contract['contractID']
     )

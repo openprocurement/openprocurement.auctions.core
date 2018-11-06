@@ -148,8 +148,7 @@ class AwardManagerV3_1Adapter(BaseAwardManagerAdapter):
             auction.contracts.append(type(auction).contracts.model_class({
                 'awardID': award.id,
                 'suppliers': award.suppliers,
-                'value': award.value,
-                'date': get_now(),
+                'date': now,
                 'items': auction.items,
                 'contractID': '{}-{}{}'.format(
                     auction.auctionID,
