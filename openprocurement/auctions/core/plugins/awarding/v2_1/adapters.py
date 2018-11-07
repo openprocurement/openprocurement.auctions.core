@@ -59,6 +59,7 @@ class AwardingNextCheckV2_1(AuctionAwardingNextCheckAdapter):
     def add_awarding_checks(self, auction):
         return next_check_awarding(auction)
 
+
 class AwardManagerV2_1Adapter(BaseAwardManagerAdapter):
 
     name = "Award v-2_1 adapter"
@@ -123,7 +124,6 @@ class AwardManagerV2_1Adapter(BaseAwardManagerAdapter):
             auction.contracts.append(type(auction).contracts.model_class({
                 'awardID': award.id,
                 'suppliers': award.suppliers,
-                'value': award.value,
                 'date': now,
                 'items': [i for i in auction.items if i.relatedLot == award.lotID],
                 'contractID': '{}-{}{}'.format(
