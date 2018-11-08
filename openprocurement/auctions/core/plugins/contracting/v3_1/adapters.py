@@ -52,7 +52,7 @@ class ContractManagerV3_1Adapter(BaseContractManagerAdapter):
         data = request.validated['data']
         now = get_now()
 
-        if data.get('value') and context.value is not None:
+        if data.get('value'):
             award = [a for a in auction.awards if a.id == request.context.awardID][0]
             for ro_attr in ('valueAddedTaxIncluded', 'currency'):
                 if data['value'][ro_attr] != getattr(award.value, ro_attr):
