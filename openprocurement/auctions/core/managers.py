@@ -123,7 +123,7 @@ class BidManager(object):
         return self._is_changed
 
     def represent(self, method):
-        representer = self.Representer(self.context)
+        representer = self.Representer(self._request, self.context)
         return representer.represent(method)
 
 
