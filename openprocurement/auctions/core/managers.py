@@ -36,7 +36,7 @@ class AuctionManager(object):
     def award(self):
         auctioner = self.Auctioneer(self._request, self.context)
         if auctioner.award():
-            awarding = self.Awarding(self._request, self.context)
+            awarding = self.Awarding(self.context, self._request)
             awarding.start_awarding()
 
     def cancel(self):
@@ -48,7 +48,7 @@ class AuctionManager(object):
         checker = self.Checker(self._request, self.context)
         checker.check()
         if self.context.status == 'active.qualification':
-            awarding = self.Awarding(self._request, self.context)
+            awarding = self.Awarding(self.context, self._request)
             awarding.start_awarding()
 
     def update_auction_urls(self):
