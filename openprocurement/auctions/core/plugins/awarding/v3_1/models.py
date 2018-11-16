@@ -50,14 +50,6 @@ class Award(BaseAward):
                 bid_owner_token = bid.owner_token
         return dict([('{}_{}'.format(bid_owner, bid_owner_token), 'bid_owner')])
 
-    def __acl__(self):
-        auction = get_auction(self)
-        for bid in auction.bids:
-            if bid.id == self.bid_id:
-                bid_owner = bid.owner
-                bid_owner_token = bid.owner_token
-        return [(Allow, '{}_{}'.format(bid_owner, bid_owner_token), 'edit_auction_award')]
-
     status = StringType(required=True, choices=['pending.waiting', 'unsuccessful', 'active', 'cancelled', 'pending', 'pending.admission'], default='pending')
     suppliers = ListType(ModelType(Organization), min_size=1, max_size=1)
     complaints = ListType(ModelType(Complaint), default=list())
