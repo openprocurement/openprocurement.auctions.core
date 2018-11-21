@@ -24,6 +24,7 @@ from openprocurement.auctions.core.utils import (
 from openprocurement.auctions.core.validation import (
     validate_award_data_post_common,
     validate_patch_award_data,
+    validate_patch_award_access,
     validate_patch_award_data_patch_common,
 )
 from openprocurement.auctions.core.plugins.awarding.base.utils import (
@@ -74,6 +75,7 @@ class AwardManagerV3_1Adapter(BaseAwardManagerAdapter):
 
     change_validators = (
         validate_patch_award_data,
+        validate_patch_award_access,
         validate_patch_award_data_patch_common,
     )
 

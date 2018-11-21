@@ -238,6 +238,24 @@ def validate_patch_award_data_patch_common(request, **kwargs):
         raise error_handler(request)
 
 
+def validate_patch_award_access(request, **kwargs):
+    auction = request.validated['auction']
+    award = request.context
+    next_status = request.validated['json_data'].get('status')
+
+    # bid_owner in some cases has permission to change award
+    if request.authenticated_role == 'bid_owner':
+        # bid_owner(winner) can switch award form status 'pending.waiting' to cancelled
+        if award.status == 'pending.waiting' and next_status == 'cancelled':
+            return True
+        else:
+            err_msg = 'You can\'t update award to {}'.format(auction.status, next_status)
+            request.errors.add('body', 'data', err_msg)
+            request.errors.status = 403
+            raise error_handler(request)
+    return True
+
+
 def validate_complaint_data_post_common(request, **kwargs):
     auction = request.validated['auction']
     context = request.context
@@ -335,6 +353,19 @@ def validate_award_document(request, operation):
 
 def validate_file_upload_award_post_common(request, **kwargs):
     validate_award_document(request, 'add')
+
+def validate_access_to_award_document_upload(request, **kwargs):
+    document = request.validated['document']
+
+    # bid_owner in some cases has permission to change award
+    if request.authenticated_role == 'bid_owner':
+        # bid_owner(winner) can`t upload rejection protocol to award
+        if document.documentType == 'rejectionProtocol':
+            err_msg = 'You can\'t upload rejection protocol to award'
+            request.errors.add('body', 'data', err_msg)
+            request.errors.status = 403
+            raise error_handler(request)
+    return True
 
 
 def validate_file_update_award_put_common(request, **kwargs):
