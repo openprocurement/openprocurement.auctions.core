@@ -21,7 +21,8 @@ from openprocurement.auctions.core.validation import (
     validate_file_upload,
     validate_file_upload_award_post_common,
     validate_file_update_award_put_common,
-    validate_patch_document_data_award_patch_common
+    validate_patch_document_data_award_patch_common,
+    validate_access_to_award_document_upload
 )
 
 
@@ -63,7 +64,9 @@ class AuctionAwardDocumentResource(APIResource):
             ]).values(), key=lambda i: i['dateModified'])
         return {'data': collection_data}
 
-    @json_view(validators=(validate_file_upload, validate_file_upload_award_post_common),
+    @json_view(validators=(validate_file_upload,
+                           validate_file_upload_award_post_common,
+                           validate_access_to_award_document_upload),
                permission='edit_auction_award')
     def collection_post(self):
         """Auction Award Document Upload
