@@ -354,13 +354,14 @@ def validate_award_document(request, operation):
 def validate_file_upload_award_post_common(request, **kwargs):
     validate_award_document(request, 'add')
 
+
 def validate_access_to_award_document_upload(request, **kwargs):
-    document = request.validated['document']
+    document = request.validated.get('document')
 
     # bid_owner in some cases has permission to change award
     if request.authenticated_role == 'bid_owner':
         # bid_owner(winner) can`t upload rejection protocol to award
-        if document.documentType == 'rejectionProtocol':
+        if document and document.documentType == 'rejectionProtocol':
             err_msg = 'You can\'t upload rejection protocol to award'
             request.errors.add('body', 'data', err_msg)
             request.errors.status = 403
