@@ -25,55 +25,50 @@ class AuctionManager(object):
         self._request = request
         self.context = context
 
-    def initialize(self, status):
-        initializator = self.Initializator(self._request, self.context)
-        initializator.initialize(status)
-
     def change(self):
-        changer = self.Changer(self._request, self.context)
+        changer = self.changer(self._request, self.context)
         return changer.change()
 
     def award(self):
-        auctioner = self.Auctioneer(self._request, self.context)
+        auctioner = self.auctioneer(self._request, self.context)
         if auctioner.award():
-            awarding = self.Awarding(self.context, self._request)
+            awarding = self.awarding(self.context, self._request)
             awarding.start_awarding()
 
     def cancel(self):
-        canceller = self.Canceller(self._request, self.context)
+        canceller = self.canceller(self._request, self.context)
         cancellation = canceller.cancel()
         return cancellation
 
     def check(self):
-        checker = self.Checker(self._request, self.context)
+        checker = self.checker(self._request, self.context)
         checker.check()
         if self.context.status == 'active.qualification':
-            awarding = self.Awarding(self.context, self._request)
+            awarding = self.awarding(self.context, self._request)
             awarding.start_awarding()
 
     def update_auction_urls(self):
-        auctioner = self.Auctioneer(self._request, self.context)
+        auctioner = self.auctioneer(self._request, self.context)
         return auctioner.update_auction_urls()
 
-    def auction_report(self):
-        auctioner = self.Auctioneer(self._request, self.context)
-        if auctioner.report():
-            auctioner.initialize()
+    def report(self):
+        changer = self.changer(self._request, self.context)
+        return changer.change()
 
     def create(self, applicant):
-        creator = self.Creator(self._request, self.context)
+        creator = self.creator(self._request, self.context)
         return creator.create(applicant)
 
     def log_action(self, action, verbose):
-        logger = self.Logger(self._request, self.context)
+        logger = self.logger(self._request, self.context)
         logger.log_action(action, verbose)
 
     def represent_subresources_listing(self, subresource_implemented):
-        representer = self.SubResourceRepresenter(self._request, self.context)
+        representer = self.subResourceRepresenter(self._request, self.context)
         return representer.represent_listing(subresource_implemented)
 
     def represent_subresource_created(self, subresource):
-        representer = self.SubResourceRepresenter(self._request, self.context)
+        representer = self.subResourceRepresenter(self._request, self.context)
         return representer.represent_created(subresource)
 
     def save(self):
