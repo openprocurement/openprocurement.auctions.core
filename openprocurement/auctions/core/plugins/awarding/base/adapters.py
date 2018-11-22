@@ -52,11 +52,11 @@ class BaseAwardingMixin(object):
                 set_award_status_unsuccessful(award, now)
             if award.status == 'pending':
                 if getattr(self, 'verificationPeriod', None):
-                    award.verificationPeriod = self.verificationPeriod
+                    award.verificationPeriod = self.verificationPeriod()
                 else:
                     award.verificationPeriod = {'startDate': now}
                 if getattr(self, 'signingPeriod', None):
-                    award.signingPeriod = self.signingPeriod
+                    award.signingPeriod = self.signingPeriod()
                 else:
                     award.signingPeriod = {'startDate': now}
                 add_award_route_url(self.request, auction, award, awarding_type)

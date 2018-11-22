@@ -9,8 +9,6 @@ from blanks.award_blanks import (
     complate_auction_with_second_award1,
     complate_auction_with_second_award2,
     complate_auction_with_second_award3,
-    unsuccessful_auction1,
-    unsuccessful_auction2,
     unsuccessful_auction3,
     unsuccessful_auction4,
     unsuccessful_auction5,
@@ -48,8 +46,6 @@ class AuctionAwardProcessTestMixin(object):
         successful_second_auction_award
     )
 
-    test_unsuccessful_auction1 = snitch(unsuccessful_auction1)
-    test_unsuccessful_auction2 = snitch(unsuccessful_auction2)
     test_unsuccessful_auction3 = snitch(unsuccessful_auction3)
     test_unsuccessful_auction4 = snitch(unsuccessful_auction4)
     test_unsuccessful_auction5 = snitch(unsuccessful_auction5)
