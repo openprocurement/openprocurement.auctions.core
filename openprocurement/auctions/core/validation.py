@@ -246,7 +246,7 @@ def validate_patch_award_access(request, **kwargs):
     # bid_owner in some cases has permission to change award
     if request.authenticated_role == 'bid_owner':
         # bid_owner(winner) can switch award form status 'pending.waiting' to cancelled
-        if award.status == 'pending.waiting' and next_status == 'cancelled':
+        if award.status == 'pending.waiting' and next_status in ['cancelled', 'unsuccessful']:
             return True
         else:
             err_msg = 'You can\'t update award to {}'.format(auction.status, next_status)
