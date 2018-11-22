@@ -905,66 +905,6 @@ def successful_second_auction_award(self):
     self.assertEqual(response.json['data']["value"]["amount"], self.second_award['value']['amount'])
 
 
-def unsuccessful_auction1(self):
-    response = self.app.patch_json('/auctions/{}/awards/{}?acc_token={}'.format(
-        self.auction_id, self.second_award_id, self.auction_token
-    ), {"data": {"status": "cancelled"}}, status=403)
-    self.assertEqual(response.status, '403 Forbidden')
-    self.assertEqual(response.content_type, 'application/json')
-    self.assertEqual(response.json['status'], 'error')
-    self.assertEqual(response.json['errors'], [
-        {u'description': u'Only bid owner may cancel award in current (pending.waiting) status', u'location':
-            u'body', u'name': u'data'}
-    ])
-
-    bid_token = self.initial_bids_tokens[self.second_award['bid_id']]
-    response = self.app.patch_json(
-        '/auctions/{}/awards/{}?acc_token={}'.format(self.auction_id, self.second_award_id, bid_token),
-        {"data": {"status": "cancelled"}})
-    self.assertEqual(response.status, '200 OK')
-    self.assertEqual(response.content_type, 'application/json')
-
-    self.upload_auction_protocol(self.first_award)
-    self.upload_rejection_protocol(self.first_award)
-
-    bid_token = self.initial_bids_tokens[self.first_award['bid_id']]
-
-    response = self.app.patch_json('/auctions/{}/awards/{}?acc_token={}'.format(
-        self.auction_id, self.first_award_id, bid_token
-    ), {"data": {"status": "unsuccessful"}})
-    self.assertEqual(response.status, '200 OK')
-    self.assertEqual(response.content_type, 'application/json')
-
-    response = self.app.get('/auctions/{}'.format(self.auction_id))
-    self.assertEqual(response.status, '200 OK')
-    self.assertEqual(response.content_type, 'application/json')
-    self.assertEqual(response.json['data']['status'], 'unsuccessful')
-
-
-def unsuccessful_auction2(self):
-    bid_token = self.initial_bids_tokens[self.second_award['bid_id']]
-    response = self.app.patch_json(
-        '/auctions/{}/awards/{}?acc_token={}'.format(self.auction_id, self.second_award_id, bid_token),
-        {"data": {"status": "cancelled"}})
-    self.assertEqual(response.status, '200 OK')
-    self.assertEqual(response.content_type, 'application/json')
-
-    self.upload_auction_protocol(self.first_award)
-    self.upload_rejection_protocol(self.first_award)
-
-    bid_token = self.initial_bids_tokens[self.first_award['bid_id']]
-    response = self.app.patch_json('/auctions/{}/awards/{}?acc_token={}'.format(
-        self.auction_id, self.first_award_id, bid_token
-    ), {"data": {"status": "unsuccessful"}})
-    self.assertEqual(response.status, '200 OK')
-    self.assertEqual(response.content_type, 'application/json')
-
-    response = self.app.get('/auctions/{}'.format(self.auction_id))
-    self.assertEqual(response.status, '200 OK')
-    self.assertEqual(response.content_type, 'application/json')
-    self.assertEqual(response.json['data']['status'], 'unsuccessful')
-
-
 def unsuccessful_auction3(self):
     bid_token = self.initial_bids_tokens[self.second_award['bid_id']]
     response = self.app.patch_json(
