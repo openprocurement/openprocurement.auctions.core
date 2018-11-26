@@ -67,7 +67,6 @@ class BaseAuctionAwardContractResource(APIResource):
         contract = self.request.context
         contract_manager = self.request.registry.getAdapter(contract, IContractManagerAdapter)
         contract_manager.change_contract(self.request, context=self.context)
-        self.request.auction.modified = True
 
         if save_auction(self.request):
             self.LOGGER.info(
