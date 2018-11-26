@@ -52,6 +52,7 @@ class BaseAuctionAwardContractDocumentResource(APIResource):
             return
         document = upload_file(self.request)
         self.context.documents.append(document)
+        self.request.auction.modified = True
         if save_auction(self.request):
             self.LOGGER.info('Created auction contract document {}'.format(document.id),
                         extra=context_unpack(self.request, {'MESSAGE_ID': 'auction_contract_document_create'}, {'document_id': document.id}))
