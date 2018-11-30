@@ -249,7 +249,7 @@ def validate_patch_award_access(request, **kwargs):
         if award.status == 'pending.waiting' and next_status == 'cancelled':
             return True
         else:
-            err_msg = 'You can\'t update award to {}'.format(auction.status, next_status)
+            err_msg = 'Bidder is not allowed to switch award from pending to active.'
             request.errors.add('body', 'data', err_msg)
             request.errors.status = 403
             raise error_handler(request)

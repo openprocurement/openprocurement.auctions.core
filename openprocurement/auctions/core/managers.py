@@ -77,7 +77,7 @@ class AuctionManager(object):
         return representer.represent_created(subresource)
 
     def save(self):
-        if self.context.modified:
+        if self.context.changed:
             return save_auction(self._request)
 
 
@@ -141,7 +141,7 @@ class QuestionManager(object):
         return changer.change()
 
     def save(self):
-        if self._auction.modified:
+        if self._auction.changed:
             return save_auction(self._request)
 
 
@@ -246,7 +246,7 @@ class DocumentManager(object):
         return changer.put()
 
     def save(self):
-        if self._auction.modified:
+        if self._auction.changed:
             return save_auction(self._request)
 
 
