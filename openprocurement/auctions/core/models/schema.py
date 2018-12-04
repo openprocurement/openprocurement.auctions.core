@@ -237,11 +237,20 @@ class dgfCDB2Item(flashItem):
     address = ModelType(Address)
     location = ModelType(Location)
     contractPeriod = ModelType(Period)
+    schema_properties = FlexibleModelType(SchemaStore())
 
     def __init__(self, *args, **kwargs):
         super(dgfCDB2Item, self).__init__(*args, **kwargs)
         if hasattr(self, 'deliveryDate'):
             del self.deliveryDate
+
+    def validate_schema_properties(self, data, new_schema_properties):
+        """ Raise validation error if code in schema_properties mismatch
+            with classification id """
+        if new_schema_properties and not data['classification']['id'].startswith(
+                new_schema_properties['code']):
+            raise ValidationError(
+                "classification id mismatch with schema_properties code")
 
     def validate_address(self, data, address):
         if not address:
@@ -257,6 +266,7 @@ class dgfCDB2Item(flashItem):
                 )
                 if non_specific_location_cav or non_specific_location_cpv:
                     raise ValidationError(u'This field is required.')
+
 
 
 from openprocurement.api.models.registry_models import LokiItem
