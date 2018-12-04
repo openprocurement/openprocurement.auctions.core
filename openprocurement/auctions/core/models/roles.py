@@ -9,6 +9,7 @@ from openprocurement.api.models.auction_models import (
 )
 from openprocurement.api.models.roles import (
     Administrator_role,
+    item_roles  # noqa forwarded import
 )
 from openprocurement.api.models.common import (
     sensitive_embedded_role,
