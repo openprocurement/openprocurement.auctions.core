@@ -507,6 +507,7 @@ def kvtspz_validator(data, code):
         raise ValidationError(BaseType.MESSAGES['choices'].format(unicode(KVTSPZ_CODES)))
     return True
 
+
 def validate_item_rectification_period(request, **kwargs):
     """Forbid to use view if auction is out of it's rectificationPeriod"""
     auction = request.context.__parent__
@@ -521,3 +522,22 @@ def validate_item_rectification_period(request, **kwargs):
         )
         request.errors.status = 403
         raise error_handler(request)
+
+
+def validate_insider_auction_auction_data(request, **kwargs):
+    data = validate_patch_auction_data(request)
+    auction = request.validated['auction']
+    if auction.status != 'active.auction':
+        request.errors.add('body', 'data', 'Can\'t {} in current ({}) auction status'.format('report auction results' if request.method == 'POST' else 'update auction urls', auction.status))
+        request.errors.status = 403
+        return
+    if data is not None:
+        bids = data.get('bids', [])
+        auction_bids_ids = [i.id for i in auction.bids]
+        data['bids'] = [x for (y, x) in sorted(zip([auction_bids_ids.index(i['id']) for i in bids], bids))]
+    else:
+        data = {}
+    if request.method == 'POST':
+        now = get_now().isoformat()
+        data['auctionPeriod'] = {'endDate': now}
+    request.validated['data'] = data
