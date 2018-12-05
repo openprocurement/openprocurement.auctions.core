@@ -145,7 +145,7 @@ class AwardManagerV3_1Adapter(BaseAwardManagerAdapter):
                 raise error_handler(request)
 
             award.complaintPeriod.endDate = now
-            auction.contracts.append(type(auction).contracts.model_class({
+            new_contract_data = {
                 'awardID': award.id,
                 'suppliers': award.suppliers,
                 'date': now,
@@ -156,7 +156,11 @@ class AwardManagerV3_1Adapter(BaseAwardManagerAdapter):
                     len(auction.contracts) + 1
                 ),
                 'signingPeriod': award.signingPeriod,
-            }))
+            }
+            if self.COPY_AWARD_VALUE_TO_CONTRACT:
+                new_contract_data['value'] = award.value
+
+            auction.contracts.append(type(auction).contracts.model_class(new_contract_data))
             auction.status = 'active.awarded'
             auction.awardPeriod.endDate = now
 
