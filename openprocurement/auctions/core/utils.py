@@ -32,7 +32,7 @@ from openprocurement.api.utils import (
     set_modetest_titles,
     update_logging_context,
     context_unpack,
-    switch_auction_status,
+    log_auction_status_change,
     json_view,  # noqa forwarded import
     APIResource,  # noqa forwarded import
     set_specific_hour, # noqa forwarded import
@@ -265,11 +265,11 @@ def check_status(request):
             check_complaint_status(request, complaint, now)
     if auction.status == 'active.enquiries' and not auction.tenderPeriod.startDate and auction.enquiryPeriod.endDate.astimezone(TZ) <= now:
         auction.status = 'active.tendering'
-        switch_auction_status(request, auction, auction.status)
+        log_auction_status_change(request, auction, auction.status)
         return True
     elif auction.status == 'active.enquiries' and auction.tenderPeriod.startDate and auction.tenderPeriod.startDate.astimezone(TZ) <= now:
         auction.status = 'active.tendering'
-        switch_auction_status(request, auction, auction.status)
+        log_auction_status_change(request, auction, auction.status)
         return True
     elif not auction.lots and auction.status == 'active.tendering' and auction.tenderPeriod.endDate <= now:
         auction.status = 'active.auction'
@@ -277,14 +277,14 @@ def check_status(request):
         check_bids(request)
         if auction.numberOfBids < 2 and auction.auctionPeriod:
             auction.auctionPeriod.startDate = None
-        switch_auction_status(request, auction, auction.status)
+        log_auction_status_change(request, auction, auction.status)
         return True
     elif auction.lots and auction.status == 'active.tendering' and auction.tenderPeriod.endDate <= now:
         auction.status = 'active.auction'
         remove_draft_bids(request)
         check_bids(request)
         _ = [setattr(i.auctionPeriod, 'startDate', None) for i in auction.lots if i.numberOfBids < 2 and i.auctionPeriod]
-        switch_auction_status(request, auction, auction.status)
+        log_auction_status_change(request, auction, auction.status)
         return True
     elif not auction.lots and auction.status == 'active.awarded':
         standStillEnds = [
@@ -358,17 +358,17 @@ def check_auction_status(request):
         statuses = set([lot.status for lot in auction.lots])
         if statuses == set(['cancelled']):
             adapter.pendify_auction_status('cancelled')
-            switch_auction_status(request, auction, auction.status)
+            log_auction_status_change(request, auction, auction.status)
         elif not statuses.difference(set(['unsuccessful', 'cancelled'])):
             adapter.pendify_auction_status('unsuccessful')
-            switch_auction_status(request, auction, auction.status)
+            log_auction_status_change(request, auction, auction.status)
         elif not statuses.difference(set(['complete', 'unsuccessful', 'cancelled'])):
             adapter.pendify_auction_status('complete')
-            switch_auction_status(request, auction, auction.status)
+            log_auction_status_change(request, auction, auction.status)
     else:
         if auction.contracts and auction.contracts[-1].status == 'active':
             adapter.pendify_auction_status('complete')
-            switch_auction_status(request, auction, auction.status)
+            log_auction_status_change(request, auction, auction.status)
 
 
 opresource = partial(resource, error_handler=error_handler, factory=factory)
