@@ -10,7 +10,8 @@ from openprocurement.api.tests.base import (
     JSON_RENDERER_ERROR,  # noqa forwarded import
 )
 from openprocurement.api.tests.blanks.json_data import (
-    test_document_data  # noqa forwarded import
+    test_document_data,  # noqa forwarded import
+    test_item_data  # noqa forwarded import
 )
 from openprocurement.auctions.core.utils import (
     apply_data_patch,
