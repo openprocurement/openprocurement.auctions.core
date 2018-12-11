@@ -3,7 +3,7 @@ from logging import getLogger
 from pkg_resources import get_distribution
 
 from openprocurement.api.utils import (
-    context_unpack,
+    log_auction_status_change
 )
 from openprocurement.auctions.core.interfaces import IAuctionManager
 
@@ -25,17 +25,11 @@ def check_auction_status(request):
     else:
         awards_statuses = set([""])
     if not awards_statuses.difference(set(['unsuccessful', 'cancelled'])):
-        LOGGER.info(
-            'Switched auction {} to {}'.format(auction.id, 'unsuccessful'),
-            extra=context_unpack(request, {'MESSAGE_ID': 'switched_auction_unsuccessful'})
-        )
         adapter.pendify_auction_status('unsuccessful')
+        log_auction_status_change(request, auction, auction.status)
     if auction.contracts and auction.contracts[-1].status == 'active':
-        LOGGER.info(
-            'Switched auction {} to {}'.format(auction.id, 'complete'),
-            extra=context_unpack(request, {'MESSAGE_ID': 'switched_auction_complete'})
-        )
         adapter.pendify_auction_status('complete')
+        log_auction_status_change(request, auction, auction.status)
 
 
 def check_document_existence(contract, document_type):
