@@ -517,3 +517,70 @@ dgf_item_roles = {
         'id',
     ),
 }
+
+
+rubble_auction_roles = {
+    'create': (
+        auction_embedded_role +
+        blacklist(
+            '_attachments',
+            'auctionID',
+            'auctionUrl',
+            'awardCriteria',
+            'awardPeriod',
+            'awards',
+            'bids',
+            'cancellations',
+            'complaints',
+            'contracts',
+            'date',
+            'dateModified',
+            'doc_id',
+            'documents',
+            'eligibilityCriteria',
+            'eligibilityCriteria_en',
+            'eligibilityCriteria_ru',
+            'enquiryPeriod',
+            'numberOfBidders',
+            'owner',
+            'procurementMethod',
+            'questions',
+            'revisions',
+            'status',
+            'submissionMethod',
+            'tenderPeriod',
+        )
+    ),
+    'edit_active.tendering': (
+        edit_role +
+        blacklist(
+            'auction_guarantee',
+            'auction_minimalStep',
+            'auction_value',
+            'awardCriteriaDetails',
+            'awardCriteriaDetails_en',
+            'awardCriteriaDetails_ru',
+            'eligibilityCriteria',
+            'eligibilityCriteria_en',
+            'eligibilityCriteria_ru',
+            'enquiryPeriod',
+            'minNumberOfQualifiedBids',
+            'procurementMethodRationale',
+            'procurementMethodRationale_en',
+            'procurementMethodRationale_ru',
+            'rectificationPeriod',
+            'submissionMethodDetails',
+            'submissionMethodDetails_en',
+            'submissionMethodDetails_ru',
+            'tenderPeriod',
+        )
+    ),
+    'Administrator': 
+        (
+            Administrator_role +
+            whitelist(
+                'awards',
+                'rectificationPeriod',
+            )
+        ),
+}
