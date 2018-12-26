@@ -575,7 +575,7 @@ rubble_auction_roles = {
             'tenderPeriod',
         )
     ),
-    'Administrator': 
+    'Administrator':
         (
             Administrator_role +
             whitelist(
