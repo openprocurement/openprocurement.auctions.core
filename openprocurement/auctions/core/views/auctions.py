@@ -22,8 +22,7 @@ from openprocurement.auctions.core.design import (
     auctions_test_by_local_seq_view,
 )
 from openprocurement.auctions.core.interfaces import (
-    IAuctionManager,
-    IManager,
+    IAuctionManager
 )
 from openprocurement.auctions.core.utils import (
     generate_auction_id,
@@ -73,11 +72,12 @@ class AuctionsResource(APIResourceListing):
         auction = self.request.validated['auction']
 
         if auction['_internal_type'] == 'geb':
-            manager = self.request.registry.queryMultiAdapter((self.request, auction), IManager)
+            manager = self.request.registry.queryMultiAdapter((self.request, auction), IAuctionManager)
             applicant = self.request.validated['auction']
             auction = manager.create(applicant)
             if not auction:
                 return
+            manager.initialize(manager.context.status)
         else:
             self.request.registry.getAdapter(auction, IAuctionManager).create_auction(self.request)
             auction_id = generate_id()
