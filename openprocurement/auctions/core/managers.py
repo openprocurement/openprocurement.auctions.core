@@ -6,267 +6,263 @@ from openprocurement.auctions.core.utils import (
 )
 
 from openprocurement.auctions.core.interfaces import (
-    IAuctionManager,
-    IBidManager,
-    IBidDocumentManager,
-    ICancellationManager,
-    IDocumentManager,
-    IItemManager,
-    IQuestionManager
+    IManager
 )
 
 
-@implementer(IAuctionManager)
+@implementer(IManager)
 class AuctionManager(object):
-    name = 'Auction Manager'
-    context = None
 
     def __init__(self, request, context):
-        self._request = request
+        self.request = request
         self.context = context
-
-    def initialize(self, status):
-        initializator = self.Initializator(self._request, self.context)
-        initializator.initialize(status)
-
-    def change(self):
-        changer = self.Changer(self._request, self.context)
-        return changer.change()
+        self.changed = False
+        self.saved = False
 
     def award(self):
-        auctioner = self.Auctioneer(self._request, self.context)
+        auctioner = self.auctioneer(self.request, self.context)
         if auctioner.award():
-            awarding = self.Awarding(self.context, self._request)
+            awarding = self.awarding(self.context, self.request)
             awarding.start_awarding()
 
     def cancel(self):
-        canceller = self.Canceller(self._request, self.context)
+        canceller = self.canceller(self.request, self.context)
         cancellation = canceller.cancel()
         return cancellation
 
-    def check(self):
-        checker = self.Checker(self._request, self.context)
-        checker.check()
-        if self.context.status == 'active.qualification':
-            awarding = self.Awarding(self.context, self._request)
-            awarding.start_awarding()
+    def report(self):
+        manager = self.changion_manager(self.request, self.context)
+        self.changed = manager.manage()
+        return self.changed
 
-    def update_auction_urls(self):
-        auctioner = self.Auctioneer(self._request, self.context)
-        return auctioner.update_auction_urls()
-
-    def auction_report(self):
-        auctioner = self.Auctioneer(self._request, self.context)
-        if auctioner.report():
-            auctioner.initialize()
+    def change(self):
+        manager = self.changion_manager(self.request, self.context)
+        self.changed = manager.manage()
+        return self.changed
 
     def create(self, applicant):
-        creator = self.Creator(self._request, self.context)
-        return creator.create(applicant)
+        manager = self.creation_manager(self.request, self.context)
+        creature = manager.manage(applicant)
+        if creature:
+            self.changed = True
+        return creature
 
-    def log_action(self, action, verbose):
-        logger = self.Logger(self._request, self.context)
-        logger.log_action(action, verbose)
+    def log(self, action, verbose):
+        logger = self.log(self.request, self.context)
+        logger.log(action, verbose)
 
-    def represent_subresources_listing(self, subresource_implemented):
-        representer = self.SubResourceRepresenter(self._request, self.context)
-        return representer.represent_listing(subresource_implemented)
-
-    def represent_subresource_created(self, subresource):
-        representer = self.SubResourceRepresenter(self._request, self.context)
-        return representer.represent_created(subresource)
+    def get_representation_manager(self):
+        return self.representation_manager(self.request, self.context)
 
     def save(self):
-        if self.context.changed:
-            return save_auction(self._request)
+        if self.changed:
+            self.saved = save_auction(self.request)
+        return self.saved
 
 
-@implementer(IBidManager)
+@implementer(IManager)
 class BidManager(object):
-    name = 'Bid Manager'
 
     def __init__(self, request, context):
-        self._request = request
+        self.request = request
         self.context = context
-        self._auction = context.__parent__
-        self._is_changed = False
-        self._is_saved = False
+        self.changed = False
+        self.saved = False
 
     def initialize(self):
-        initializator = self.Initializator(self._request, self.context)
+        initializator = self.Initializator(self.request, self.context)
         initializator.initialize()
 
     def change(self):
-        changer = self.Changer(self._request, self.context)
-        self._is_changed = changer.change()
-        return self._is_changed
+        manager = self.changion_manager(self.request, self.context)
+        self.changed = manager.manage()
+        return self.changed
 
     def create(self, applicant):
-        creator = self.Creator(self._request, self.context)
-        creature = creator.create(applicant)
+        manager = self.creation_manager(self.request, self.context)
+        creature = manager.manage(applicant)
         if creature:
-            self._is_changed = True
+            self.changed = True
         return creature
 
-    def log_action(self, action, verbose):
-        logger = self.Logger(self._request, self.context)
-        logger.log_action(action, verbose)
+    def log(self, action, verbose):
+        logger = self.log(self.request, self.context)
+        logger.log(action, verbose)
 
     def save(self):
-        if self._is_changed:
-            self._is_saved = save_auction(self._request)
-        return self._is_saved
+        if self.changed:
+            self.saved = save_auction(self.request)
+        return self.saved
 
     def delete(self):
-        deleter = self.Deleter(self._request, self.context)
-        self._is_changed = deleter.delete()
-        return self._is_changed
+        manager = self.deletion_manager(self.request, self.context)
+        deleted = manager.manage()
+        if deleted:
+            self.changed = True
+        return deleted
 
-    def represent(self, method):
-        representer = self.Representer(self._request, self.context)
-        return representer.represent(method)
+    def get_representation_manager(self):
+        return self.representation_manager(self.request, self.context)
 
 
-@implementer(IQuestionManager)
+@implementer(IManager)
 class QuestionManager(object):
-    name = 'Question Manager'
 
     def __init__(self, request, context):
-        self._request = request
+        self.request = request
         self.context = context
-        self._auction = context.__parent__
+        self.changed = False
+        self.saved = False
 
     def change(self):
-        changer = self.Changer(self._request, self.context)
-        return changer.change()
+        manager = self.changion_manager(self.request, self.context)
+        self.changed = manager.manage()
+        return self.changed
 
     def save(self):
-        if self._auction.changed:
-            return save_auction(self._request)
+        if self.changed:
+            self.saved = save_auction(self.request)
+        return self.saved
 
 
-@implementer(IItemManager)
+@implementer(IManager)
 class ItemManager(object):
-    name = 'Item Manager'
 
     def __init__(self, request, context):
-        self._request = request
+        self.request = request
         self.context = context
-        self._auction = context.__parent__
-        self._is_changed = False
-        self._is_saved = False
+        self.changed = False
+        self.saved = False
 
     def change(self):
-        changer = self.Changer(self._request, self.context)
-        self._is_changed = changer.change()
-
-        return self._is_changed
+        manager = self.changion_manager(self.request, self.context)
+        self.changed = manager.manage()
+        return self.changed
 
     def create(self, applicant):
-        creator = self.Creator(self._request, self.context)
-        creature = creator.create(applicant)
+        manager = self.creation_manager(self.request, self.context)
+        creature = manager.manage(applicant)
         if creature:
-            self._is_changed = True
+            self.changed = True
         return creature
 
-    def represent(self, method):
-        representer = self.Representer(self.context)
-        return representer.represent(method)
+    def get_representation_manager(self):
+        return self.representation_manager(self.request, self.context)
 
-    def log_action(self, action, verbose):
-        logger = self.Logger(self._request, self.context)
-        logger.log_action(action, verbose)
+    def log(self, action, verbose):
+        logger = self.log(self.request, self.context)
+        logger.log(action, verbose)
 
     def save(self):
-        if self._is_changed:
-            self._is_saved = save_auction(self._request)
-        return self._is_saved
+        if self.changed:
+            self.saved = save_auction(self.request)
+        return self.saved
 
 
-@implementer(ICancellationManager)
+@implementer(IManager)
 class CancellationManager(object):
-    name = 'Cancellation Manager'
 
     def __init__(self, request, context):
-        self._request = request
+        self.request = request
         self.context = context
-        self._auction = context.__parent__
-        self._is_changed = False
-        self._is_saved = False
+        self.changed = False
+        self.saved = False
 
     def change(self):
-        changer = self.Changer(self._request, self.context)
-        self._is_changed = changer.change()
-        return self._is_changed
+        manager = self.changion_manager(self.request, self.context)
+        self.changed = manager.manage()
+        return self.changed
 
     def represent(self, method):
         representer = self.Representer(self.context)
         return representer.represent(method)
 
+    def get_representation_manager(self):
+        return self.representation_manager(self.request, self.context)
+
     def create(self, applicant):
-        creator = self.Creator(self._request, self.context)
-        creature = creator.create(applicant)
-        if creature:
-            self._is_changed = True
-        return creature
+        manager = self.creation_manager(self.request, self.context)
+        created = manager.manage(applicant)
+        if created:
+            self.changed = True
+        return created
 
-    def log_action(self, action, verbose):
-        logger = self.Logger(self._request, self.context)
-        logger.log_action(action, verbose)
-
-    def represent_subresources_listing(self, subresource_implemented):
-        representer = self.SubResourceRepresenter(self._request, self.context)
-        return representer.represent_listing(subresource_implemented)
-
-    def represent_subresource_created(self, subresource):
-        representer = self.SubResourceRepresenter(self._request, self.context)
-        return representer.represent_created(subresource)
+    def log(self, action, verbose):
+        logger = self.log(self.request, self.context)
+        logger.log(action, verbose)
 
     def save(self):
-        if self._is_changed:
-            self._is_saved = save_auction(self._request)
-        return self._is_saved
+        if self.changed:
+            self.saved = save_auction(self.request)
+        return self.saved
 
 
-@implementer(IDocumentManager)
+@implementer(IManager)
 class DocumentManager(object):
-    name = 'Document Manager'
 
     def __init__(self, request, context):
-        self._request = request
+        self.request = request
         self.context = context
-        self._auction = context.__parent__
+        self.changed = False
+        self.saved = False
 
     def change(self):
-        changer = self.Changer(self._request, self.context)
-        return changer.change()
+        manager = self.changion_manager(self.request, self.context)
+        self.changed = manager.manage()
+        return self.changed
 
     def put(self):
-        changer = self.Changer(self._request, self.context)
-        return changer.put()
+        manager = self.changion_manager(self.request, self.context)
+        self.changed = manager.manage()
+        return self.changed
 
     def save(self):
-        if self._auction.changed:
-            return save_auction(self._request)
+        if self.changed:
+            self.saved = save_auction(self.request)
+        return self.saved
 
 
-@implementer(IBidDocumentManager)
+@implementer(IManager)
 class BidDocumentManager(object):
-    name = 'Cancellation Manager'
 
     def __init__(self, request, context):
-        self._request = request
+        self.request = request
         self.context = context
-        self._auction = context.__parent__
-        self._is_changed = False
-        self._is_saved = False
+        self.changed = False
+        self.saved = False
 
     def change(self):
-        changer = self.Changer(self._request, self.context)
-        self._is_changed = changer.change()
-        return self._is_changed
+        manager = self.changion_manager(self.request, self.context)
+        self.changed = manager.manage()
+        return self.changed
 
     def save(self):
-        if self._is_changed:
-            self._is_saved = save_auction(self._request)
-        return self._is_saved
+        if self.changed:
+            self.saved = save_auction(self.request)
+        return self.saved
+
+
+@implementer(IManager)
+class CancellationDocumentManager(object):
+
+    def __init__(self, request, context):
+        self.request = request
+        self.context = context
+        self.changed = False
+        self.saved = False
+
+    def create(self, applicant):
+        pass
+
+    def save(self):
+        if self.changed:
+            self.saved = save_auction(self.request)
+        return self.saved
+
+    def log(self, action, verbose):
+        logger = self.log(self.request, self.context)
+        logger.log(action, verbose)
+
+    def represent(self, role):
+        representer = self.representer(self.context)
+        return representer.represent(role)
