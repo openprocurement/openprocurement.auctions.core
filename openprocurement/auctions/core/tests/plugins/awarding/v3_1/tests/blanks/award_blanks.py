@@ -5,9 +5,6 @@ from openprocurement.api.models.common import Period
 from openprocurement.api.tests.base import JSON_RENDERER_ERROR
 from openprocurement.api.utils import calculate_business_date, get_now
 
-from openprocurement.auctions.core.plugins.awarding.v3_1.constants import (
-    VERIFY_AUCTION_PROTOCOL_TIME
-)
 from openprocurement.auctions.core.utils import get_related_contract_of_award
 # CreateAuctionAwardTest
 
@@ -1051,7 +1048,6 @@ def verification_period_length(self):
     period = Period(self.first_award['verificationPeriod'])
     actual_period_length = period.endDate - period.startDate
 
-    target_end_date = calculate_business_date(period.startDate, VERIFY_AUCTION_PROTOCOL_TIME, auction, True)
     round_to_18_hour_delta = period.endDate.replace(hour=18, minute=0, second=0) - period.endDate
     target_end_date = calculate_business_date(period.endDate, round_to_18_hour_delta, auction, False)
     target_period_length = target_end_date - period.startDate
