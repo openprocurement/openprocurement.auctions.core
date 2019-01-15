@@ -1,3 +1,6 @@
+# -*- coding: utf-8 -*-
+from datetime import timedelta
+
 from pyramid.security import Allow
 from schematics.transforms import (
     blacklist,
@@ -22,11 +25,6 @@ from openprocurement.auctions.core.models import (
 )
 from openprocurement.auctions.core.validation import (
     validate_disallow_dgfPlatformLegalDetails
-)
-from .constants import (
-    CONTRACT_SIGNING_TIME,
-    AWARDING_PERIODS_END_DATE_HOUR,
-    VERIFY_AUCTION_PROTOCOL_TIME,
 )
 from .interfaces import IAwardV3_1
 
@@ -67,6 +65,11 @@ class Award(BaseAward):
     signingPeriod = ModelType(Period)
     admissionPeriod = ModelType(Period)
 
+    VERIFY_AUCTION_PROTOCOL_TIME = timedelta(days=10)
+    CONTRACT_SIGNING_TIME = timedelta(days=40)
+    VERIFY_ADMISSION_PROTOCOL_TIME = timedelta(days=5)
+    AWARDING_PERIODS_END_DATE_HOUR = 18
+
     @serializable(serialized_name="verificationPeriod", serialize_when_none=False)
     def award_verificationPeriod(self):
         period = self.verificationPeriod
@@ -75,7 +78,7 @@ class Award(BaseAward):
         if not period.endDate:
             auction = get_auction(self)
             period.endDate = calculate_business_date(
-                period.startDate, VERIFY_AUCTION_PROTOCOL_TIME, auction, True, AWARDING_PERIODS_END_DATE_HOUR
+                period.startDate, self.VERIFY_AUCTION_PROTOCOL_TIME, auction, True, self.AWARDING_PERIODS_END_DATE_HOUR
             )
         return period.to_primitive()
 
@@ -88,10 +91,10 @@ class Award(BaseAward):
             auction = get_auction(self)
             period.endDate = calculate_business_date(
                 period.startDate,
-                CONTRACT_SIGNING_TIME,
+                self.CONTRACT_SIGNING_TIME,
                 auction,
                 working_days=False,
-                specific_hour=AWARDING_PERIODS_END_DATE_HOUR,
+                specific_hour=self.AWARDING_PERIODS_END_DATE_HOUR,
                 result_is_working_day=True
             )
         return period.to_primitive()

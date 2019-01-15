@@ -18,12 +18,7 @@ from openprocurement.auctions.core.plugins.awarding.base.utils import (
     get_bids_to_qualify
 )
 
-from openprocurement.auctions.core.plugins.awarding.v3_1.constants import (
-    AWARDING_PERIODS_END_DATE_HOUR,
-    VERIFY_ADMISSION_PROTOCOL_TIME
-)
 from openprocurement.auctions.core.plugins.awarding.base.predicates import (
-    awarded_predicate,
     awarded_and_lots_predicate,
     admission_overdue_predicate
 )
@@ -61,8 +56,8 @@ def create_awards(request, pending_admission_for_one_bid):
             award.admissionPeriod = {
                 'startDate': now,
                 'endDate': calculate_business_date(
-                    now, VERIFY_ADMISSION_PROTOCOL_TIME, auction,
-                    True, AWARDING_PERIODS_END_DATE_HOUR
+                    now, award.VERIFY_ADMISSION_PROTOCOL_TIME, auction,
+                    True, award.AWARDING_PERIODS_END_DATE_HOUR
                 )
             }
             add_award_route_url(request, auction, award, awarding_type)
