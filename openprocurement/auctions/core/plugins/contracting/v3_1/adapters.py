@@ -25,6 +25,17 @@ from openprocurement.auctions.core.validation import (
 )
 
 
+class ContractingV3_1ConfiguratorMixin(object):
+    is_contract_signed_required = False
+
+    def change_contract_extender(self, request):
+        if request.context.status == 'pending' and request.validated['data'].get('dateSigned'):
+            if self.is_contract_signed_required and not check_document_existence(request.context, 'contractSigned'):
+                request.errors.add('body', 'data', 'Can\'t sign contract without contractSigned document')
+                request.errors.status = 403
+                raise error_handler(request)
+
+
 class ContractManagerV3_1Adapter(BaseContractManagerAdapter):
 
     name = 'Contract v-3_1 adapter'
@@ -64,6 +75,8 @@ class ContractManagerV3_1Adapter(BaseContractManagerAdapter):
                 request.errors.add('body', 'data', 'Value amount should be greater or equal to awarded amount ({})'.format(award.value.amount))
                 request.errors.status = 403
                 raise error_handler(request)
+
+        request.content_configurator.change_contract_extender(request)
 
         if request.context.status == 'pending' and 'status' in data and data['status'] == 'cancelled':
             if not (check_document_existence(request.context, 'rejectionProtocol') or
