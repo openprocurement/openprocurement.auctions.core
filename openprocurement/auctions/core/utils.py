@@ -49,6 +49,7 @@ from openprocurement.api.utils import (
     get_forbidden_users, # noqa forwarded import
     utcoffset_difference, # noqa forwarded import
     validate_with, # noqa forwarded import
+    time_dependent_value  # noqa forwarded import
 )
 
 from openprocurement.auctions.core.constants import (
