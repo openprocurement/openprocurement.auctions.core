@@ -19,6 +19,7 @@ from openprocurement.api.constants import (
     DOCUMENT_BLACKLISTED_FIELDS as API_DOCUMENT_BLACKLISTED_FIELDS,
     SESSION  # noqa forwarded import
 )
+from openprocurement.api.constants import VERSION
 from openprocurement.api.interfaces import (
     IProjectConfigurator  # noqa forwarded import
 )
@@ -66,10 +67,6 @@ from openprocurement.auctions.core.configurator import project_configurator
 PKG = get_distribution(__package__)
 LOGGER = getLogger(PKG.project_name)
 ACCELERATOR_RE = re_compile(r'.accelerator=(?P<accelerator>\d+)')
-VERSION = '{}.{}'.format(
-    int(PKG.parsed_version[0]),
-    int(PKG.parsed_version[1]) if PKG.parsed_version[1].isdigit() else 0
-)
 ROUTE_PREFIX = '/api/{}'.format(VERSION)
 DOCUMENT_BLACKLISTED_FIELDS = (
     'title',
