@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 import os
 
-version = '1.2.11'
+VERSION = '1.2.12'
 auction_core = 'openprocurement.auctions.core.includeme:includeme'
 auction_transferring = 'openprocurement.auctions.core.plugins.transferring.includeme:includeme'
 
@@ -25,7 +25,7 @@ requires = [
 test_requires = requires + []
 
 setup(name='openprocurement.auctions.core',
-      version=version,
+      version=VERSION,
       description="",
       long_description=open("README.rst").read() + "\n" +
                        open(os.path.join("docs", "HISTORY.txt")).read(),
