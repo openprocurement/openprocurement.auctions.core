@@ -28,7 +28,9 @@ from blanks.award_blanks import (
 class AuctionAwardProcessTestMixin(object):
     test_invalid_patch_auction_award = snitch(invalid_patch_auction_award)
     test_patch_auction_award = snitch(patch_auction_award)
-    test_patch_auction_award_admin = snitch(patch_auction_award_admin)
+
+    # Disabled due to https://app.asana.com/0/552773873947976/1111002199230153/f
+    # test_patch_auction_award_admin = snitch(patch_auction_award_admin)
 
     test_complate_auction_with_second_award1 = snitch(
         complate_auction_with_second_award1
