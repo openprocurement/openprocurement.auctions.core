@@ -585,3 +585,30 @@ def generate_rectificationPeriod_tender_period_margin(auction, tp_margin=MINIMAL
         period.endDate = calculated_endDate if calculated_endDate > now else now
     period.invalidationDate = None
     return period
+
+
+def migrate_all_document_of_tender(auction):
+    """
+    Change documentOf to auction if it was tender to auction
+    :param auction:
+    :return: boolean True if document was changed else False
+    """
+    changed = False
+    documents = []
+    CHANGED_TYPES = ['bids', 'awards', 'contracts', 'cancellations']
+
+    for _type in CHANGED_TYPES:
+        for obj in auction.get(_type, []):
+            for type_document in obj.get('documents', []):
+                documents.append(type_document)
+
+    for auction_document in auction.get('documents', []):
+        documents.append(auction_document)
+
+    for document in documents:
+        if document and document['documentOf'] == 'tender':
+            document.update({
+                'documentOf': 'auction'
+            })
+            changed = True
+    return changed
