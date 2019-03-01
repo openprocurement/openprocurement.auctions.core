@@ -587,28 +587,27 @@ def generate_rectificationPeriod_tender_period_margin(auction, tp_margin=MINIMAL
     return period
 
 
+def change_document_of(document):
+    if document and document['documentOf'] == 'tender':
+        document.update({
+            'documentOf': 'auction'
+        })
+        return True
+    return False
+
+
 def migrate_all_document_of_tender(auction):
     """
     Change documentOf to auction if it was tender to auction
     :param auction:
     :return: boolean True if document was changed else False
     """
-    changed = False
-    documents = []
-    CHANGED_TYPES = ['bids', 'awards', 'contracts', 'cancellations']
+    status_list = []
 
-    for _type in CHANGED_TYPES:
-        for obj in auction.get(_type, []):
-            for type_document in obj.get('documents', []):
-                documents.append(type_document)
+    for _type in ['bids', 'awards', 'contracts', 'cancellations']:
+        for type_array in auction.get(_type, []):
+            status_list.append([change_document_of(document) for document in type_array.get('documents', [])])
 
-    for auction_document in auction.get('documents', []):
-        documents.append(auction_document)
+    status_list.append([change_document_of(auction_document) for auction_document in auction.get('documents', [])])
 
-    for document in documents:
-        if document and document['documentOf'] == 'tender':
-            document.update({
-                'documentOf': 'auction'
-            })
-            changed = True
-    return changed
+    return any([any(status) for status in status_list])
