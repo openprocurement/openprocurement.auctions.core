@@ -588,6 +588,12 @@ def generate_rectificationPeriod_tender_period_margin(auction, tp_margin=MINIMAL
 
 
 def change_document_of(document):
+    """
+    Only for migration
+    Function that change documnet_of attribute in auction's document
+    :param document:
+    :return: True if document was changed else False
+    """
     if document and document['documentOf'] == 'tender':
         document.update({
             'documentOf': 'auction'
@@ -599,15 +605,24 @@ def change_document_of(document):
 def migrate_all_document_of_tender(auction):
     """
     Change documentOf to auction if it was tender to auction
+    Iterate through keys of auctions and get the array of needed type if it exists
+    Iterate through array of needed type and get array of documents if it exists
+    Call function that change document_of attribute of document and get execution result (true or false)
+    if auction wasn't change before set is_changed_auction_data to true
     :param auction:
     :return: boolean True if document was changed else False
     """
-    status_list = []
+
+    is_changed_auction_data = False
 
     for _type in ['bids', 'awards', 'contracts', 'cancellations']:
-        for type_array in auction.get(_type, []):
-            status_list.append([change_document_of(document) for document in type_array.get('documents', [])])
+        for type_obj in auction.get(_type, []):
+            for document in type_obj.get('documents', []):
+                is_change_document = change_document_of(document)
+                is_changed_auction_data = is_changed_auction_data or is_change_document
 
-    status_list.append([change_document_of(auction_document) for auction_document in auction.get('documents', [])])
+    for auction_document in auction.get('documents', []):
+        is_change_document = change_document_of(auction_document)
+        is_changed_auction_data = is_changed_auction_data or is_change_document
 
-    return any([any(status) for status in status_list])
+    return is_changed_auction_data
