@@ -70,6 +70,9 @@ class Award(BaseAward):
     VERIFY_ADMISSION_PROTOCOL_TIME = timedelta(days=5)
     AWARDING_PERIODS_END_DATE_HOUR = 18
 
+    VERIFICATION_PERIOD_WITH_WORKING_DAYS = True
+    SIGNING_PERIOD_WITH_WORKING_DAYS = False
+
     @serializable(serialized_name="verificationPeriod", serialize_when_none=False)
     def award_verificationPeriod(self):
         period = self.verificationPeriod
@@ -78,7 +81,11 @@ class Award(BaseAward):
         if not period.endDate:
             auction = get_auction(self)
             period.endDate = calculate_business_date(
-                period.startDate, self.VERIFY_AUCTION_PROTOCOL_TIME, auction, True, self.AWARDING_PERIODS_END_DATE_HOUR
+                period.startDate,
+                self.VERIFY_AUCTION_PROTOCOL_TIME,
+                auction,
+                self.VERIFICATION_PERIOD_WITH_WORKING_DAYS,
+                self.AWARDING_PERIODS_END_DATE_HOUR
             )
         return period.to_primitive()
 
@@ -93,7 +100,7 @@ class Award(BaseAward):
                 period.startDate,
                 self.CONTRACT_SIGNING_TIME,
                 auction,
-                working_days=False,
+                working_days=self.SIGNING_PERIOD_WITH_WORKING_DAYS,
                 specific_hour=self.AWARDING_PERIODS_END_DATE_HOUR,
                 result_is_working_day=True
             )
