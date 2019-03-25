@@ -65,13 +65,24 @@ class Award(BaseAward):
     signingPeriod = ModelType(Period)
     admissionPeriod = ModelType(Period)
 
-    VERIFY_AUCTION_PROTOCOL_TIME = timedelta(days=10)
-    CONTRACT_SIGNING_TIME = timedelta(days=40)
-    VERIFY_ADMISSION_PROTOCOL_TIME = timedelta(days=5)
-    AWARDING_PERIODS_END_DATE_HOUR = 18
+    VERIFICATION_PERIOD_PARAMS = {
+        'delta': timedelta(days=10),
+        'specific_hour': 18,
+        'working_days': True
+    }
 
-    VERIFICATION_PERIOD_WITH_WORKING_DAYS = True
-    SIGNING_PERIOD_WITH_WORKING_DAYS = False
+    SIGNING_PERIOD_PARAMS = {
+        'delta': timedelta(days=40),
+        'specific_hour': 18,
+        'working_days': False,
+        'result_is_working_day': True
+    }
+
+    ADMISSION_PERIOD_PARAMS = {
+        'delta': timedelta(days=5),
+        'specific_hour': 18,
+        'working_days': True
+    }
 
     @serializable(serialized_name="verificationPeriod", serialize_when_none=False)
     def award_verificationPeriod(self):
@@ -81,11 +92,9 @@ class Award(BaseAward):
         if not period.endDate:
             auction = get_auction(self)
             period.endDate = calculate_business_date(
-                period.startDate,
-                self.VERIFY_AUCTION_PROTOCOL_TIME,
-                auction,
-                self.VERIFICATION_PERIOD_WITH_WORKING_DAYS,
-                self.AWARDING_PERIODS_END_DATE_HOUR
+                start=period.startDate,
+                context=auction,
+                **self.VERIFICATION_PERIOD_PARAMS
             )
         return period.to_primitive()
 
@@ -97,11 +106,8 @@ class Award(BaseAward):
         if not period.endDate:
             auction = get_auction(self)
             period.endDate = calculate_business_date(
-                period.startDate,
-                self.CONTRACT_SIGNING_TIME,
-                auction,
-                working_days=self.SIGNING_PERIOD_WITH_WORKING_DAYS,
-                specific_hour=self.AWARDING_PERIODS_END_DATE_HOUR,
-                result_is_working_day=True
+                start=period.startDate,
+                context=auction,
+                **self.SIGNING_PERIOD_PARAMS
             )
         return period.to_primitive()
