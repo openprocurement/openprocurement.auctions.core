@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
-from .models import Award
-from .utils import (
+from itertools import izip_longest
+from barbecue import chef
+
+from openprocurement.auctions.core.plugins.awarding.v3_1.models import Award
+from openprocurement.auctions.core.plugins.awarding.v3_1.utils import (
     switch_to_next_award,
     next_check_awarding,
     check_award_status
@@ -16,7 +19,8 @@ from openprocurement.auctions.core.plugins.awarding.base.adapters import (
 from openprocurement.api.utils import (
     get_now,
     error_handler,
-    validate_with
+    validate_with,
+    calculate_business_date
 )
 from openprocurement.auctions.core.utils import (
     apply_patch,
@@ -28,14 +32,14 @@ from openprocurement.auctions.core.validation import (
     validate_patch_award_data_patch_common,
 )
 from openprocurement.auctions.core.plugins.awarding.base.utils import (
-    check_document_existence
-)
-from openprocurement.auctions.core.plugins.awarding.base.adapters import (
-    BaseAwardingMixin
+    check_document_existence,
+    make_award,
+    add_award_route_url,
+    set_award_status_unsuccessful
 )
 
 
-class AwardingV3_1ConfiguratorMixin(BaseAwardingMixin):
+class AwardingV3_1ConfiguratorMixin(object):
     """Brings methods that are needed for the process of Awarding
 
         start_awarding - call after auction ends in auction view
@@ -48,6 +52,15 @@ class AwardingV3_1ConfiguratorMixin(BaseAwardingMixin):
     VERIFY_ADMISSION_PROTOCOL_TIME = timedelta(days=5)
     NUMBER_OF_BIDS_TO_BE_QUALIFIED = 2
 
+    def start_awarding(self):
+        self._start_awarding()
+
+    def get_bids_to_qualify(self, bids):
+        len_bids = len(bids)
+        if len_bids > self.NUMBER_OF_BIDS_TO_BE_QUALIFIED:
+            return self.NUMBER_OF_BIDS_TO_BE_QUALIFIED
+        return len_bids
+
     def back_to_awarding(self):
         """
             Call when we need to qualify another bidder
@@ -57,6 +70,65 @@ class AwardingV3_1ConfiguratorMixin(BaseAwardingMixin):
     def check_award_status(self, request, award, now):
         """Checking protocol and contract loading by the owner in time."""
         return check_award_status(request, award, now)
+
+    def verificationPeriod(self):
+        return {'startDate': get_now()}
+
+    def signingPeriod(self):
+        return {'startDate': get_now()}
+
+    def is_bid_valid(self, bid):
+        """
+        Check if bid is suitable for awarding
+        :param bid:
+        :rtype: bool
+        :return True if bid is valid, otherwise False
+        """
+        return bid['value'] is not None
+
+    def _start_awarding(self):
+        """
+            Function create NUMBER_OF_BIDS_TO_BE_QUALIFIED awards objects
+            First award always in pending.verification status
+            others in pending.waiting status
+            In case that only one bid was applied, award object
+            in pending.admission status will be created for that bid
+        """
+
+        auction = self.context
+        auction.status = 'active.qualification'
+        now = get_now()
+
+        auction.awardPeriod = type(auction).awardPeriod({'startDate': now})
+        awarding_type = self.awarding_type
+        valid_bids = [bid for bid in auction.bids if self.is_bid_valid(bid)]
+
+        award_status = 'pending.admission' if len(valid_bids) == 1 and self.pending_admission_for_one_bid else 'pending'
+
+        bids = chef(valid_bids, auction.features or [], [], True)
+        bids_to_qualify = self.get_bids_to_qualify(bids)
+        for bid, status in izip_longest(bids[:bids_to_qualify], [award_status], fillvalue='pending.waiting'):
+            bid = bid.serialize()
+            award = make_award(self.request, auction, bid, status, now, parent=True)
+
+            if bid['status'] == 'invalid':
+                set_award_status_unsuccessful(award, now)
+            if award.status == 'pending':
+                award.verificationPeriod = self.verificationPeriod()
+                award.signingPeriod = self.signingPeriod()
+                add_award_route_url(self.request, auction, award, awarding_type)
+            if award.status == 'pending.admission':
+                award.admissionPeriod = {
+                    'startDate': now,
+                    'endDate': calculate_business_date(
+                        start=now,
+                        context=auction,
+                        **award.ADMISSION_PERIOD_PARAMS
+                    )
+                }
+                add_award_route_url(self.request, auction, award, awarding_type)
+            auction.awards.append(award)
+        return True
 
 
 class AwardingNextCheckV3_1(AuctionAwardingNextCheckAdapter):

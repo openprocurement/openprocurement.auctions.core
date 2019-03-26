@@ -1,7 +1,4 @@
 # -*- coding: utf-8 -*-
-from itertools import izip_longest
-from barbecue import chef
-
 from openprocurement.api.constants import TZ
 from openprocurement.api.utils import (
     get_now,
@@ -10,60 +7,15 @@ from openprocurement.api.utils import (
 
 from openprocurement.auctions.core.interfaces import IAuctionManager
 from openprocurement.auctions.core.plugins.awarding.base.utils import (
-    make_award,
     check_lots_awarding,
     add_award_route_url,
     set_unsuccessful_award,
-    set_award_status_unsuccessful,
-    get_bids_to_qualify
 )
 
 from openprocurement.auctions.core.plugins.awarding.base.predicates import (
     awarded_and_lots_predicate,
     admission_overdue_predicate
 )
-
-
-def create_awards(request, pending_admission_for_one_bid):
-    """
-        Function create NUMBER_OF_BIDS_TO_BE_QUALIFIED awards objects
-        First award always in pending.verification status
-        others in pending.waiting status
-        In case that only one bid was applied, award object
-        in pending.admission status will be created for that bid
-    """
-    auction = request.validated['auction']
-    auction.status = 'active.qualification'
-    now = get_now()
-    auction.awardPeriod = type(auction).awardPeriod({'startDate': now})
-    awarding_type = request.content_configurator.awarding_type
-    valid_bids = [bid for bid in auction.bids if bid['value'] is not None]
-
-    award_status = 'pending.admission' if len(valid_bids) == 1 and pending_admission_for_one_bid else 'pending'
-
-    bids = chef(valid_bids, auction.features or [], [], True)
-    bids_to_qualify = get_bids_to_qualify(bids)
-    for bid, status in izip_longest(bids[:bids_to_qualify], [award_status], fillvalue='pending.waiting'):
-        bid = bid.serialize()
-        award = make_award(request, auction, bid, status, now, parent=True)
-
-        if bid['status'] == 'invalid':
-            set_award_status_unsuccessful(award, now)
-        if award.status == 'pending':
-            award.signingPeriod = award.verificationPeriod = {'startDate': now}
-            add_award_route_url(request, auction, award, awarding_type)
-        if award.status == 'pending.admission':
-            award.admissionPeriod = {
-                'startDate': now,
-                'endDate': calculate_business_date(
-                    start=now,
-                    context=auction,
-                    **award.ADMISSION_PERIOD_PARAMS
-                )
-            }
-            add_award_route_url(request, auction, award, awarding_type)
-
-        auction.awards.append(award)
 
 
 def switch_to_next_award(request):
