@@ -33,7 +33,7 @@ draft_role = whitelist('status')
 
 auction_post_role = whitelist('bids')
 
-auction_patch_role = whitelist('auctionUrl', 'bids', 'lots')
+auction_patch_role = whitelist('auctionUrl', 'bids', 'lots', 'auctionPeriod', 'lots')
 
 auction_role = (
     auction_embedded_role +
@@ -179,6 +179,8 @@ auction_view_role = whitelist(
     'lots',
     'minimalStep',
     'procurementMethodType',
+    'submissionMethodDetails',
+    'status',
 )
 auction_roles = {
     'plain': plain_role,
