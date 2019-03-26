@@ -121,8 +121,9 @@ class AwardingV3_1ConfiguratorMixin(object):
                 award.admissionPeriod = {
                     'startDate': now,
                     'endDate': calculate_business_date(
-                        now, self.VERIFY_ADMISSION_PROTOCOL_TIME, auction,
-                        True, self.AWARDING_PERIODS_END_DATE_HOUR
+                        start=now,
+                        context=auction,
+                        **award.ADMISSION_PERIOD_PARAMS
                     )
                 }
                 add_award_route_url(self.request, auction, award, awarding_type)
