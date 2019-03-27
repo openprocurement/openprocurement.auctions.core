@@ -5,7 +5,7 @@ from openprocurement.auctions.core.plugins.awarding.v3.tests.blanks.award_blanks
     # AuctionAwardProcessTest
     invalid_patch_auction_award,
     patch_auction_award,
-    patch_auction_award_admin,
+    # patch_auction_award_admin,
     complate_auction_with_second_award1,
     complate_auction_with_second_award2,
     complate_auction_with_second_award3,
@@ -30,7 +30,7 @@ from openprocurement.auctions.core.plugins.awarding.v3.tests.blanks.award_blanks
 class AuctionAwardProcessTestMixin(object):
     test_invalid_patch_auction_award = snitch(invalid_patch_auction_award)
     test_patch_auction_award = snitch(patch_auction_award)
-    test_patch_auction_award_admin = snitch(patch_auction_award_admin)
+    # test_patch_auction_award_admin = snitch(patch_auction_award_admin)
 
     test_complate_auction_with_second_award1 = snitch(
         complate_auction_with_second_award1
