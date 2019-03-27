@@ -497,6 +497,23 @@ class contractV3_1Document(swiftsureDocument):
             'act'])
 
 
+class awardVXDocument(swiftsureDocument):
+    documentType = StringType(choices=[
+        'winningBid', 'admissionProtocol', 'rejectionProtocol',
+        'act', 'auctionProtocol'
+    ])
+
+
+class contractVXDocument(swiftsureDocument):
+    documentType = StringType(
+        choices=[
+            'notice',
+            'contractSigned',
+            'contractAnnexe',
+            'rejectionProtocol',
+            'act'])
+
+
 class swiftsureBidDocument(swiftsureDocument):
     documentType = StringType(choices=[
         'commercialProposal', 'qualificationDocuments', 'eligibilityDocuments',

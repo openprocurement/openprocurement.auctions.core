@@ -4,6 +4,7 @@ from openprocurement.auctions.core.plugins.awarding.v2 import includeme as v2
 from openprocurement.auctions.core.plugins.awarding.v2_1 import includeme as v2_1
 from openprocurement.auctions.core.plugins.awarding.v3 import includeme as v3
 from openprocurement.auctions.core.plugins.awarding.v3_1 import includeme as v3_1
+from openprocurement.auctions.core.plugins.awarding.vX import includeme as vX
 
 
 def includeme(config):
@@ -13,3 +14,4 @@ def includeme(config):
     v2_1.includeme(config)
     v3.includeme(config)
     v3_1.includeme(config)
+    vX.includeme(config)
