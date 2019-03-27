@@ -413,6 +413,14 @@ class dgfCDB2Document(dgfDocument):
     ])
 
 
+class AuctionDocument(dgfCDB2Document):
+    """
+    Override dgfCDB2Document model
+    Append auction choice in doucmentOf field
+    """
+    documentOf = StringType(required=True, choices=['auction', 'item', 'lot', 'tender'], default='auction')
+
+
 class swiftsureDocument(dgfDocument):
     documentOf = StringType(
         required=True,
@@ -653,6 +661,35 @@ class flashCancellation(BaseCancellation):
 class dgfCancellation(BaseCancellation):
     documents = ListType(ModelType(dgfDocument), default=list(), validators=[
                          validate_disallow_dgfPlatformLegalDetails])
+
+
+class AuctionCancellationDetailsDocument(AuctionDocument):
+    """
+    Override cancellation documents model
+    Append cancellationDetails choice to documenTtype
+    """
+    documentType = StringType(choices=[
+        'auctionNotice', 'awardNotice', 'contractNotice',
+        'notice', 'biddingDocuments', 'technicalSpecifications',
+        'evaluationCriteria', 'clarifications', 'shortlistedFirms',
+        'riskProvisions', 'billOfQuantity', 'bidders', 'conflictOfInterest',
+        'debarments', 'evaluationReports', 'winningBid', 'complaints',
+        'contractSigned', 'contractArrangements', 'contractSchedule',
+        'contractAnnexe', 'contractGuarantees', 'subContract',
+        'eligibilityCriteria', 'contractProforma', 'commercialProposal',
+        'qualificationDocuments', 'eligibilityDocuments', 'tenderNotice',
+        'illustration', 'auctionProtocol', 'x_dgfAssetFamiliarization',
+        'x_presentation', 'x_nda', 'cancellationDetails'
+    ])
+
+
+class AuctionCancellation(BaseCancellation):
+    """
+    Override auction cancellation model
+    include cancellation details in documentType
+    """
+    documents = ListType(ModelType(AuctionCancellationDetailsDocument), default=list())
+
 
 
 class swiftsureCancellation(BaseCancellation):
