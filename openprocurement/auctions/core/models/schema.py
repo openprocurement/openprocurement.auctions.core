@@ -413,6 +413,10 @@ class dgfCDB2Document(dgfDocument):
     ])
 
 
+class AuctionDocument(dgfCDB2Document):
+    documentOf = StringType(required=True, choices=['auction', 'item', 'lot', 'tender'], default='auction')
+
+
 class swiftsureDocument(dgfDocument):
     documentOf = StringType(
         required=True,
@@ -653,6 +657,10 @@ class flashCancellation(BaseCancellation):
 class dgfCancellation(BaseCancellation):
     documents = ListType(ModelType(dgfDocument), default=list(), validators=[
                          validate_disallow_dgfPlatformLegalDetails])
+
+
+class AuctionCancellation(BaseCancellation):
+    documents = ListType(ModelType(AuctionDocument), default=list())
 
 
 class swiftsureCancellation(BaseCancellation):
