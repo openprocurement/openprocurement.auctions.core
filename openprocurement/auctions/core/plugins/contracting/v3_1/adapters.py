@@ -64,13 +64,13 @@ class ContractManagerV3_1Adapter(BaseContractManagerAdapter):
         now = get_now()
 
         if data.get('value'):
+            award = [a for a in auction.awards if a.id == request.context.awardID][0]
             for ro_attr in ('valueAddedTaxIncluded', 'currency'):
-                if data['value'][ro_attr] != getattr(context.value, ro_attr):
+                if data['value'][ro_attr] != getattr(award.value, ro_attr):
                     request.errors.add('body', 'data', 'Can\'t update {} for contract value'.format(ro_attr))
                     request.errors.status = 403
                     raise error_handler(request)
 
-            award = [a for a in auction.awards if a.id == request.context.awardID][0]
             if data['value']['amount'] < award.value.amount:
                 request.errors.add('body', 'data', 'Value amount should be greater or equal to awarded amount ({})'.format(award.value.amount))
                 request.errors.status = 403
@@ -131,6 +131,14 @@ class ContractManagerV3_1Adapter(BaseContractManagerAdapter):
                 request.errors.add('body', 'data', 'Can\'t sign contract without specified dateSigned field')
                 request.errors.status = 403
                 raise error_handler(request)
+            if not (
+                data.get('value')  # there's value passed
+                or context.value is not None  # there's value defined
+            ):
+                request.errors.add('body', 'data', 'Can\'t activate contract without value defined')
+                request.errors.status = 403
+                raise error_handler(request)
+
         current_contract_status = request.context.status
         apply_patch(request, save=False, src=request.context.serialize())
         if current_contract_status != request.context.status and (
