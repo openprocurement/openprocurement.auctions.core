@@ -59,9 +59,11 @@ class AwardingNextCheckV2_1(AuctionAwardingNextCheckAdapter):
     def add_awarding_checks(self, auction):
         return next_check_awarding(auction)
 
+
 class AwardManagerV2_1Adapter(BaseAwardManagerAdapter):
 
     name = "Award v-2_1 adapter"
+    COPY_AWARD_VALUE_TO_CONTRACT = False
 
     change_validators = (
         validate_patch_award_data,
@@ -120,10 +122,9 @@ class AwardManagerV2_1Adapter(BaseAwardManagerAdapter):
                 raise error_handler(request)
         elif current_award_status == 'pending.payment' and award.status == 'active':
             award.complaintPeriod.endDate = award.paymentPeriod.endDate = now
-            auction.contracts.append(type(auction).contracts.model_class({
+            new_contract_data = {
                 'awardID': award.id,
                 'suppliers': award.suppliers,
-                'value': award.value,
                 'date': now,
                 'items': [i for i in auction.items if i.relatedLot == award.lotID],
                 'contractID': '{}-{}{}'.format(
@@ -131,7 +132,11 @@ class AwardManagerV2_1Adapter(BaseAwardManagerAdapter):
                     server_id,
                     len(auction.contracts) + 1
                 )
-            }))
+            }
+            if self.COPY_AWARD_VALUE_TO_CONTRACT:
+                new_contract_data['value'] = award.value
+
+            auction.contracts.append(type(auction).contracts.model_class(new_contract_data))
             auction.status = 'active.awarded'
             auction.awardPeriod.endDate = now
         elif current_award_status != 'pending.waiting' and award.status == 'unsuccessful':
