@@ -22,10 +22,11 @@ from openprocurement.auctions.core.utils import (
 from openprocurement.api.tests.base import MOCK_CONFIG as BASE_MOCK_CONFIG
 from openprocurement.api.tests.fixtures.mocks import MigrationResourcesDTO_mock # noqa import fowrard
 from openprocurement.auctions.core.tests.fixtures.config import PARTIAL_MOCK_CONFIG
+from openprocurement.auctions.core.utils import get_now
 
 from openprocurement.api.tests.base import BaseResourceWebTest, BaseWebTest as CoreWebTest
 
-now = datetime.now()
+now = get_now()
 test_organization = {
     "name": u"Державне управління справами",
     "identifier": {
